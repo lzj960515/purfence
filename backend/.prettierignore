@@ -1,0 +1,6 @@
+seed
+migration
+generated
+*.graphqls
+schema.graphql
+.husky

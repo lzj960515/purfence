@@ -1,0 +1,14 @@
+{
+  "app": {
+    "windows": [
+      {
+        "title": "Purfence",
+        "width": 1360,
+        "height": 840,
+        "resizable": true,
+        "fullscreen": false,
+        "devtools": true
+      }
+    ]
+  }
+}

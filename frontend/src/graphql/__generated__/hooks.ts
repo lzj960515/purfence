@@ -1,0 +1,2335 @@
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
+import * as ApolloReactHooks from '@apollo/client/react';
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = T | null;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+const defaultOptions = {} as const;
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  DateTime: { input: any; output: any; }
+  JSON: { input: any; output: any; }
+  _Any: { input: any; output: any; }
+  federation__FieldSet: { input: any; output: any; }
+  link__Import: { input: any; output: any; }
+};
+
+export type ClaudeCodeConfig = {
+  __typename?: 'ClaudeCodeConfig';
+  createdAt: Scalars['DateTime']['output'];
+  env?: Maybe<Array<ClaudeCodeEnvItem>>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  modelProviderId?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  useDefaultConfig: Scalars['Boolean']['output'];
+};
+
+export type ClaudeCodeConfigConnection = {
+  __typename?: 'ClaudeCodeConfigConnection';
+  /** Array of nodes. */
+  nodes: Array<ClaudeCodeConfig>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ClaudeCodeConfigCreateInput = {
+  env?: InputMaybe<Array<ClaudeCodeEnvItemInput>>;
+  modelProviderId?: InputMaybe<Scalars['String']['input']>;
+  useDefaultConfig?: Scalars['Boolean']['input'];
+};
+
+export type ClaudeCodeConfigDeleteResponse = {
+  __typename?: 'ClaudeCodeConfigDeleteResponse';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  env?: Maybe<Array<ClaudeCodeEnvItem>>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  modelProviderId?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  useDefaultConfig?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ClaudeCodeConfigFilter = {
+  and?: InputMaybe<Array<ClaudeCodeConfigFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  modelProviderId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<ClaudeCodeConfigFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type ClaudeCodeConfigSort = {
+  direction: SortDirection;
+  field: ClaudeCodeConfigSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type ClaudeCodeConfigSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'modelProviderId'
+  | 'updatedAt';
+
+export type ClaudeCodeConfigUpdateInput = {
+  env?: InputMaybe<Array<ClaudeCodeEnvItemInput>>;
+  modelProviderId?: InputMaybe<Scalars['String']['input']>;
+  useDefaultConfig?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type ClaudeCodeEnvItem = {
+  __typename?: 'ClaudeCodeEnvItem';
+  key: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type ClaudeCodeEnvItemInput = {
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type CodexOAuthInfoObject = {
+  __typename?: 'CodexOAuthInfoObject';
+  accessToken: Scalars['String']['output'];
+  accountId?: Maybe<Scalars['String']['output']>;
+  expiresAt: Scalars['Int']['output'];
+  idToken?: Maybe<Scalars['String']['output']>;
+  refreshToken: Scalars['String']['output'];
+  scope?: Maybe<Scalars['String']['output']>;
+  tokenType: Scalars['String']['output'];
+};
+
+export type CreateManyPurfenceIssuesInput = {
+  /** Array of records to create */
+  purfenceIssues: Array<PurfenceIssueCreateInput>;
+};
+
+export type CreateOneClaudeCodeConfigInput = {
+  /** The record to create */
+  claudeCodeConfig: ClaudeCodeConfigCreateInput;
+};
+
+export type CreateOnePurfenceIssueInput = {
+  /** The record to create */
+  purfenceIssue: PurfenceIssueCreateInput;
+};
+
+export type CreateOnePurfenceProjectInput = {
+  /** The record to create */
+  purfenceProject: PurfenceProjectCreateInput;
+};
+
+export type CreateOneModelProviderConfigDtoInput = {
+  /** The record to create */
+  modelProviderConfigDto: ModelProviderConfigCreateInput;
+};
+
+export type CreateOnePurfenceConfigInput = {
+  /** The record to create */
+  purfenceConfig: PurfenceConfigCreateInput;
+};
+
+export type DateFieldComparison = {
+  between?: InputMaybe<DateFieldComparisonBetween>;
+  eq?: InputMaybe<Scalars['DateTime']['input']>;
+  gt?: InputMaybe<Scalars['DateTime']['input']>;
+  gte?: InputMaybe<Scalars['DateTime']['input']>;
+  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  lt?: InputMaybe<Scalars['DateTime']['input']>;
+  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  neq?: InputMaybe<Scalars['DateTime']['input']>;
+  notBetween?: InputMaybe<DateFieldComparisonBetween>;
+  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+};
+
+export type DateFieldComparisonBetween = {
+  lower: Scalars['DateTime']['input'];
+  upper: Scalars['DateTime']['input'];
+};
+
+export type DeleteManyPurfenceExecutionsInput = {
+  /** Filter to find records to delete */
+  filter: PurfenceExecutionDeleteFilter;
+};
+
+export type DeleteManyPurfenceProjectsInput = {
+  /** Filter to find records to delete */
+  filter: PurfenceProjectDeleteFilter;
+};
+
+export type DeleteManyResponse = {
+  __typename?: 'DeleteManyResponse';
+  /** The number of records deleted. */
+  deletedCount: Scalars['Int']['output'];
+};
+
+export type DeleteOneClaudeCodeConfigInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceExecutionInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceIssueInput = {
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceProjectInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneModelProviderConfigDtoInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceConfigInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type PurfenceExecution = {
+  __typename?: 'PurfenceExecution';
+  branchName?: Maybe<Scalars['String']['output']>;
+  conversationId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  executionDir?: Maybe<Scalars['String']['output']>;
+  goal?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  issueId: Scalars['String']['output'];
+  jobQueryUrl?: Maybe<Scalars['String']['output']>;
+  parentExecutionId?: Maybe<Scalars['String']['output']>;
+  projectId: Scalars['String']['output'];
+  status: PurfenceStatus;
+  updatedAt: Scalars['DateTime']['output'];
+  worktreePath?: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceExecutionConnection = {
+  __typename?: 'PurfenceExecutionConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceExecution>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceExecutionDeleteFilter = {
+  and?: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
+  conversationId?: InputMaybe<StringFieldComparison>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  issueId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
+  projectId?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionDeleteResponse = {
+  __typename?: 'PurfenceExecutionDeleteResponse';
+  branchName?: Maybe<Scalars['String']['output']>;
+  conversationId?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  executionDir?: Maybe<Scalars['String']['output']>;
+  goal?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  issueId?: Maybe<Scalars['String']['output']>;
+  jobQueryUrl?: Maybe<Scalars['String']['output']>;
+  parentExecutionId?: Maybe<Scalars['String']['output']>;
+  projectId?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<PurfenceStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  worktreePath?: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceExecutionFilter = {
+  and?: InputMaybe<Array<PurfenceExecutionFilter>>;
+  conversationId?: InputMaybe<StringFieldComparison>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  issueId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceExecutionFilter>>;
+  projectId?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionSort = {
+  direction: SortDirection;
+  field: PurfenceExecutionSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type PurfenceExecutionSortFields =
+  | 'conversationId'
+  | 'createdAt'
+  | 'id'
+  | 'issueId'
+  | 'projectId'
+  | 'status'
+  | 'updatedAt';
+
+export type PurfenceExecutionUpdateFilter = {
+  and?: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
+  conversationId?: InputMaybe<StringFieldComparison>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  issueId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
+  projectId?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionUpdateInput = {
+  error?: InputMaybe<Scalars['String']['input']>;
+  goal?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<PurfenceStatus>;
+};
+
+export type PurfenceIssue = {
+  __typename?: 'PurfenceIssue';
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  latestExecutionId?: Maybe<Scalars['String']['output']>;
+  projectId: Scalars['String']['output'];
+  status: PurfenceStatus;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  workdir?: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceIssueConnection = {
+  __typename?: 'PurfenceIssueConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceIssue>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceIssueCreateInput = {
+  dependsOnIssueId?: InputMaybe<Scalars['ID']['input']>;
+  description: Scalars['String']['input'];
+  projectId: Scalars['ID']['input'];
+  slug: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type PurfenceIssueFilter = {
+  and?: InputMaybe<Array<PurfenceIssueFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  latestExecutionId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceIssueFilter>>;
+  projectId?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<PurfenceStatusFilterComparison>;
+  title?: InputMaybe<StringFieldComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceIssueSort = {
+  direction: SortDirection;
+  field: PurfenceIssueSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type PurfenceIssueSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'latestExecutionId'
+  | 'projectId'
+  | 'status'
+  | 'title'
+  | 'updatedAt';
+
+export type PurfenceIssueUpdateFilter = {
+  and?: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  latestExecutionId?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
+  projectId?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<PurfenceStatusFilterComparison>;
+  title?: InputMaybe<StringFieldComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceIssueUpdateInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<PurfenceStatus>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceProject = {
+  __typename?: 'PurfenceProject';
+  createdAt: Scalars['DateTime']['output'];
+  defaultBranch: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  externalPath?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  localRootPath: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PurfenceProjectConnection = {
+  __typename?: 'PurfenceProjectConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceProject>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceProjectCreateInput = {
+  defaultBranch?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  externalPath?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  slug: Scalars['String']['input'];
+};
+
+export type PurfenceProjectDeleteFilter = {
+  and?: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  defaultBranch?: InputMaybe<StringFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  localRootPath?: InputMaybe<StringFieldComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectDeleteResponse = {
+  __typename?: 'PurfenceProjectDeleteResponse';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  defaultBranch?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  externalPath?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  localRootPath?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PurfenceProjectFilter = {
+  and?: InputMaybe<Array<PurfenceProjectFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  defaultBranch?: InputMaybe<StringFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  localRootPath?: InputMaybe<StringFieldComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceProjectFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectSort = {
+  direction: SortDirection;
+  field: PurfenceProjectSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type PurfenceProjectSortFields =
+  | 'createdAt'
+  | 'defaultBranch'
+  | 'id'
+  | 'localRootPath'
+  | 'name'
+  | 'updatedAt';
+
+export type PurfenceProjectUpdateFilter = {
+  and?: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  defaultBranch?: InputMaybe<StringFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  localRootPath?: InputMaybe<StringFieldComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectUpdateInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceStatus =
+  | 'budget_exhausted'
+  | 'done'
+  | 'failed'
+  | 'needs_approval'
+  | 'needs_user'
+  | 'open'
+  | 'running';
+
+export type PurfenceStatusFilterComparison = {
+  eq?: InputMaybe<PurfenceStatus>;
+  gt?: InputMaybe<PurfenceStatus>;
+  gte?: InputMaybe<PurfenceStatus>;
+  iLike?: InputMaybe<PurfenceStatus>;
+  in?: InputMaybe<Array<PurfenceStatus>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<PurfenceStatus>;
+  lt?: InputMaybe<PurfenceStatus>;
+  lte?: InputMaybe<PurfenceStatus>;
+  neq?: InputMaybe<PurfenceStatus>;
+  notILike?: InputMaybe<PurfenceStatus>;
+  notIn?: InputMaybe<Array<PurfenceStatus>>;
+  notLike?: InputMaybe<PurfenceStatus>;
+};
+
+export type IdFilterComparison = {
+  eq?: InputMaybe<Scalars['ID']['input']>;
+  gt?: InputMaybe<Scalars['ID']['input']>;
+  gte?: InputMaybe<Scalars['ID']['input']>;
+  iLike?: InputMaybe<Scalars['ID']['input']>;
+  in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<Scalars['ID']['input']>;
+  lt?: InputMaybe<Scalars['ID']['input']>;
+  lte?: InputMaybe<Scalars['ID']['input']>;
+  neq?: InputMaybe<Scalars['ID']['input']>;
+  notILike?: InputMaybe<Scalars['ID']['input']>;
+  notIn?: InputMaybe<Array<Scalars['ID']['input']>>;
+  notLike?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type ModelProviderConfigCreateInput = {
+  apiKey?: InputMaybe<Scalars['String']['input']>;
+  baseUrl?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  isActive?: Scalars['Boolean']['input'];
+  isDefault?: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  provider: ProviderType;
+  refreshToken?: InputMaybe<Scalars['String']['input']>;
+};
+
+/**
+ * ModelProviderConfig DTO
+ *
+ * GraphQL output type for ModelProviderConfig.
+ * Excludes sensitive data (apiKey, refreshToken) for security.
+ */
+export type ModelProviderConfigDto = {
+  __typename?: 'ModelProviderConfigDto';
+  baseUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  isDefault: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  provider: ProviderType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ModelProviderConfigDtoConnection = {
+  __typename?: 'ModelProviderConfigDtoConnection';
+  /** Array of nodes. */
+  nodes: Array<ModelProviderConfigDto>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ModelProviderConfigDtoDeleteResponse = {
+  __typename?: 'ModelProviderConfigDtoDeleteResponse';
+  baseUrl?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  isActive?: Maybe<Scalars['Boolean']['output']>;
+  isDefault?: Maybe<Scalars['Boolean']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  provider?: Maybe<ProviderType>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ModelProviderConfigDtoFilter = {
+  and?: InputMaybe<Array<ModelProviderConfigDtoFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<ModelProviderConfigDtoFilter>>;
+  provider?: InputMaybe<ProviderTypeFilterComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type ModelProviderConfigDtoSort = {
+  direction: SortDirection;
+  field: ModelProviderConfigDtoSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type ModelProviderConfigDtoSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'name'
+  | 'provider'
+  | 'updatedAt';
+
+export type ModelProviderConfigUpdateInput = {
+  apiKey?: InputMaybe<Scalars['String']['input']>;
+  baseUrl?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  isDefault?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<ProviderType>;
+  refreshToken?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createManyPurfenceIssues: Array<PurfenceIssue>;
+  createOneClaudeCodeConfig: ClaudeCodeConfig;
+  createOnePurfenceIssue: PurfenceIssue;
+  createOnePurfenceProject: PurfenceProject;
+  createOneModelProviderConfigDto: ModelProviderConfigDto;
+  createOnePurfenceConfig: PurfenceConfig;
+  deleteManyPurfenceExecutions: DeleteManyResponse;
+  deleteManyPurfenceProjects: DeleteManyResponse;
+  deleteOneClaudeCodeConfig: ClaudeCodeConfigDeleteResponse;
+  deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
+  deleteOnePurfenceIssue: Scalars['ID']['output'];
+  deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
+  deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
+  deleteOnePurfenceConfig: PurfenceConfigDeleteResponse;
+  handleCodexOAuthCallback: OAuthCallbackResponse;
+  initiateCodexOAuth: OAuthAuthorization;
+  refreshCodexToken: ModelProviderConfigDto;
+  toggleModelProviderConfig: ModelProviderConfigDto;
+  updateManyPurfenceExecutions: UpdateManyResponse;
+  updateManyPurfenceIssues: UpdateManyResponse;
+  updateManyPurfenceProjects: UpdateManyResponse;
+  updateOneClaudeCodeConfig: ClaudeCodeConfig;
+  updateOnePurfenceExecution: PurfenceExecution;
+  updateOnePurfenceIssue: PurfenceIssue;
+  updateOnePurfenceProject: PurfenceProject;
+  updateOneModelProviderConfigDto: ModelProviderConfigDto;
+  updateOnePurfenceConfig: PurfenceConfig;
+};
+
+
+export type MutationCreateManyPurfenceIssuesArgs = {
+  input: CreateManyPurfenceIssuesInput;
+};
+
+
+export type MutationCreateOneClaudeCodeConfigArgs = {
+  input: CreateOneClaudeCodeConfigInput;
+};
+
+
+export type MutationCreateOnePurfenceIssueArgs = {
+  input: CreateOnePurfenceIssueInput;
+};
+
+
+export type MutationCreateOnePurfenceProjectArgs = {
+  input: CreateOnePurfenceProjectInput;
+};
+
+
+export type MutationCreateOneModelProviderConfigDtoArgs = {
+  input: CreateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationCreateOnePurfenceConfigArgs = {
+  input: CreateOnePurfenceConfigInput;
+};
+
+
+export type MutationDeleteManyPurfenceExecutionsArgs = {
+  input: DeleteManyPurfenceExecutionsInput;
+};
+
+
+export type MutationDeleteManyPurfenceProjectsArgs = {
+  input: DeleteManyPurfenceProjectsInput;
+};
+
+
+export type MutationDeleteOneClaudeCodeConfigArgs = {
+  input: DeleteOneClaudeCodeConfigInput;
+};
+
+
+export type MutationDeleteOnePurfenceExecutionArgs = {
+  input: DeleteOnePurfenceExecutionInput;
+};
+
+
+export type MutationDeleteOnePurfenceIssueArgs = {
+  input: DeleteOnePurfenceIssueInput;
+};
+
+
+export type MutationDeleteOnePurfenceProjectArgs = {
+  input: DeleteOnePurfenceProjectInput;
+};
+
+
+export type MutationDeleteOneModelProviderConfigDtoArgs = {
+  input: DeleteOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationDeleteOnePurfenceConfigArgs = {
+  input: DeleteOnePurfenceConfigInput;
+};
+
+
+export type MutationHandleCodexOAuthCallbackArgs = {
+  code: Scalars['String']['input'];
+  redirectUri: Scalars['String']['input'];
+  state: Scalars['String']['input'];
+};
+
+
+export type MutationInitiateCodexOAuthArgs = {
+  redirectUri: Scalars['String']['input'];
+};
+
+
+export type MutationRefreshCodexTokenArgs = {
+  configId: Scalars['ID']['input'];
+};
+
+
+export type MutationToggleModelProviderConfigArgs = {
+  id: Scalars['ID']['input'];
+  isActive: Scalars['Boolean']['input'];
+};
+
+
+export type MutationUpdateManyPurfenceExecutionsArgs = {
+  input: UpdateManyPurfenceExecutionsInput;
+};
+
+
+export type MutationUpdateManyPurfenceIssuesArgs = {
+  input: UpdateManyPurfenceIssuesInput;
+};
+
+
+export type MutationUpdateManyPurfenceProjectsArgs = {
+  input: UpdateManyPurfenceProjectsInput;
+};
+
+
+export type MutationUpdateOneClaudeCodeConfigArgs = {
+  input: UpdateOneClaudeCodeConfigInput;
+};
+
+
+export type MutationUpdateOnePurfenceExecutionArgs = {
+  input: UpdateOnePurfenceExecutionInput;
+};
+
+
+export type MutationUpdateOnePurfenceIssueArgs = {
+  input: UpdateOnePurfenceIssueInput;
+};
+
+
+export type MutationUpdateOnePurfenceProjectArgs = {
+  input: UpdateOnePurfenceProjectInput;
+};
+
+
+export type MutationUpdateOneModelProviderConfigDtoArgs = {
+  input: UpdateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationUpdateOnePurfenceConfigArgs = {
+  input: UpdateOnePurfenceConfigInput;
+};
+
+export type OAuthAuthorization = {
+  __typename?: 'OAuthAuthorization';
+  authorizationUrl: Scalars['String']['output'];
+  state: Scalars['String']['output'];
+};
+
+export type OAuthCallbackResponse = {
+  __typename?: 'OAuthCallbackResponse';
+  email: Scalars['String']['output'];
+  oauthInfo: CodexOAuthInfoObject;
+  quota: QuotaInfo;
+};
+
+export type OffsetPageInfo = {
+  __typename?: 'OffsetPageInfo';
+  /** true if paging forward and there are more records. */
+  hasNextPage?: Maybe<Scalars['Boolean']['output']>;
+  /** true if paging backwards and there are more records. */
+  hasPreviousPage?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type OffsetPaging = {
+  /** Limit the number of records returned */
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  /** Offset to start returning records from */
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** AI model provider type */
+export type ProviderType =
+  | 'CODEX'
+  | 'KIMI'
+  | 'OPENAI'
+  | 'ZHIPU';
+
+export type ProviderTypeFilterComparison = {
+  eq?: InputMaybe<ProviderType>;
+  gt?: InputMaybe<ProviderType>;
+  gte?: InputMaybe<ProviderType>;
+  iLike?: InputMaybe<ProviderType>;
+  in?: InputMaybe<Array<ProviderType>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<ProviderType>;
+  lt?: InputMaybe<ProviderType>;
+  lte?: InputMaybe<ProviderType>;
+  neq?: InputMaybe<ProviderType>;
+  notILike?: InputMaybe<ProviderType>;
+  notIn?: InputMaybe<Array<ProviderType>>;
+  notLike?: InputMaybe<ProviderType>;
+};
+
+export type PurfenceConfig = {
+  __typename?: 'PurfenceConfig';
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  proxyUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PurfenceConfigConnection = {
+  __typename?: 'PurfenceConfigConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceConfig>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceConfigCreateInput = {
+  proxyUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceConfigDeleteResponse = {
+  __typename?: 'PurfenceConfigDeleteResponse';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  proxyUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PurfenceConfigFilter = {
+  and?: InputMaybe<Array<PurfenceConfigFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  or?: InputMaybe<Array<PurfenceConfigFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceConfigSort = {
+  direction: SortDirection;
+  field: PurfenceConfigSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type PurfenceConfigSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'updatedAt';
+
+export type PurfenceConfigUpdateInput = {
+  proxyUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Query = {
+  __typename?: 'Query';
+  _service: _Service;
+  claudeCodeConfig: ClaudeCodeConfig;
+  claudeCodeConfigs: ClaudeCodeConfigConnection;
+  purfenceExecution: PurfenceExecution;
+  purfenceExecutions: PurfenceExecutionConnection;
+  purfenceIssue: PurfenceIssue;
+  purfenceIssues: PurfenceIssueConnection;
+  purfenceListIssueArtifactFiles: Array<Scalars['String']['output']>;
+  purfenceProject: PurfenceProject;
+  purfenceProjects: PurfenceProjectConnection;
+  purfenceReadIssueArtifactFile: Scalars['String']['output'];
+  /** ping test */
+  hello?: Maybe<Scalars['JSON']['output']>;
+  modelProviderConfigDto: ModelProviderConfigDto;
+  modelProviderConfigDtos: ModelProviderConfigDtoConnection;
+  purfenceConfig: PurfenceConfig;
+  purfenceConfigs: PurfenceConfigConnection;
+};
+
+
+export type QueryClaudeCodeConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryClaudeCodeConfigsArgs = {
+  filter?: ClaudeCodeConfigFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<ClaudeCodeConfigSort>;
+};
+
+
+export type QueryPurfenceExecutionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceExecutionsArgs = {
+  filter?: PurfenceExecutionFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceExecutionSort>;
+};
+
+
+export type QueryPurfenceIssueArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceIssuesArgs = {
+  filter?: PurfenceIssueFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceIssueSort>;
+};
+
+
+export type QueryPurfenceListIssueArtifactFilesArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceProjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceProjectsArgs = {
+  filter?: PurfenceProjectFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceProjectSort>;
+};
+
+
+export type QueryPurfenceReadIssueArtifactFileArgs = {
+  issueId: Scalars['ID']['input'];
+  path: Scalars['String']['input'];
+};
+
+
+export type QueryModelProviderConfigDtoArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryModelProviderConfigDtosArgs = {
+  filter?: ModelProviderConfigDtoFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<ModelProviderConfigDtoSort>;
+};
+
+
+export type QueryPurfenceConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceConfigsArgs = {
+  filter?: PurfenceConfigFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceConfigSort>;
+};
+
+export type QuotaInfo = {
+  __typename?: 'QuotaInfo';
+  remaining: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+  used: Scalars['Int']['output'];
+};
+
+/** Sort Directions */
+export type SortDirection =
+  | 'ASC'
+  | 'DESC';
+
+/** Sort Nulls Options */
+export type SortNulls =
+  | 'NULLS_FIRST'
+  | 'NULLS_LAST';
+
+export type StringFieldComparison = {
+  eq?: InputMaybe<Scalars['String']['input']>;
+  gt?: InputMaybe<Scalars['String']['input']>;
+  gte?: InputMaybe<Scalars['String']['input']>;
+  iLike?: InputMaybe<Scalars['String']['input']>;
+  in?: InputMaybe<Array<Scalars['String']['input']>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  lt?: InputMaybe<Scalars['String']['input']>;
+  lte?: InputMaybe<Scalars['String']['input']>;
+  neq?: InputMaybe<Scalars['String']['input']>;
+  notILike?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notLike?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateManyPurfenceExecutionsInput = {
+  /** Filter used to find fields to update */
+  filter: PurfenceExecutionUpdateFilter;
+  /** The update to apply to all records found using the filter */
+  update: PurfenceExecutionUpdateInput;
+};
+
+export type UpdateManyPurfenceIssuesInput = {
+  /** Filter used to find fields to update */
+  filter: PurfenceIssueUpdateFilter;
+  /** The update to apply to all records found using the filter */
+  update: PurfenceIssueUpdateInput;
+};
+
+export type UpdateManyPurfenceProjectsInput = {
+  /** Filter used to find fields to update */
+  filter: PurfenceProjectUpdateFilter;
+  /** The update to apply to all records found using the filter */
+  update: PurfenceProjectUpdateInput;
+};
+
+export type UpdateManyResponse = {
+  __typename?: 'UpdateManyResponse';
+  /** The number of records updated. */
+  updatedCount: Scalars['Int']['output'];
+};
+
+export type UpdateOneClaudeCodeConfigInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: ClaudeCodeConfigUpdateInput;
+};
+
+export type UpdateOnePurfenceExecutionInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceExecutionUpdateInput;
+};
+
+export type UpdateOnePurfenceIssueInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceIssueUpdateInput;
+};
+
+export type UpdateOnePurfenceProjectInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceProjectUpdateInput;
+};
+
+export type UpdateOneModelProviderConfigDtoInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: ModelProviderConfigUpdateInput;
+};
+
+export type UpdateOnePurfenceConfigInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceConfigUpdateInput;
+};
+
+export type _Service = {
+  __typename?: '_Service';
+  sdl?: Maybe<Scalars['String']['output']>;
+};
+
+export type Link__Purpose =
+  /** `EXECUTION` features provide metadata necessary for operation execution. */
+  | 'EXECUTION'
+  /** `SECURITY` features provide metadata necessary to securely resolve fields. */
+  | 'SECURITY';
+
+export type CreateOnePurfenceProjectMutationVariables = Exact<{
+  input: CreateOnePurfenceProjectInput;
+}>;
+
+
+export type CreateOnePurfenceProjectMutation = { __typename?: 'Mutation', createOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, externalPath?: string | null, defaultBranch: string, createdAt: any, updatedAt: any } };
+
+export type CreateOnePurfenceIssueMutationVariables = Exact<{
+  input: CreateOnePurfenceIssueInput;
+}>;
+
+
+export type CreateOnePurfenceIssueMutation = { __typename?: 'Mutation', createOnePurfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId?: string | null, createdAt: any, updatedAt: any, workdir?: string | null } };
+
+export type PurfenceProjectsQueryVariables = Exact<{
+  paging?: InputMaybe<OffsetPaging>;
+  filter?: InputMaybe<PurfenceProjectFilter>;
+  sorting?: InputMaybe<Array<PurfenceProjectSort> | PurfenceProjectSort>;
+}>;
+
+
+export type PurfenceProjectsQuery = { __typename?: 'Query', purfenceProjects: { __typename?: 'PurfenceProjectConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, createdAt: any, updatedAt: any }> } };
+
+export type PurfenceIssueQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PurfenceIssueQuery = { __typename?: 'Query', purfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId?: string | null, workdir?: string | null, createdAt: any, updatedAt: any } };
+
+export type PurfenceProjectQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PurfenceProjectQuery = { __typename?: 'Query', purfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, createdAt: any, updatedAt: any } };
+
+export type PurfenceIssuesQueryVariables = Exact<{
+  paging?: InputMaybe<OffsetPaging>;
+  filter?: InputMaybe<PurfenceIssueFilter>;
+  sorting?: InputMaybe<Array<PurfenceIssueSort> | PurfenceIssueSort>;
+}>;
+
+
+export type PurfenceIssuesQuery = { __typename?: 'Query', purfenceIssues: { __typename?: 'PurfenceIssueConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId?: string | null, createdAt: any, updatedAt: any }> } };
+
+export type PurfenceExecutionsQueryVariables = Exact<{
+  paging?: InputMaybe<OffsetPaging>;
+  filter?: InputMaybe<PurfenceExecutionFilter>;
+  sorting?: InputMaybe<Array<PurfenceExecutionSort> | PurfenceExecutionSort>;
+}>;
+
+
+export type PurfenceExecutionsQuery = { __typename?: 'Query', purfenceExecutions: { __typename?: 'PurfenceExecutionConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceExecution', id: string, projectId: string, issueId: string, goal?: string | null, status: PurfenceStatus, branchName?: string | null, worktreePath?: string | null, executionDir?: string | null, error?: string | null, createdAt: any, updatedAt: any }> } };
+
+export type DeleteOnePurfenceIssueMutationVariables = Exact<{
+  input: DeleteOnePurfenceIssueInput;
+}>;
+
+
+export type DeleteOnePurfenceIssueMutation = { __typename?: 'Mutation', deleteOnePurfenceIssue: string };
+
+export type InitiateCodexOAuthMutationVariables = Exact<{
+  redirectUri: Scalars['String']['input'];
+}>;
+
+
+export type InitiateCodexOAuthMutation = { __typename?: 'Mutation', initiateCodexOAuth: { __typename?: 'OAuthAuthorization', authorizationUrl: string, state: string } };
+
+export type HandleCodexOAuthCallbackMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+  state: Scalars['String']['input'];
+  redirectUri: Scalars['String']['input'];
+}>;
+
+
+export type HandleCodexOAuthCallbackMutation = { __typename?: 'Mutation', handleCodexOAuthCallback: { __typename?: 'OAuthCallbackResponse', email: string, quota: { __typename?: 'QuotaInfo', total: number, used: number, remaining: number }, oauthInfo: { __typename?: 'CodexOAuthInfoObject', accessToken: string, refreshToken: string, idToken?: string | null, tokenType: string, scope?: string | null, expiresAt: number, accountId?: string | null } } };
+
+export type RefreshCodexTokenMutationVariables = Exact<{
+  configId: Scalars['ID']['input'];
+}>;
+
+
+export type RefreshCodexTokenMutation = { __typename?: 'Mutation', refreshCodexToken: { __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean, createdAt: any, updatedAt: any } };
+
+export type GetClaudeCodeConfigsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetClaudeCodeConfigsQuery = { __typename?: 'Query', claudeCodeConfigs: { __typename?: 'ClaudeCodeConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId?: string | null, createdAt: any, updatedAt: any, env?: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null }> } };
+
+export type CreateClaudeCodeConfigMutationVariables = Exact<{
+  input: CreateOneClaudeCodeConfigInput;
+}>;
+
+
+export type CreateClaudeCodeConfigMutation = { __typename?: 'Mutation', createOneClaudeCodeConfig: { __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId?: string | null, createdAt: any, updatedAt: any, env?: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null } };
+
+export type UpdateClaudeCodeConfigMutationVariables = Exact<{
+  input: UpdateOneClaudeCodeConfigInput;
+}>;
+
+
+export type UpdateClaudeCodeConfigMutation = { __typename?: 'Mutation', updateOneClaudeCodeConfig: { __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId?: string | null, createdAt: any, updatedAt: any, env?: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null } };
+
+export type GetProviderOptionsForClaudeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProviderOptionsForClaudeQuery = { __typename?: 'Query', modelProviderConfigDtos: { __typename?: 'ModelProviderConfigDtoConnection', nodes: Array<{ __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean }> } };
+
+export type GetProviderConfigsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProviderConfigsQuery = { __typename?: 'Query', modelProviderConfigDtos: { __typename?: 'ModelProviderConfigDtoConnection', totalCount: number, nodes: Array<{ __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email?: string | null, baseUrl?: string | null, isActive: boolean, isDefault: boolean, createdAt: any, updatedAt: any }> } };
+
+export type GetProviderConfigQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetProviderConfigQuery = { __typename?: 'Query', modelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email?: string | null, baseUrl?: string | null, isActive: boolean, isDefault: boolean, createdAt: any, updatedAt: any } };
+
+export type CreateProviderConfigMutationVariables = Exact<{
+  input: CreateOneModelProviderConfigDtoInput;
+}>;
+
+
+export type CreateProviderConfigMutation = { __typename?: 'Mutation', createOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email?: string | null, baseUrl?: string | null, isActive: boolean, isDefault: boolean, createdAt: any } };
+
+export type UpdateProviderConfigMutationVariables = Exact<{
+  input: UpdateOneModelProviderConfigDtoInput;
+}>;
+
+
+export type UpdateProviderConfigMutation = { __typename?: 'Mutation', updateOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email?: string | null, baseUrl?: string | null, isActive: boolean, isDefault: boolean, updatedAt: any } };
+
+export type DeleteProviderConfigMutationVariables = Exact<{
+  input: DeleteOneModelProviderConfigDtoInput;
+}>;
+
+
+export type DeleteProviderConfigMutation = { __typename?: 'Mutation', deleteOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDtoDeleteResponse', id?: string | null } };
+
+export type ToggleProviderEnabledMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isActive: Scalars['Boolean']['input'];
+}>;
+
+
+export type ToggleProviderEnabledMutation = { __typename?: 'Mutation', toggleModelProviderConfig: { __typename?: 'ModelProviderConfigDto', id: string, isActive: boolean } };
+
+export type GetPurfenceConfigsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPurfenceConfigsQuery = { __typename?: 'Query', purfenceConfigs: { __typename?: 'PurfenceConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceConfig', id: string, proxyUrl?: string | null, createdAt: any, updatedAt: any }> } };
+
+export type CreatePurfenceConfigMutationVariables = Exact<{
+  input: CreateOnePurfenceConfigInput;
+}>;
+
+
+export type CreatePurfenceConfigMutation = { __typename?: 'Mutation', createOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, proxyUrl?: string | null, createdAt: any, updatedAt: any } };
+
+export type UpdatePurfenceConfigMutationVariables = Exact<{
+  input: UpdateOnePurfenceConfigInput;
+}>;
+
+
+export type UpdatePurfenceConfigMutation = { __typename?: 'Mutation', updateOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, proxyUrl?: string | null, createdAt: any, updatedAt: any } };
+
+
+export const CreateOnePurfenceProjectDocument = gql`
+    mutation CreateOnePurfenceProject($input: CreateOnePurfenceProjectInput!) {
+  createOnePurfenceProject(input: $input) {
+    id
+    name
+    description
+    localRootPath
+    externalPath
+    defaultBranch
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateOnePurfenceProjectMutationFn = Apollo.MutationFunction<CreateOnePurfenceProjectMutation, CreateOnePurfenceProjectMutationVariables>;
+
+/**
+ * __useCreateOnePurfenceProjectMutation__
+ *
+ * To run a mutation, you first call `useCreateOnePurfenceProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOnePurfenceProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOnePurfenceProjectMutation, { data, loading, error }] = useCreateOnePurfenceProjectMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateOnePurfenceProjectMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateOnePurfenceProjectMutation, CreateOnePurfenceProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateOnePurfenceProjectMutation, CreateOnePurfenceProjectMutationVariables>(CreateOnePurfenceProjectDocument, options);
+      }
+export type CreateOnePurfenceProjectMutationHookResult = ReturnType<typeof useCreateOnePurfenceProjectMutation>;
+export type CreateOnePurfenceProjectMutationResult = Apollo.MutationResult<CreateOnePurfenceProjectMutation>;
+export type CreateOnePurfenceProjectMutationOptions = Apollo.BaseMutationOptions<CreateOnePurfenceProjectMutation, CreateOnePurfenceProjectMutationVariables>;
+export const CreateOnePurfenceIssueDocument = gql`
+    mutation CreateOnePurfenceIssue($input: CreateOnePurfenceIssueInput!) {
+  createOnePurfenceIssue(input: $input) {
+    id
+    projectId
+    title
+    description
+    status
+    latestExecutionId
+    createdAt
+    updatedAt
+    workdir
+  }
+}
+    `;
+export type CreateOnePurfenceIssueMutationFn = Apollo.MutationFunction<CreateOnePurfenceIssueMutation, CreateOnePurfenceIssueMutationVariables>;
+
+/**
+ * __useCreateOnePurfenceIssueMutation__
+ *
+ * To run a mutation, you first call `useCreateOnePurfenceIssueMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOnePurfenceIssueMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOnePurfenceIssueMutation, { data, loading, error }] = useCreateOnePurfenceIssueMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateOnePurfenceIssueMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateOnePurfenceIssueMutation, CreateOnePurfenceIssueMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateOnePurfenceIssueMutation, CreateOnePurfenceIssueMutationVariables>(CreateOnePurfenceIssueDocument, options);
+      }
+export type CreateOnePurfenceIssueMutationHookResult = ReturnType<typeof useCreateOnePurfenceIssueMutation>;
+export type CreateOnePurfenceIssueMutationResult = Apollo.MutationResult<CreateOnePurfenceIssueMutation>;
+export type CreateOnePurfenceIssueMutationOptions = Apollo.BaseMutationOptions<CreateOnePurfenceIssueMutation, CreateOnePurfenceIssueMutationVariables>;
+export const PurfenceProjectsDocument = gql`
+    query PurfenceProjects($paging: OffsetPaging, $filter: PurfenceProjectFilter, $sorting: [PurfenceProjectSort!]) {
+  purfenceProjects(paging: $paging, filter: $filter, sorting: $sorting) {
+    nodes {
+      id
+      name
+      description
+      localRootPath
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __usePurfenceProjectsQuery__
+ *
+ * To run a query within a React component, call `usePurfenceProjectsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePurfenceProjectsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePurfenceProjectsQuery({
+ *   variables: {
+ *      paging: // value for 'paging'
+ *      filter: // value for 'filter'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function usePurfenceProjectsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>(PurfenceProjectsDocument, options);
+      }
+export function usePurfenceProjectsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>(PurfenceProjectsDocument, options);
+        }
+// @ts-ignore
+export function usePurfenceProjectsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>;
+export function usePurfenceProjectsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceProjectsQuery | undefined, PurfenceProjectsQueryVariables>;
+export function usePurfenceProjectsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>(PurfenceProjectsDocument, options);
+        }
+export type PurfenceProjectsQueryHookResult = ReturnType<typeof usePurfenceProjectsQuery>;
+export type PurfenceProjectsLazyQueryHookResult = ReturnType<typeof usePurfenceProjectsLazyQuery>;
+export type PurfenceProjectsSuspenseQueryHookResult = ReturnType<typeof usePurfenceProjectsSuspenseQuery>;
+export type PurfenceProjectsQueryResult = Apollo.QueryResult<PurfenceProjectsQuery, PurfenceProjectsQueryVariables>;
+export const PurfenceIssueDocument = gql`
+    query PurfenceIssue($id: ID!) {
+  purfenceIssue(id: $id) {
+    id
+    projectId
+    title
+    description
+    status
+    latestExecutionId
+    workdir
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __usePurfenceIssueQuery__
+ *
+ * To run a query within a React component, call `usePurfenceIssueQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePurfenceIssueQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePurfenceIssueQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePurfenceIssueQuery(baseOptions: ApolloReactHooks.QueryHookOptions<PurfenceIssueQuery, PurfenceIssueQueryVariables> & ({ variables: PurfenceIssueQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<PurfenceIssueQuery, PurfenceIssueQueryVariables>(PurfenceIssueDocument, options);
+      }
+export function usePurfenceIssueLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceIssueQuery, PurfenceIssueQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<PurfenceIssueQuery, PurfenceIssueQueryVariables>(PurfenceIssueDocument, options);
+        }
+// @ts-ignore
+export function usePurfenceIssueSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssueQuery, PurfenceIssueQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceIssueQuery, PurfenceIssueQueryVariables>;
+export function usePurfenceIssueSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssueQuery, PurfenceIssueQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceIssueQuery | undefined, PurfenceIssueQueryVariables>;
+export function usePurfenceIssueSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssueQuery, PurfenceIssueQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PurfenceIssueQuery, PurfenceIssueQueryVariables>(PurfenceIssueDocument, options);
+        }
+export type PurfenceIssueQueryHookResult = ReturnType<typeof usePurfenceIssueQuery>;
+export type PurfenceIssueLazyQueryHookResult = ReturnType<typeof usePurfenceIssueLazyQuery>;
+export type PurfenceIssueSuspenseQueryHookResult = ReturnType<typeof usePurfenceIssueSuspenseQuery>;
+export type PurfenceIssueQueryResult = Apollo.QueryResult<PurfenceIssueQuery, PurfenceIssueQueryVariables>;
+export const PurfenceProjectDocument = gql`
+    query PurfenceProject($id: ID!) {
+  purfenceProject(id: $id) {
+    id
+    name
+    description
+    localRootPath
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __usePurfenceProjectQuery__
+ *
+ * To run a query within a React component, call `usePurfenceProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePurfenceProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePurfenceProjectQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePurfenceProjectQuery(baseOptions: ApolloReactHooks.QueryHookOptions<PurfenceProjectQuery, PurfenceProjectQueryVariables> & ({ variables: PurfenceProjectQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<PurfenceProjectQuery, PurfenceProjectQueryVariables>(PurfenceProjectDocument, options);
+      }
+export function usePurfenceProjectLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceProjectQuery, PurfenceProjectQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<PurfenceProjectQuery, PurfenceProjectQueryVariables>(PurfenceProjectDocument, options);
+        }
+// @ts-ignore
+export function usePurfenceProjectSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectQuery, PurfenceProjectQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceProjectQuery, PurfenceProjectQueryVariables>;
+export function usePurfenceProjectSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectQuery, PurfenceProjectQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceProjectQuery | undefined, PurfenceProjectQueryVariables>;
+export function usePurfenceProjectSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceProjectQuery, PurfenceProjectQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PurfenceProjectQuery, PurfenceProjectQueryVariables>(PurfenceProjectDocument, options);
+        }
+export type PurfenceProjectQueryHookResult = ReturnType<typeof usePurfenceProjectQuery>;
+export type PurfenceProjectLazyQueryHookResult = ReturnType<typeof usePurfenceProjectLazyQuery>;
+export type PurfenceProjectSuspenseQueryHookResult = ReturnType<typeof usePurfenceProjectSuspenseQuery>;
+export type PurfenceProjectQueryResult = Apollo.QueryResult<PurfenceProjectQuery, PurfenceProjectQueryVariables>;
+export const PurfenceIssuesDocument = gql`
+    query PurfenceIssues($paging: OffsetPaging, $filter: PurfenceIssueFilter, $sorting: [PurfenceIssueSort!]) {
+  purfenceIssues(paging: $paging, filter: $filter, sorting: $sorting) {
+    nodes {
+      id
+      projectId
+      title
+      description
+      status
+      latestExecutionId
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __usePurfenceIssuesQuery__
+ *
+ * To run a query within a React component, call `usePurfenceIssuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePurfenceIssuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePurfenceIssuesQuery({
+ *   variables: {
+ *      paging: // value for 'paging'
+ *      filter: // value for 'filter'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function usePurfenceIssuesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>(PurfenceIssuesDocument, options);
+      }
+export function usePurfenceIssuesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>(PurfenceIssuesDocument, options);
+        }
+// @ts-ignore
+export function usePurfenceIssuesSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>;
+export function usePurfenceIssuesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceIssuesQuery | undefined, PurfenceIssuesQueryVariables>;
+export function usePurfenceIssuesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>(PurfenceIssuesDocument, options);
+        }
+export type PurfenceIssuesQueryHookResult = ReturnType<typeof usePurfenceIssuesQuery>;
+export type PurfenceIssuesLazyQueryHookResult = ReturnType<typeof usePurfenceIssuesLazyQuery>;
+export type PurfenceIssuesSuspenseQueryHookResult = ReturnType<typeof usePurfenceIssuesSuspenseQuery>;
+export type PurfenceIssuesQueryResult = Apollo.QueryResult<PurfenceIssuesQuery, PurfenceIssuesQueryVariables>;
+export const PurfenceExecutionsDocument = gql`
+    query PurfenceExecutions($paging: OffsetPaging, $filter: PurfenceExecutionFilter, $sorting: [PurfenceExecutionSort!]) {
+  purfenceExecutions(paging: $paging, filter: $filter, sorting: $sorting) {
+    nodes {
+      id
+      projectId
+      issueId
+      goal
+      status
+      branchName
+      worktreePath
+      executionDir
+      error
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __usePurfenceExecutionsQuery__
+ *
+ * To run a query within a React component, call `usePurfenceExecutionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePurfenceExecutionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePurfenceExecutionsQuery({
+ *   variables: {
+ *      paging: // value for 'paging'
+ *      filter: // value for 'filter'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function usePurfenceExecutionsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>(PurfenceExecutionsDocument, options);
+      }
+export function usePurfenceExecutionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>(PurfenceExecutionsDocument, options);
+        }
+// @ts-ignore
+export function usePurfenceExecutionsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>;
+export function usePurfenceExecutionsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceExecutionsQuery | undefined, PurfenceExecutionsQueryVariables>;
+export function usePurfenceExecutionsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>(PurfenceExecutionsDocument, options);
+        }
+export type PurfenceExecutionsQueryHookResult = ReturnType<typeof usePurfenceExecutionsQuery>;
+export type PurfenceExecutionsLazyQueryHookResult = ReturnType<typeof usePurfenceExecutionsLazyQuery>;
+export type PurfenceExecutionsSuspenseQueryHookResult = ReturnType<typeof usePurfenceExecutionsSuspenseQuery>;
+export type PurfenceExecutionsQueryResult = Apollo.QueryResult<PurfenceExecutionsQuery, PurfenceExecutionsQueryVariables>;
+export const DeleteOnePurfenceIssueDocument = gql`
+    mutation DeleteOnePurfenceIssue($input: DeleteOnePurfenceIssueInput!) {
+  deleteOnePurfenceIssue(input: $input)
+}
+    `;
+export type DeleteOnePurfenceIssueMutationFn = Apollo.MutationFunction<DeleteOnePurfenceIssueMutation, DeleteOnePurfenceIssueMutationVariables>;
+
+/**
+ * __useDeleteOnePurfenceIssueMutation__
+ *
+ * To run a mutation, you first call `useDeleteOnePurfenceIssueMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteOnePurfenceIssueMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteOnePurfenceIssueMutation, { data, loading, error }] = useDeleteOnePurfenceIssueMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteOnePurfenceIssueMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteOnePurfenceIssueMutation, DeleteOnePurfenceIssueMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteOnePurfenceIssueMutation, DeleteOnePurfenceIssueMutationVariables>(DeleteOnePurfenceIssueDocument, options);
+      }
+export type DeleteOnePurfenceIssueMutationHookResult = ReturnType<typeof useDeleteOnePurfenceIssueMutation>;
+export type DeleteOnePurfenceIssueMutationResult = Apollo.MutationResult<DeleteOnePurfenceIssueMutation>;
+export type DeleteOnePurfenceIssueMutationOptions = Apollo.BaseMutationOptions<DeleteOnePurfenceIssueMutation, DeleteOnePurfenceIssueMutationVariables>;
+export const InitiateCodexOAuthDocument = gql`
+    mutation InitiateCodexOAuth($redirectUri: String!) {
+  initiateCodexOAuth(redirectUri: $redirectUri) {
+    authorizationUrl
+    state
+  }
+}
+    `;
+export type InitiateCodexOAuthMutationFn = Apollo.MutationFunction<InitiateCodexOAuthMutation, InitiateCodexOAuthMutationVariables>;
+
+/**
+ * __useInitiateCodexOAuthMutation__
+ *
+ * To run a mutation, you first call `useInitiateCodexOAuthMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInitiateCodexOAuthMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [initiateCodexOAuthMutation, { data, loading, error }] = useInitiateCodexOAuthMutation({
+ *   variables: {
+ *      redirectUri: // value for 'redirectUri'
+ *   },
+ * });
+ */
+export function useInitiateCodexOAuthMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<InitiateCodexOAuthMutation, InitiateCodexOAuthMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<InitiateCodexOAuthMutation, InitiateCodexOAuthMutationVariables>(InitiateCodexOAuthDocument, options);
+      }
+export type InitiateCodexOAuthMutationHookResult = ReturnType<typeof useInitiateCodexOAuthMutation>;
+export type InitiateCodexOAuthMutationResult = Apollo.MutationResult<InitiateCodexOAuthMutation>;
+export type InitiateCodexOAuthMutationOptions = Apollo.BaseMutationOptions<InitiateCodexOAuthMutation, InitiateCodexOAuthMutationVariables>;
+export const HandleCodexOAuthCallbackDocument = gql`
+    mutation HandleCodexOAuthCallback($code: String!, $state: String!, $redirectUri: String!) {
+  handleCodexOAuthCallback(code: $code, state: $state, redirectUri: $redirectUri) {
+    email
+    quota {
+      total
+      used
+      remaining
+    }
+    oauthInfo {
+      accessToken
+      refreshToken
+      idToken
+      tokenType
+      scope
+      expiresAt
+      accountId
+    }
+  }
+}
+    `;
+export type HandleCodexOAuthCallbackMutationFn = Apollo.MutationFunction<HandleCodexOAuthCallbackMutation, HandleCodexOAuthCallbackMutationVariables>;
+
+/**
+ * __useHandleCodexOAuthCallbackMutation__
+ *
+ * To run a mutation, you first call `useHandleCodexOAuthCallbackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useHandleCodexOAuthCallbackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [handleCodexOAuthCallbackMutation, { data, loading, error }] = useHandleCodexOAuthCallbackMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *      state: // value for 'state'
+ *      redirectUri: // value for 'redirectUri'
+ *   },
+ * });
+ */
+export function useHandleCodexOAuthCallbackMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HandleCodexOAuthCallbackMutation, HandleCodexOAuthCallbackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<HandleCodexOAuthCallbackMutation, HandleCodexOAuthCallbackMutationVariables>(HandleCodexOAuthCallbackDocument, options);
+      }
+export type HandleCodexOAuthCallbackMutationHookResult = ReturnType<typeof useHandleCodexOAuthCallbackMutation>;
+export type HandleCodexOAuthCallbackMutationResult = Apollo.MutationResult<HandleCodexOAuthCallbackMutation>;
+export type HandleCodexOAuthCallbackMutationOptions = Apollo.BaseMutationOptions<HandleCodexOAuthCallbackMutation, HandleCodexOAuthCallbackMutationVariables>;
+export const RefreshCodexTokenDocument = gql`
+    mutation RefreshCodexToken($configId: ID!) {
+  refreshCodexToken(configId: $configId) {
+    id
+    name
+    provider
+    isActive
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type RefreshCodexTokenMutationFn = Apollo.MutationFunction<RefreshCodexTokenMutation, RefreshCodexTokenMutationVariables>;
+
+/**
+ * __useRefreshCodexTokenMutation__
+ *
+ * To run a mutation, you first call `useRefreshCodexTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRefreshCodexTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [refreshCodexTokenMutation, { data, loading, error }] = useRefreshCodexTokenMutation({
+ *   variables: {
+ *      configId: // value for 'configId'
+ *   },
+ * });
+ */
+export function useRefreshCodexTokenMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RefreshCodexTokenMutation, RefreshCodexTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<RefreshCodexTokenMutation, RefreshCodexTokenMutationVariables>(RefreshCodexTokenDocument, options);
+      }
+export type RefreshCodexTokenMutationHookResult = ReturnType<typeof useRefreshCodexTokenMutation>;
+export type RefreshCodexTokenMutationResult = Apollo.MutationResult<RefreshCodexTokenMutation>;
+export type RefreshCodexTokenMutationOptions = Apollo.BaseMutationOptions<RefreshCodexTokenMutation, RefreshCodexTokenMutationVariables>;
+export const GetClaudeCodeConfigsDocument = gql`
+    query GetClaudeCodeConfigs {
+  claudeCodeConfigs(paging: {limit: 1, offset: 0}) {
+    totalCount
+    nodes {
+      id
+      useDefaultConfig
+      modelProviderId
+      env {
+        key
+        value
+      }
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetClaudeCodeConfigsQuery__
+ *
+ * To run a query within a React component, call `useGetClaudeCodeConfigsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetClaudeCodeConfigsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetClaudeCodeConfigsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetClaudeCodeConfigsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>(GetClaudeCodeConfigsDocument, options);
+      }
+export function useGetClaudeCodeConfigsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>(GetClaudeCodeConfigsDocument, options);
+        }
+// @ts-ignore
+export function useGetClaudeCodeConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>;
+export function useGetClaudeCodeConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetClaudeCodeConfigsQuery | undefined, GetClaudeCodeConfigsQueryVariables>;
+export function useGetClaudeCodeConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>(GetClaudeCodeConfigsDocument, options);
+        }
+export type GetClaudeCodeConfigsQueryHookResult = ReturnType<typeof useGetClaudeCodeConfigsQuery>;
+export type GetClaudeCodeConfigsLazyQueryHookResult = ReturnType<typeof useGetClaudeCodeConfigsLazyQuery>;
+export type GetClaudeCodeConfigsSuspenseQueryHookResult = ReturnType<typeof useGetClaudeCodeConfigsSuspenseQuery>;
+export type GetClaudeCodeConfigsQueryResult = Apollo.QueryResult<GetClaudeCodeConfigsQuery, GetClaudeCodeConfigsQueryVariables>;
+export const CreateClaudeCodeConfigDocument = gql`
+    mutation CreateClaudeCodeConfig($input: CreateOneClaudeCodeConfigInput!) {
+  createOneClaudeCodeConfig(input: $input) {
+    id
+    useDefaultConfig
+    modelProviderId
+    env {
+      key
+      value
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateClaudeCodeConfigMutationFn = Apollo.MutationFunction<CreateClaudeCodeConfigMutation, CreateClaudeCodeConfigMutationVariables>;
+
+/**
+ * __useCreateClaudeCodeConfigMutation__
+ *
+ * To run a mutation, you first call `useCreateClaudeCodeConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClaudeCodeConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClaudeCodeConfigMutation, { data, loading, error }] = useCreateClaudeCodeConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateClaudeCodeConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateClaudeCodeConfigMutation, CreateClaudeCodeConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateClaudeCodeConfigMutation, CreateClaudeCodeConfigMutationVariables>(CreateClaudeCodeConfigDocument, options);
+      }
+export type CreateClaudeCodeConfigMutationHookResult = ReturnType<typeof useCreateClaudeCodeConfigMutation>;
+export type CreateClaudeCodeConfigMutationResult = Apollo.MutationResult<CreateClaudeCodeConfigMutation>;
+export type CreateClaudeCodeConfigMutationOptions = Apollo.BaseMutationOptions<CreateClaudeCodeConfigMutation, CreateClaudeCodeConfigMutationVariables>;
+export const UpdateClaudeCodeConfigDocument = gql`
+    mutation UpdateClaudeCodeConfig($input: UpdateOneClaudeCodeConfigInput!) {
+  updateOneClaudeCodeConfig(input: $input) {
+    id
+    useDefaultConfig
+    modelProviderId
+    env {
+      key
+      value
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateClaudeCodeConfigMutationFn = Apollo.MutationFunction<UpdateClaudeCodeConfigMutation, UpdateClaudeCodeConfigMutationVariables>;
+
+/**
+ * __useUpdateClaudeCodeConfigMutation__
+ *
+ * To run a mutation, you first call `useUpdateClaudeCodeConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClaudeCodeConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClaudeCodeConfigMutation, { data, loading, error }] = useUpdateClaudeCodeConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateClaudeCodeConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateClaudeCodeConfigMutation, UpdateClaudeCodeConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateClaudeCodeConfigMutation, UpdateClaudeCodeConfigMutationVariables>(UpdateClaudeCodeConfigDocument, options);
+      }
+export type UpdateClaudeCodeConfigMutationHookResult = ReturnType<typeof useUpdateClaudeCodeConfigMutation>;
+export type UpdateClaudeCodeConfigMutationResult = Apollo.MutationResult<UpdateClaudeCodeConfigMutation>;
+export type UpdateClaudeCodeConfigMutationOptions = Apollo.BaseMutationOptions<UpdateClaudeCodeConfigMutation, UpdateClaudeCodeConfigMutationVariables>;
+export const GetProviderOptionsForClaudeDocument = gql`
+    query GetProviderOptionsForClaude {
+  modelProviderConfigDtos {
+    nodes {
+      id
+      name
+      provider
+      isActive
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetProviderOptionsForClaudeQuery__
+ *
+ * To run a query within a React component, call `useGetProviderOptionsForClaudeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProviderOptionsForClaudeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProviderOptionsForClaudeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetProviderOptionsForClaudeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>(GetProviderOptionsForClaudeDocument, options);
+      }
+export function useGetProviderOptionsForClaudeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>(GetProviderOptionsForClaudeDocument, options);
+        }
+// @ts-ignore
+export function useGetProviderOptionsForClaudeSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>;
+export function useGetProviderOptionsForClaudeSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderOptionsForClaudeQuery | undefined, GetProviderOptionsForClaudeQueryVariables>;
+export function useGetProviderOptionsForClaudeSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>(GetProviderOptionsForClaudeDocument, options);
+        }
+export type GetProviderOptionsForClaudeQueryHookResult = ReturnType<typeof useGetProviderOptionsForClaudeQuery>;
+export type GetProviderOptionsForClaudeLazyQueryHookResult = ReturnType<typeof useGetProviderOptionsForClaudeLazyQuery>;
+export type GetProviderOptionsForClaudeSuspenseQueryHookResult = ReturnType<typeof useGetProviderOptionsForClaudeSuspenseQuery>;
+export type GetProviderOptionsForClaudeQueryResult = Apollo.QueryResult<GetProviderOptionsForClaudeQuery, GetProviderOptionsForClaudeQueryVariables>;
+export const GetProviderConfigsDocument = gql`
+    query GetProviderConfigs {
+  modelProviderConfigDtos {
+    nodes {
+      id
+      provider
+      name
+      email
+      baseUrl
+      isActive
+      isDefault
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetProviderConfigsQuery__
+ *
+ * To run a query within a React component, call `useGetProviderConfigsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProviderConfigsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProviderConfigsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetProviderConfigsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>(GetProviderConfigsDocument, options);
+      }
+export function useGetProviderConfigsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>(GetProviderConfigsDocument, options);
+        }
+// @ts-ignore
+export function useGetProviderConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>;
+export function useGetProviderConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderConfigsQuery | undefined, GetProviderConfigsQueryVariables>;
+export function useGetProviderConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>(GetProviderConfigsDocument, options);
+        }
+export type GetProviderConfigsQueryHookResult = ReturnType<typeof useGetProviderConfigsQuery>;
+export type GetProviderConfigsLazyQueryHookResult = ReturnType<typeof useGetProviderConfigsLazyQuery>;
+export type GetProviderConfigsSuspenseQueryHookResult = ReturnType<typeof useGetProviderConfigsSuspenseQuery>;
+export type GetProviderConfigsQueryResult = Apollo.QueryResult<GetProviderConfigsQuery, GetProviderConfigsQueryVariables>;
+export const GetProviderConfigDocument = gql`
+    query GetProviderConfig($id: ID!) {
+  modelProviderConfigDto(id: $id) {
+    id
+    provider
+    name
+    email
+    baseUrl
+    isActive
+    isDefault
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetProviderConfigQuery__
+ *
+ * To run a query within a React component, call `useGetProviderConfigQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProviderConfigQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProviderConfigQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetProviderConfigQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetProviderConfigQuery, GetProviderConfigQueryVariables> & ({ variables: GetProviderConfigQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetProviderConfigQuery, GetProviderConfigQueryVariables>(GetProviderConfigDocument, options);
+      }
+export function useGetProviderConfigLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetProviderConfigQuery, GetProviderConfigQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetProviderConfigQuery, GetProviderConfigQueryVariables>(GetProviderConfigDocument, options);
+        }
+// @ts-ignore
+export function useGetProviderConfigSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigQuery, GetProviderConfigQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderConfigQuery, GetProviderConfigQueryVariables>;
+export function useGetProviderConfigSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigQuery, GetProviderConfigQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetProviderConfigQuery | undefined, GetProviderConfigQueryVariables>;
+export function useGetProviderConfigSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetProviderConfigQuery, GetProviderConfigQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetProviderConfigQuery, GetProviderConfigQueryVariables>(GetProviderConfigDocument, options);
+        }
+export type GetProviderConfigQueryHookResult = ReturnType<typeof useGetProviderConfigQuery>;
+export type GetProviderConfigLazyQueryHookResult = ReturnType<typeof useGetProviderConfigLazyQuery>;
+export type GetProviderConfigSuspenseQueryHookResult = ReturnType<typeof useGetProviderConfigSuspenseQuery>;
+export type GetProviderConfigQueryResult = Apollo.QueryResult<GetProviderConfigQuery, GetProviderConfigQueryVariables>;
+export const CreateProviderConfigDocument = gql`
+    mutation CreateProviderConfig($input: CreateOneModelProviderConfigDtoInput!) {
+  createOneModelProviderConfigDto(input: $input) {
+    id
+    provider
+    name
+    email
+    baseUrl
+    isActive
+    isDefault
+    createdAt
+  }
+}
+    `;
+export type CreateProviderConfigMutationFn = Apollo.MutationFunction<CreateProviderConfigMutation, CreateProviderConfigMutationVariables>;
+
+/**
+ * __useCreateProviderConfigMutation__
+ *
+ * To run a mutation, you first call `useCreateProviderConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProviderConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProviderConfigMutation, { data, loading, error }] = useCreateProviderConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateProviderConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateProviderConfigMutation, CreateProviderConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateProviderConfigMutation, CreateProviderConfigMutationVariables>(CreateProviderConfigDocument, options);
+      }
+export type CreateProviderConfigMutationHookResult = ReturnType<typeof useCreateProviderConfigMutation>;
+export type CreateProviderConfigMutationResult = Apollo.MutationResult<CreateProviderConfigMutation>;
+export type CreateProviderConfigMutationOptions = Apollo.BaseMutationOptions<CreateProviderConfigMutation, CreateProviderConfigMutationVariables>;
+export const UpdateProviderConfigDocument = gql`
+    mutation UpdateProviderConfig($input: UpdateOneModelProviderConfigDtoInput!) {
+  updateOneModelProviderConfigDto(input: $input) {
+    id
+    provider
+    name
+    email
+    baseUrl
+    isActive
+    isDefault
+    updatedAt
+  }
+}
+    `;
+export type UpdateProviderConfigMutationFn = Apollo.MutationFunction<UpdateProviderConfigMutation, UpdateProviderConfigMutationVariables>;
+
+/**
+ * __useUpdateProviderConfigMutation__
+ *
+ * To run a mutation, you first call `useUpdateProviderConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProviderConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProviderConfigMutation, { data, loading, error }] = useUpdateProviderConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateProviderConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateProviderConfigMutation, UpdateProviderConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateProviderConfigMutation, UpdateProviderConfigMutationVariables>(UpdateProviderConfigDocument, options);
+      }
+export type UpdateProviderConfigMutationHookResult = ReturnType<typeof useUpdateProviderConfigMutation>;
+export type UpdateProviderConfigMutationResult = Apollo.MutationResult<UpdateProviderConfigMutation>;
+export type UpdateProviderConfigMutationOptions = Apollo.BaseMutationOptions<UpdateProviderConfigMutation, UpdateProviderConfigMutationVariables>;
+export const DeleteProviderConfigDocument = gql`
+    mutation DeleteProviderConfig($input: DeleteOneModelProviderConfigDtoInput!) {
+  deleteOneModelProviderConfigDto(input: $input) {
+    id
+  }
+}
+    `;
+export type DeleteProviderConfigMutationFn = Apollo.MutationFunction<DeleteProviderConfigMutation, DeleteProviderConfigMutationVariables>;
+
+/**
+ * __useDeleteProviderConfigMutation__
+ *
+ * To run a mutation, you first call `useDeleteProviderConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProviderConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProviderConfigMutation, { data, loading, error }] = useDeleteProviderConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteProviderConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteProviderConfigMutation, DeleteProviderConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteProviderConfigMutation, DeleteProviderConfigMutationVariables>(DeleteProviderConfigDocument, options);
+      }
+export type DeleteProviderConfigMutationHookResult = ReturnType<typeof useDeleteProviderConfigMutation>;
+export type DeleteProviderConfigMutationResult = Apollo.MutationResult<DeleteProviderConfigMutation>;
+export type DeleteProviderConfigMutationOptions = Apollo.BaseMutationOptions<DeleteProviderConfigMutation, DeleteProviderConfigMutationVariables>;
+export const ToggleProviderEnabledDocument = gql`
+    mutation ToggleProviderEnabled($id: ID!, $isActive: Boolean!) {
+  toggleModelProviderConfig(id: $id, isActive: $isActive) {
+    id
+    isActive
+  }
+}
+    `;
+export type ToggleProviderEnabledMutationFn = Apollo.MutationFunction<ToggleProviderEnabledMutation, ToggleProviderEnabledMutationVariables>;
+
+/**
+ * __useToggleProviderEnabledMutation__
+ *
+ * To run a mutation, you first call `useToggleProviderEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleProviderEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleProviderEnabledMutation, { data, loading, error }] = useToggleProviderEnabledMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      isActive: // value for 'isActive'
+ *   },
+ * });
+ */
+export function useToggleProviderEnabledMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ToggleProviderEnabledMutation, ToggleProviderEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ToggleProviderEnabledMutation, ToggleProviderEnabledMutationVariables>(ToggleProviderEnabledDocument, options);
+      }
+export type ToggleProviderEnabledMutationHookResult = ReturnType<typeof useToggleProviderEnabledMutation>;
+export type ToggleProviderEnabledMutationResult = Apollo.MutationResult<ToggleProviderEnabledMutation>;
+export type ToggleProviderEnabledMutationOptions = Apollo.BaseMutationOptions<ToggleProviderEnabledMutation, ToggleProviderEnabledMutationVariables>;
+export const GetPurfenceConfigsDocument = gql`
+    query GetPurfenceConfigs {
+  purfenceConfigs(paging: {limit: 1, offset: 0}) {
+    totalCount
+    nodes {
+      id
+      proxyUrl
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPurfenceConfigsQuery__
+ *
+ * To run a query within a React component, call `useGetPurfenceConfigsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPurfenceConfigsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPurfenceConfigsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetPurfenceConfigsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>(GetPurfenceConfigsDocument, options);
+      }
+export function useGetPurfenceConfigsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>(GetPurfenceConfigsDocument, options);
+        }
+// @ts-ignore
+export function useGetPurfenceConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>;
+export function useGetPurfenceConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetPurfenceConfigsQuery | undefined, GetPurfenceConfigsQueryVariables>;
+export function useGetPurfenceConfigsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>(GetPurfenceConfigsDocument, options);
+        }
+export type GetPurfenceConfigsQueryHookResult = ReturnType<typeof useGetPurfenceConfigsQuery>;
+export type GetPurfenceConfigsLazyQueryHookResult = ReturnType<typeof useGetPurfenceConfigsLazyQuery>;
+export type GetPurfenceConfigsSuspenseQueryHookResult = ReturnType<typeof useGetPurfenceConfigsSuspenseQuery>;
+export type GetPurfenceConfigsQueryResult = Apollo.QueryResult<GetPurfenceConfigsQuery, GetPurfenceConfigsQueryVariables>;
+export const CreatePurfenceConfigDocument = gql`
+    mutation CreatePurfenceConfig($input: CreateOnePurfenceConfigInput!) {
+  createOnePurfenceConfig(input: $input) {
+    id
+    proxyUrl
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreatePurfenceConfigMutationFn = Apollo.MutationFunction<CreatePurfenceConfigMutation, CreatePurfenceConfigMutationVariables>;
+
+/**
+ * __useCreatePurfenceConfigMutation__
+ *
+ * To run a mutation, you first call `useCreatePurfenceConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePurfenceConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPurfenceConfigMutation, { data, loading, error }] = useCreatePurfenceConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreatePurfenceConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreatePurfenceConfigMutation, CreatePurfenceConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreatePurfenceConfigMutation, CreatePurfenceConfigMutationVariables>(CreatePurfenceConfigDocument, options);
+      }
+export type CreatePurfenceConfigMutationHookResult = ReturnType<typeof useCreatePurfenceConfigMutation>;
+export type CreatePurfenceConfigMutationResult = Apollo.MutationResult<CreatePurfenceConfigMutation>;
+export type CreatePurfenceConfigMutationOptions = Apollo.BaseMutationOptions<CreatePurfenceConfigMutation, CreatePurfenceConfigMutationVariables>;
+export const UpdatePurfenceConfigDocument = gql`
+    mutation UpdatePurfenceConfig($input: UpdateOnePurfenceConfigInput!) {
+  updateOnePurfenceConfig(input: $input) {
+    id
+    proxyUrl
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdatePurfenceConfigMutationFn = Apollo.MutationFunction<UpdatePurfenceConfigMutation, UpdatePurfenceConfigMutationVariables>;
+
+/**
+ * __useUpdatePurfenceConfigMutation__
+ *
+ * To run a mutation, you first call `useUpdatePurfenceConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePurfenceConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePurfenceConfigMutation, { data, loading, error }] = useUpdatePurfenceConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePurfenceConfigMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePurfenceConfigMutation, UpdatePurfenceConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdatePurfenceConfigMutation, UpdatePurfenceConfigMutationVariables>(UpdatePurfenceConfigDocument, options);
+      }
+export type UpdatePurfenceConfigMutationHookResult = ReturnType<typeof useUpdatePurfenceConfigMutation>;
+export type UpdatePurfenceConfigMutationResult = Apollo.MutationResult<UpdatePurfenceConfigMutation>;
+export type UpdatePurfenceConfigMutationOptions = Apollo.BaseMutationOptions<UpdatePurfenceConfigMutation, UpdatePurfenceConfigMutationVariables>;

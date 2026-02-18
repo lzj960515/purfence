@@ -1,0 +1,120 @@
+#!/bin/bash
+# Apple Mail Search - Fast email search via SQLite
+# Requires: sqlite3 (built into macOS)
+
+set -e
+
+# Find Mail database
+find_db() {
+    find ~/Library/Mail -name "Envelope Index" -type f 2>/dev/null | head -1
+}
+
+DB_PATH="${DB_PATH:-$(find_db)}"
+
+if [ -z "$DB_PATH" ]; then
+    echo "Error: Could not find Mail database" >&2
+    exit 1
+fi
+
+# Default settings
+LIMIT=20
+FORMAT="column"
+QUIET=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -n|--limit)
+            LIMIT="$2"
+            shift 2
+            ;;
+        -j|--json)
+            FORMAT="json"
+            shift
+            ;;
+        -c|--csv)
+            FORMAT="csv"
+            shift
+            ;;
+        -q|--quiet)
+            QUIET="-norow"
+            shift
+            ;;
+        --db)
+            DB_PATH="$2"
+            shift 2
+            ;;
+        subject)
+            QUERY="SELECT m.ROWID as id, s.subject, a.address as sender, datetime(m.date_sent + 978307200, 'unixepoch') as date
+                   FROM messages m
+                   JOIN subjects s ON m.subject = s.ROWID
+                   LEFT JOIN addresses a ON m.sender = a.ROWID
+                   WHERE s.subject LIKE '%${2}%'
+                   ORDER BY m.date_sent DESC
+                   LIMIT $LIMIT"
+            shift 2
+            ;;
+        sender)
+            QUERY="SELECT m.ROWID as id, s.subject, a.address as sender, datetime(m.date_sent + 978307200, 'unixepoch') as date
+                   FROM messages m
+                   JOIN subjects s ON m.subject = s.ROWID
+                   LEFT JOIN addresses a ON m.sender = a.ROWID
+                   WHERE a.address LIKE '%${2}%'
+                   ORDER BY m.date_sent DESC
+                   LIMIT $LIMIT"
+            shift 2
+            ;;
+        from-name)
+            QUERY="SELECT m.ROWID as id, s.subject, a.address as sender, datetime(m.date_sent + 978307200, 'unixepoch') as date
+                   FROM messages m
+                   JOIN subjects s ON m.subject = s.ROWID
+                   LEFT JOIN addresses a ON m.sender = a.ROWID
+                   WHERE a.comment LIKE '%${2}%'
+                   ORDER BY m.date_sent DESC
+                   LIMIT $LIMIT"
+            shift 2
+            ;;
+        unread)
+            QUERY="SELECT m.ROWID as id, s.subject, a.address as sender, datetime(m.date_sent + 978307200, 'unixepoch') as date
+                   FROM messages m
+                   JOIN subjects s ON m.subject = s.ROWID
+                   LEFT JOIN addresses a ON m.sender = a.ROWID
+                   WHERE m.flags & 1 = 0
+                   ORDER BY m.date_sent DESC
+                   LIMIT $LIMIT"
+            shift
+            ;;
+        recent)
+            DAYS="${2:-7}"
+            QUERY="SELECT m.ROWID as id, s.subject, a.address as sender, datetime(m.date_sent + 978307200, 'unixepoch') as date
+                   FROM messages m
+                   JOIN subjects s ON m.subject = s.ROWID
+                   LEFT JOIN addresses a ON m.sender = a.ROWID
+                   WHERE m.date_sent > (strftime('%s', 'now') - 978307200 - ($DAYS * 86400))
+                   ORDER BY m.date_sent DESC
+                   LIMIT $LIMIT"
+            shift 2
+            ;;
+        stats)
+            QUERY="SELECT
+                    (SELECT COUNT(*) FROM messages) as total_messages,
+                    (SELECT COUNT(*) FROM addresses) as total_addresses,
+                    (SELECT COUNT(*) FROM subjects) as total_subjects"
+            shift
+            ;;
+        *)
+            echo "Unknown command: $1" >&2
+            echo "Usage: mail-search {subject|sender|from-name|unread|recent|stats} [query]" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Execute query
+if [ "$FORMAT" = "json" ]; then
+    sqlite3 "$DB_PATH" -json "$QUERY"
+elif [ "$FORMAT" = "csv" ]; then
+    sqlite3 "$DB_PATH" -csv -header "$QUERY"
+else
+    sqlite3 "$DB_PATH" -header -column "$QUERY"
+fi

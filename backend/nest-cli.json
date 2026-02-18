@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": false,
+    "webpack": false,
+    "assets": [
+      {
+        "include": "src/purfence/prompts/**/*.md",
+        "outDir": "dist"
+      }
+    ],
+    "plugins": [
+      {
+        "name": "@nestjs/graphql",
+        "options": {
+          "typeFileNameSuffix": [
+            ".input.ts",
+            ".args.ts",
+            ".dto.ts"
+          ],
+          "introspectComments": true
+        }
+      }
+    ]
+  },
+  "generateOptions": {
+    "spec": false
+  },
+  "projects": {
+    "cache": {
+      "type": "library",
+      "root": "libs/cache",
+      "entryFile": "index",
+      "sourceRoot": "libs/cache/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/cache/tsconfig.lib.json"
+      }
+    },
+    "hotfix": {
+      "type": "library",
+      "root": "libs/hotfix",
+      "entryFile": "index",
+      "sourceRoot": "libs/hotfix/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/hotfix/tsconfig.lib.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    },
+    "throttler-plus": {
+      "type": "library",
+      "root": "libs/throttler-plus",
+      "entryFile": "index",
+      "sourceRoot": "libs/throttler-plus/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/throttler-plus/tsconfig.lib.json"
+      }
+    }
+  }
+}

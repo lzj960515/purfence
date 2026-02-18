@@ -1,0 +1,34 @@
+{
+  "name": "purfence",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install -w backend && npm install -w frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "concurrently \"npm run start:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run start:dev -w backend",
+    "start:backend": "npm run start -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "npm run build -w frontend",
+    "build:backend": "npm run build -w backend",
+    "tauri": "tauri",
+    "release:sync-version": "node scripts/sync-tauri-version.mjs",
+    "tauri:prepare:sidecar": "npm -w backend run build && node scripts/build-backend-sidecar.mjs",
+    "tauri:prepare": "npm -w frontend run build:tauri && npm run tauri:prepare:sidecar",
+    "tauri:dev": "tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:dev:isolated": "VITE_PURFENCE_BACKEND_PORTS=1216,1217,1218,1219,1220 VITE_PURFENCE_BACKEND_DISABLE_REUSE=1 tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:dev:fast": "tauri dev --config src-tauri/tauri.dev.conf.json --config '{\"build\":{\"beforeDevCommand\":\"npm -w frontend run dev\"}}'",
+    "tauri:build": "tauri build --bundles app",
+    "tauri:build:dmg": "tauri build --bundles dmg",
+    "tauri:build:debug": "tauri build --debug --bundles app"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.0",
+    "concurrently": "^8.2.2"
+  }
+}

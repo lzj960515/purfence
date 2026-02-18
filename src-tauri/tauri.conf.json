@@ -1,0 +1,51 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Purfence",
+  "version": "0.1.5",
+  "identifier": "com.purfence.desktop",
+  "build": {
+    "frontendDist": "../frontend/dist-tauri",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run tauri:prepare:sidecar && npm -w frontend run dev",
+    "beforeBuildCommand": "npm run tauri:prepare",
+    "beforeBundleCommand": "node scripts/tauri-codesign-resources.mjs"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Purfence",
+        "width": 1360,
+        "height": 840,
+        "resizable": true,
+        "fullscreen": false,
+        "devtools": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "app"
+    ],
+    "macOS": {
+      "entitlements": "entitlements.sidecar.plist"
+    },
+    "resources": [
+      "binaries/purfence-backend-*",
+      "binaries/node_sqlite3.node",
+      "binaries/agents/**/*",
+      "binaries/skills/**/*",
+      "binaries/claude-agent-sdk/**/*"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

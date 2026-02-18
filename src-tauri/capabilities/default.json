@@ -1,0 +1,57 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:event:allow-emit",
+    "core:event:allow-listen",
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "purfence-backend-macos-arm64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-aarch64-apple-darwin"
+        },
+        {
+          "name": "purfence-backend-macos-x64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-x86_64-apple-darwin"
+        },
+        {
+          "name": "purfence-backend-windows-arm64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-aarch64-pc-windows-msvc.exe"
+        },
+        {
+          "name": "purfence-backend-windows-x64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-x86_64-pc-windows-msvc.exe"
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "purfence-backend-macos-arm64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-aarch64-apple-darwin"
+        },
+        {
+          "name": "purfence-backend-macos-x64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-x86_64-apple-darwin"
+        },
+        {
+          "name": "purfence-backend-windows-arm64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-aarch64-pc-windows-msvc.exe"
+        },
+        {
+          "name": "purfence-backend-windows-x64",
+          "cmd": "$RESOURCE/binaries/purfence-backend-x86_64-pc-windows-msvc.exe"
+        }
+      ]
+    },
+    "dialog:default",
+    "shell:allow-open"
+  ]
+}

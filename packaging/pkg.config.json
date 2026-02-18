@@ -1,0 +1,12 @@
+{
+  "assets": [
+    "ncc/**/*.wasm",
+    "ncc/build/Release/*.node",
+    "../node_modules/sqlite3/build/*.node",
+    "../node_modules/sqlite3/build/Release/*.node"
+  ],
+  "scripts": [
+    "../node_modules/sqlite3/package.json",
+    "../node_modules/sqlite3/lib/*.js"
+  ]
+}

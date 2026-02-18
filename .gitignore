@@ -1,0 +1,71 @@
+# compiled output
+/dist
+/node_modules
+
+schema.graphql
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ENV
+.env
+.env.migration
+.env.*.local
+
+playground.graphql
+playground.*.graphql
+
+tmp
+/.env_1
+.kiro
+
+# prompt
+
+google_trends_data
+
+# Chrome Extension build output
+chrome-extension/dist/
+chrome-extension/node_modules/
+
+# Playground and experiments
+playground/**/*.js
+playground/**/*.js.map
+experiments/**/*.js
+experiments/**/*.js.map
+
+.playwright-mcp
+
+# Tauri + sidecar packaging artifacts
+/frontend/dist-tauri/
+/packaging/ncc/
+/packaging/purfence-backend*
+/packaging/*.dSYM/
+/src-tauri/binaries/purfence-backend-*
+/src-tauri/binaries/node_sqlite3.node
+/src-tauri/binaries/entity-id-prefix.json
+/src-tauri/binaries/agents/
+/src-tauri/target/
+/src-tauri/.cargo/
+/data/

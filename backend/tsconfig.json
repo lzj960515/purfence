@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@src/*": ["src/*"],
+      "@app/my-agent": ["libs/my-agent/src"],
+      "@app/my-agent/*": ["libs/my-agent/src/*"],
+      "@app/cache": ["libs/cache/src"],
+      "@app/cache/*": ["libs/cache/src/*"],
+      "@app/hotfix": ["libs/hotfix/src"],
+      "@app/hotfix/*": ["libs/hotfix/src/*"],
+      "@app/shared": ["libs/shared/src"],
+      "@app/shared/*": ["libs/shared/src/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+  ]
+}

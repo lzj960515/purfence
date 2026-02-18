@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "chrome-extension/**/*",
+    "playground/**/*",
+    "experiments/**/*",
+    "tools/**/*"
+  ]
+}

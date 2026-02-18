@@ -1,0 +1,54 @@
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { AdminLayout } from '@/components/layout/AdminLayout'
+import { ProjectListPage } from '@/pages/ProjectListPage'
+import { ProjectDetailPage } from '@/pages/ProjectDetailPage'
+import { IssueDetailPage } from '@/pages/IssueDetailPage'
+import { AgentPage } from '@/pages/AgentPage'
+import { SettingsPage } from '@/pages/SettingsPage'
+import { ProviderConfigPage } from '@/pages/ProviderConfigPage'
+import { PurfenceConfigPage } from '@/pages/PurfenceConfigPage'
+import { ClaudeCodeConfigPage } from '@/pages/ClaudeCodeConfigPage'
+import { EnvironmentSettingsPage } from '@/pages/EnvironmentSettingsPage'
+import { OnboardingPage, hasOnboardingCompleted } from '@/pages/OnboardingPage'
+import { Toaster } from '@/components/ui/sonner'
+import { ScheduledTaskSettingsPage } from '@/pages/ScheduledTaskSettingsPage'
+import { AppConfigPage } from '@/pages/AppConfigPage'
+import { SkillsSettingsPage } from '@/pages/SkillsSettingsPage'
+
+function RootRedirect() {
+  return hasOnboardingCompleted() ? (
+    <Navigate to="/agent" replace />
+  ) : (
+    <Navigate to="/onboarding" replace />
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/" element={<AdminLayout><Outlet /></AdminLayout>}>
+          <Route index element={<RootRedirect />} />
+          <Route path="projects" element={<ProjectListPage />} />
+          <Route path="projects/:id" element={<ProjectDetailPage />} />
+          <Route path="issues/:id" element={<IssueDetailPage />} />
+          <Route path="agent" element={<AgentPage />} />
+          <Route path="settings" element={<SettingsPage />}>
+            <Route index element={<Navigate to="/settings/base" replace />} />
+            <Route path="base" element={<PurfenceConfigPage />} />
+            <Route path="providers" element={<ProviderConfigPage />} />
+            <Route path="claude-code" element={<ClaudeCodeConfigPage />} />
+            <Route path="environment" element={<EnvironmentSettingsPage />} />
+            <Route path="scheduled-tasks" element={<ScheduledTaskSettingsPage />} />
+            <Route path="app" element={<AppConfigPage />} />
+            <Route path="skills" element={<SkillsSettingsPage />} />
+          </Route>
+        </Route>
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
+  )
+}
+
+export default App

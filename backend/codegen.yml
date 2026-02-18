@@ -1,0 +1,27 @@
+schema: http://localhost:1016/graphql
+documents:
+  - ../frontend/src/**/*.ts
+  - ../frontend/src/**/*.tsx
+  - '!../frontend/src/api/auth.graphql.ts'
+generates:
+  ../frontend/src/graphql/__generated__/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      avoidOptionals: true
+      enumsAsTypes: true
+      maybeValue: T | null
+
+  ../frontend/src/graphql/__generated__/hooks.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      withHooks: true
+      withHOC: false
+      withComponent: false
+      enumsAsTypes: true
+      maybeValue: T | null
+      apolloReactHooksImportFrom: '@apollo/client/react'

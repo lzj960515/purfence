@@ -1,0 +1,33 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@src(|/.*)$": "<rootDir>/../src/$1",
+    "@app/my-agent": "<rootDir>/../libs/my-agent/src",
+    "@app/my-agent/(.*)": "<rootDir>/../libs/my-agent/src/$1",
+    "@app/cache": "<rootDir>/../libs/cache/src",
+    "@app/cache/(.*)": "<rootDir>/../libs/cache/src/$1",
+    "@app/hotfix": "<rootDir>/../libs/hotfix/src",
+    "@app/hotfix/(.*)": "<rootDir>/../libs/hotfix/src/$1",
+    "@app/shared": "<rootDir>/../libs/shared/src",
+    "@app/shared/(.*)": "<rootDir>/../libs/shared/src/$1"
+  },
+  "forceExit": true,
+  "setupFiles": [
+    "../load-env.ts"
+  ],
+  "setupFilesAfterEnv": [
+    "jest-extended/all",
+    "./setup.ts"
+  ],
+  "maxWorkers": 3
+}
