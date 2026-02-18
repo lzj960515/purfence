@@ -69,6 +69,6 @@ experiments/**/*.js.map
 /src-tauri/target/
 /src-tauri/.cargo/
 /data/
-.claude
-.project-purfence
-docs
+/.claude
+/.project-purfence
+/docs
