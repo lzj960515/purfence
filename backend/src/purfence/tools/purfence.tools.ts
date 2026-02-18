@@ -24,7 +24,12 @@ export class PurfenceTools {
 
   @Tool({
     name: 'createProject',
-    description: '创建项目或导入现有本地项目（会在本地 projects 根目录初始化 repo）',
+    description: `创建项目或导入现有本地项目（会在本地 projects 根目录初始化 repo）
+
+注意：
+- 导入项目（mode="import"）时，externalPath 参数必须使用绝对路径
+- 不要使用相对路径（如 ~/project、../project）
+- 路径必须指向实际存在的目录`,
     parameters: z
       .object({
         mode: z
@@ -49,7 +54,22 @@ export class PurfenceTools {
           .string()
           .min(1)
           .optional()
-          .describe('本地已有项目的绝对路径（import 模式必填）'),
+          .describe(`本地已有项目的绝对路径（import 模式必填）。
+
+⚠️ 必须使用绝对路径，格式要求：
+
+macOS/Linux 示例：
+- ✅ 正确：/Users/用户名/projects/my-project
+- ❌ 错误：~/projects/my-project
+- ❌ 错误：../my-project
+
+Windows 示例：
+- ✅ 正确：C:\\Users\\用户名\\projects\\my-project
+- ✅ 正确：D:\\projects\\my-project
+- ❌ 错误：~\\projects\\my-project
+- ❌ 错误：..\\my-project
+
+路径必须指向实际存在的目录。`),
         defaultBranch: z
           .string()
           .min(1)
@@ -84,6 +104,33 @@ export class PurfenceTools {
             message: 'externalPath is required when mode=import',
             path: ['externalPath'],
           });
+        }
+
+        // 验证 import 模式的路径格式
+        if (mode === 'import' && value.externalPath?.trim()) {
+          const externalPath = value.externalPath.trim();
+
+          // 检查是否包含 ~ 符号
+          if (externalPath.includes('~')) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                '❌ 错误：请使用绝对路径，不要使用 ~ 符号。例如：/Users/用户名/project（macOS）或 C:\\Users\\用户名\\project（Windows）',
+              path: ['externalPath'],
+            });
+          }
+
+          // 检查是否是绝对路径（macOS/Linux 以 / 开头，Windows 以驱动器字母开头）
+          const isAbsolute =
+            externalPath.startsWith('/') || /^[A-Za-z]:/.test(externalPath);
+          if (!isAbsolute) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                '❌ 错误：请使用绝对路径。例如：/Users/用户名/project（macOS）或 C:\\Users\\用户名\\project（Windows）',
+              path: ['externalPath'],
+            });
+          }
         }
       }),
     outputSchema: z.object({

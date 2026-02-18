@@ -130,6 +130,22 @@ export class PurfenceProjectService {
     try {
       fs.symlinkSync(externalPath, repoLinkPath);
     } catch (error) {
+      // 如果错误与 ~ 符号相关，提供更详细的提示
+      if (externalPath.includes('~')) {
+        const suggestedPath = externalPath
+          .replace('~/', '/Users/用户名/')
+          .replace('~\\', 'C:\\Users\\用户名\\');
+
+        throw new Error(
+          `❌ 路径格式错误：不支持包含 ~ 的相对路径。
+
+请使用绝对路径：
+- macOS: /Users/用户名/${externalPath.replace('~/', '').replace('~\\', '')}
+- Windows: C:\\Users\\用户名\\${externalPath.replace('~/', '').replace('~\\', '')}
+
+原始错误：${error.message}`,
+        );
+      }
       throw new Error(`Failed to create symlink: ${error.message}`);
     }
 
