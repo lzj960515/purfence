@@ -1,9 +1,0 @@
-**/*
-
-!.env
-!.ebextensions/*
-!.platform/*
-
-!filebeat.docker.yml
-
-node_modules
