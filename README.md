@@ -1,69 +1,58 @@
-# purfence
+# Purfence
 
-一个本地开发友好的 Monorepo：
+Purfence 是一个面向产品与工程团队的本地优先（local-first）AI 工作台。
 
-- `frontend/`：Vite + React + TypeScript + Tailwind
-- `backend/`：NestJS + TypeScript
+从想法到交付，Purfence 把产品上下文与代码上下文放进同一条执行闭环。
 
-前端开发时通过 Vite proxy 请求后端；生产构建时前端产物写入 `backend/static/` 由后端托管。
+## 解决什么问题
 
-## 快速开始
+大多数 AI 工具要么偏聊天、要么偏写代码，而真实团队协作需要两者打通。
 
-```bash
-npm install
-npm run dev
-```
+Purfence 用一条链路把这件事做完整：
 
-构建：
+- 产品意图 -> 结构化工件
+- 工件 -> 可执行 Issue
+- Issue -> 多代理协作执行
+- 执行结果 -> 可评审、可追踪
 
-```bash
-npm run build
-```
+## 核心能力
 
-分别运行：
+- 多代理编排与上下文连续执行
+- 面向 project/worktree 的执行模型
+- 本地优先桌面工作流（repo-native）
+- 内置环境检查与引导式安装
+- Slack 与模型 Provider 集成
 
-- 前端：`npm -w frontend run dev`
-- 后端：`npm -w backend run start:dev`
+## 典型场景
 
-> 如果环境里服务已在运行，避免由智能代理直接启动服务；需要时先询问用户（见 `backend/CLAUDE.md`）。
+- 需求探索 -> PRD/工件 -> 可执行研发任务
+- 在本地仓库内运行可控上下文的 agent workflow
+- PM / 工程 / Reviewer 在同一工作台协作
+- 统一管理模型与运行环境配置，保障执行一致性
 
-## 文档
+## 适用对象
 
-- `docs/README.md`：文档索引
-- `docs/source-plan.md`：Purfence 产品概念与术语
-- `docs/product-artifacts.md`：产品工件规范
-- `docs/release-desktop.md`：Desktop 发布（GitHub Releases / 签名 / 公证）
+- 需要“可追踪 AI 交付链路”的产品团队
+- 在真实代码仓库内运行 agent 的工程团队
+- 偏好桌面化、本地优先 AI 工作空间的构建者
 
-## 桌面端（Tauri）
+## 当前状态
 
-桌面端通过 Tauri v2 打包前端，并在本地启动后端 sidecar（二进制）。面向用户分发时，建议直接从 GitHub Releases 下载产物。
+Purfence 正在快速迭代，持续增强工作流质量与交付体验。
 
-本地开发/调试（推荐）：
+最新桌面版本与发布产物：
 
-```bash
-npm run tauri:dev
-```
+- https://github.com/lzj960515/purfence/releases
 
-本地打包（Release）：
+## 近期路线图
 
-```bash
-npm run tauri:build
-```
+- 更强的「工件 -> Issue -> 验收」追踪能力
+- 更完整的计划、执行、评审协作流
+- 更稳定的跨平台打包与发布体验
+- 更深入的外部系统与自动化集成能力
 
-只打包 DMG（Release, macOS）：
+## 开发与贡献
 
-```bash
-npm run tauri:build:dmg
-```
+本地开发、构建与打包命令请查看：
 
-打包 Debug 版本（便于调试）：
-
-```bash
-# 生成 Debug .app（可打开 WebView DevTools）
-npm run tauri:build:debug
-```
-
-产物位置（macOS）：
-
-- `.app`：`src-tauri/target/release/bundle/macos/Purfence.app`
-- `.dmg`：`src-tauri/target/release/bundle/dmg/`
+- `DEVELOPING.md`
