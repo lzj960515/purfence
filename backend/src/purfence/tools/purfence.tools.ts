@@ -474,25 +474,62 @@ Slack 配置说明：
 
   @Tool({
     name: 'createScheduledTask',
-    description:
-      '创建定时任务。支持 one_time（绝对执行时间 runAt）和 recurring（cronExpr）两种模式。任务触发时会自动发起一个新的 AI 对话并发送 prompt。',
-    parameters: z.object({
-      name: z.string().min(1).max(256).describe('任务名称'),
-      prompt: z.string().min(1).describe('到点后发送给 AI 的提示词'),
-      kind: z
-        .enum(['one_time', 'recurring'])
-        .describe('one_time=一次性任务；recurring=周期任务'),
-      runAt: z
-        .string()
-        .optional()
-        .describe(
-          '一次性任务的绝对执行时间，推荐 ISO8601（kind=one_time 必填）',
-        ),
-      cronExpr: z
-        .string()
-        .optional()
-        .describe('Cron 表达式（kind=recurring 必填，支持 5/6 段）'),
-    }),
+    description: `创建定时任务。支持 one_time（绝对执行时间 runAt）和 recurring（cronExpr）两种模式。任务触发时会自动发起一个新的 AI 对话并发送 prompt。
+
+Slack 通知配置（可选）：
+- slackAppConfigId: Slack App 配置 ID（用于发送通知）
+- slackChannelId: Slack 频道 ID
+- 两个参数必须同时提供或同时为空
+- 如果不提供，会从上下文获取（向后兼容）
+- 提供参数会覆盖上下文的值`,
+    parameters: z
+      .object({
+        name: z.string().min(1).max(256).describe('任务名称'),
+        prompt: z.string().min(1).describe('到点后发送给 AI 的提示词'),
+        kind: z
+          .enum(['one_time', 'recurring'])
+          .describe('one_time=一次性任务；recurring=周期任务'),
+        runAt: z
+          .string()
+          .optional()
+          .describe(
+            '一次性任务的绝对执行时间，推荐 ISO8601（kind=one_time 必填）',
+          ),
+        cronExpr: z
+          .string()
+          .optional()
+          .describe('Cron 表达式（kind=recurring 必填，支持 5/6 段）'),
+        slackAppConfigId: z
+          .string()
+          .optional()
+          .describe('Slack App 配置 ID（可选，不提供则从上下文获取）'),
+        slackChannelId: z
+          .string()
+          .optional()
+          .describe('Slack 频道 ID（可选，不提供则从上下文获取）'),
+      })
+      .superRefine((value, ctx) => {
+        const hasAppId = value.slackAppConfigId?.trim();
+        const hasChannelId = value.slackChannelId?.trim();
+
+        if (hasAppId && !hasChannelId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'slackChannelId is required when slackAppConfigId is provided',
+            path: ['slackChannelId'],
+          });
+        }
+
+        if (!hasAppId && hasChannelId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'slackAppConfigId is required when slackChannelId is provided',
+            path: ['slackAppConfigId'],
+          });
+        }
+      }),
     outputSchema: z.object({
       id: z.string(),
       name: z.string(),
@@ -507,9 +544,19 @@ Slack 配置说明：
       kind: 'one_time' | 'recurring';
       runAt?: string;
       cronExpr?: string;
+      slackAppConfigId?: string;
+      slackChannelId?: string;
     },
     options: ToolExecuteOptions,
   ) {
+    // 参数优先级：传入参数 > 上下文
+    const slackAppConfigId =
+      args.slackAppConfigId ??
+      (options.context.get('slackAppConfigId') as string);
+    const slackChannelId =
+      args.slackChannelId ??
+      (options.context.get('slackChannelId') as string);
+
     if (args.kind === 'one_time') {
       if (!args.runAt?.trim()) {
         throw new Error('runAt is required when kind=one_time');
@@ -521,8 +568,8 @@ Slack 配置说明：
         kind: PurfenceScheduledTaskKind.one_time,
         runAt: args.runAt,
         enabled: true,
-        slackAppConfigId: options.context.get('slackAppConfigId') as string,
-        slackChannelId: options.context.get('slackChannelId') as string,
+        slackAppConfigId,
+        slackChannelId,
       });
 
       return {
@@ -543,8 +590,8 @@ Slack 配置说明：
       kind: PurfenceScheduledTaskKind.recurring,
       cronExpr: args.cronExpr,
       enabled: true,
-      slackAppConfigId: options.context.get('slackAppConfigId') as string,
-      slackChannelId: options.context.get('slackChannelId') as string,
+      slackAppConfigId,
+      slackChannelId,
     });
 
     return {
