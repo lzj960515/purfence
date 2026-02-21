@@ -393,6 +393,8 @@ export type PurfenceProject = {
   id: Scalars['ID']['output'];
   localRootPath: Scalars['String']['output'];
   name: Maybe<Scalars['String']['output']>;
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -435,6 +437,8 @@ export type PurfenceProjectDeleteResponse = {
   id: Maybe<Scalars['ID']['output']>;
   localRootPath: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -477,6 +481,8 @@ export type PurfenceProjectUpdateFilter = {
 export type PurfenceProjectUpdateInput = {
   description: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
 };
 
 export type PurfenceStatus =

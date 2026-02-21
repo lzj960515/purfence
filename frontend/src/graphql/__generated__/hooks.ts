@@ -397,6 +397,8 @@ export type PurfenceProject = {
   id: Scalars['ID']['output'];
   localRootPath: Scalars['String']['output'];
   name?: Maybe<Scalars['String']['output']>;
+  slackAppConfigId?: Maybe<Scalars['String']['output']>;
+  slackChannelId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -439,6 +441,8 @@ export type PurfenceProjectDeleteResponse = {
   id?: Maybe<Scalars['ID']['output']>;
   localRootPath?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  slackAppConfigId?: Maybe<Scalars['String']['output']>;
+  slackChannelId?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -481,6 +485,8 @@ export type PurfenceProjectUpdateFilter = {
 export type PurfenceProjectUpdateInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId?: InputMaybe<Scalars['String']['input']>;
+  slackChannelId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type PurfenceStatus =
@@ -1116,7 +1122,7 @@ export type CreateOnePurfenceProjectMutationVariables = Exact<{
 }>;
 
 
-export type CreateOnePurfenceProjectMutation = { __typename?: 'Mutation', createOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, externalPath?: string | null, defaultBranch: string, createdAt: any, updatedAt: any } };
+export type CreateOnePurfenceProjectMutation = { __typename?: 'Mutation', createOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, externalPath?: string | null, defaultBranch: string, slackAppConfigId?: string | null, slackChannelId?: string | null, createdAt: any, updatedAt: any } };
 
 export type CreateOnePurfenceIssueMutationVariables = Exact<{
   input: CreateOnePurfenceIssueInput;
@@ -1132,7 +1138,7 @@ export type PurfenceProjectsQueryVariables = Exact<{
 }>;
 
 
-export type PurfenceProjectsQuery = { __typename?: 'Query', purfenceProjects: { __typename?: 'PurfenceProjectConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, createdAt: any, updatedAt: any }> } };
+export type PurfenceProjectsQuery = { __typename?: 'Query', purfenceProjects: { __typename?: 'PurfenceProjectConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, slackAppConfigId?: string | null, slackChannelId?: string | null, createdAt: any, updatedAt: any }> } };
 
 export type PurfenceIssueQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1146,7 +1152,7 @@ export type PurfenceProjectQueryVariables = Exact<{
 }>;
 
 
-export type PurfenceProjectQuery = { __typename?: 'Query', purfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, createdAt: any, updatedAt: any } };
+export type PurfenceProjectQuery = { __typename?: 'Query', purfenceProject: { __typename?: 'PurfenceProject', id: string, name?: string | null, description?: string | null, localRootPath: string, slackAppConfigId?: string | null, slackChannelId?: string | null, createdAt: any, updatedAt: any } };
 
 export type PurfenceIssuesQueryVariables = Exact<{
   paging?: InputMaybe<OffsetPaging>;
