@@ -22,4 +22,10 @@ export class PurfenceProject extends BaseEntity {
 
   @Column({ type: 'varchar', length: 32, default: 'main' })
   defaultBranch: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  slackAppConfigId?: string;
+
+  @Column({ type: 'varchar', length: 128, nullable: true })
+  slackChannelId?: string;
 }

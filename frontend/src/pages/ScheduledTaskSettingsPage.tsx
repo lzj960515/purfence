@@ -304,10 +304,13 @@ export function ScheduledTaskSettingsPage() {
       return;
     }
 
-    if (!slackAppConfigId || !slackChannelId.trim()) {
+    // 如果填写了其中一个，则必须同时填写另一个
+    const hasSlackApp = !!slackAppConfigId;
+    const hasSlackChannel = !!slackChannelId.trim();
+    if ((hasSlackApp && !hasSlackChannel) || (!hasSlackApp && hasSlackChannel)) {
       toast({
         title: editingTaskId ? "更新失败" : "创建失败",
-        description: "请选择 Slack App 并填写 Channel ID",
+        description: "Slack App 和 Channel ID 需要同时配置",
         variant: "destructive",
       });
       return;
@@ -614,7 +617,7 @@ export function ScheduledTaskSettingsPage() {
               <Label>Slack App</Label>
               <Select value={slackAppConfigId} onValueChange={setSlackAppConfigId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择 App" />
+                  <SelectValue placeholder="选择 App（可选）" />
                 </SelectTrigger>
                 <SelectContent>
                   {slackApps.map((app) => (
@@ -624,6 +627,9 @@ export function ScheduledTaskSettingsPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                配置后，任务完成时会自动将结果推送到 Slack 频道
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -634,6 +640,9 @@ export function ScheduledTaskSettingsPage() {
                 onChange={(e) => setSlackChannelId(e.target.value)}
                 placeholder="C0123456789"
               />
+              <p className="text-xs text-muted-foreground">
+                在 Slack 频道右键选择「复制链接」，从链接中获取 Channel ID
+              </p>
             </div>
           </div>
 

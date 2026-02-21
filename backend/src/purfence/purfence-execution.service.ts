@@ -199,6 +199,11 @@ ${execution.goal ? `刚才执行的目标是：${execution.goal}` : '刚才执�
         issueId: issue.id,
         executionId: execution.id,
         projectId: project.id,
+        // 传递项目的 Slack 配置，用于评估完成时的通知
+        slackAppConfigId: project.slackAppConfigId,
+        slackChannelId: project.slackChannelId,
+        // 评估完成时发送 Slack 通知的事件（复用定时任务的事件机制）
+        event: 'purfence.evaluation.stream-ended',
       },
     });
   }

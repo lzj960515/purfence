@@ -9,4 +9,12 @@ export class PurfenceProjectUpdateInput {
 
   @Field({ nullable: true })
   description?: string;
+
+  @MaxLength(64)
+  @Field({ nullable: true })
+  slackAppConfigId?: string;
+
+  @MaxLength(128)
+  @Field({ nullable: true })
+  slackChannelId?: string;
 }

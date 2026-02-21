@@ -1,13 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   usePurfenceProjectQuery,
   usePurfenceIssuesQuery,
   useCreateOnePurfenceIssueMutation,
   useDeleteOnePurfenceIssueMutation,
 } from '@/graphql/__generated__/hooks'
+import { UPDATE_ONE_PURFENCE_PROJECT_MUTATION } from '@/api/purfence.graphql'
+import { GET_APP_CONFIGS } from '@/api/app-config.graphql'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Calendar, FolderOpen, FileText, Plus } from 'lucide-react'
+import { ArrowLeft, Calendar, FolderOpen, FileText, Plus, Bell, Pencil, Check } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -17,22 +20,45 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { IssueTable, type Issue } from '@/components/tables/IssueTable'
 import { CreateIssueDialog } from '@/components/dialogs/CreateIssueDialog'
 import { DeleteIssueDialog } from '@/components/dialogs/DeleteIssueDialog'
+import { useToast } from '@/hooks/use-toast'
+
+type AppConfigItem = {
+  id: string
+  name: string
+  type: string
+  enabled: boolean
+}
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [issueToDelete, setIssueToDelete] = useState<Issue | null>(null)
   const [pageOffset, setPageOffset] = useState(0)
   const PAGE_LIMIT = 20
 
-  const { data: projectData, loading: projectLoading, error: projectError } = usePurfenceProjectQuery({
+  // Slack 配置状态
+  const [isEditingSlack, setIsEditingSlack] = useState(false)
+  const [slackAppConfigId, setSlackAppConfigId] = useState('')
+  const [slackChannelId, setSlackChannelId] = useState('')
+
+  const { data: projectData, loading: projectLoading, error: projectError, refetch: refetchProject } = usePurfenceProjectQuery({
     variables: { id: id ?? '' },
     skip: !id,
   })
@@ -44,6 +70,16 @@ export function ProjectDetailPage() {
       sorting: [{ field: 'createdAt', direction: 'DESC' }],
     },
     skip: !id,
+  })
+
+  // 获取 Slack App 列表
+  const { data: appConfigData } = useQuery<{
+    purfenceAppConfigs: {
+      nodes: AppConfigItem[]
+      totalCount: number
+    }
+  }>(GET_APP_CONFIGS, {
+    fetchPolicy: 'network-only',
   })
 
   const [createIssue, { loading: creating }] = useCreateOnePurfenceIssueMutation({
@@ -68,9 +104,35 @@ export function ProjectDetailPage() {
     },
   })
 
+  const [updateProject, { loading: updatingSlack }] = useMutation(UPDATE_ONE_PURFENCE_PROJECT_MUTATION, {
+    onCompleted: () => {
+      setIsEditingSlack(false)
+      refetchProject()
+      toast({
+        title: '更新成功',
+        description: 'Slack 通知配置已更新。',
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: '更新失败',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+
   const project = projectData?.purfenceProject
   const issues = issuesData?.purfenceIssues?.nodes ?? []
   const totalCount = issuesData?.purfenceIssues?.totalCount ?? 0
+
+  // Slack App 列表
+  const slackApps = (appConfigData?.purfenceAppConfigs?.nodes ?? [])
+    .filter((item) => item.type?.toLowerCase() === 'slack' && item.enabled)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+    }))
 
   // Augment issues with project name
   const issuesWithProjectName: Issue[] = issues.map(issue => ({
@@ -113,6 +175,49 @@ export function ProjectDetailPage() {
       variables: {
         input: {
           id: issueToDelete.id,
+        },
+      },
+    })
+  }
+
+  // 开始编辑 Slack 配置
+  const handleStartEditSlack = () => {
+    setSlackAppConfigId(project?.slackAppConfigId || '')
+    setSlackChannelId(project?.slackChannelId || '')
+    setIsEditingSlack(true)
+  }
+
+  // 取消编辑 Slack 配置
+  const handleCancelEditSlack = () => {
+    setIsEditingSlack(false)
+    setSlackAppConfigId('')
+    setSlackChannelId('')
+  }
+
+  // 保存 Slack 配置
+  const handleSaveSlack = () => {
+    // 验证：如果填写了其中一个，则必须同时填写另一个
+    const hasApp = !!slackAppConfigId
+    const hasChannel = !!slackChannelId.trim()
+    if ((hasApp && !hasChannel) || (!hasApp && hasChannel)) {
+      toast({
+        title: '验证失败',
+        description: 'Slack App 和 Channel ID 需要同时配置',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (!id) return
+
+    updateProject({
+      variables: {
+        input: {
+          id,
+          update: {
+            slackAppConfigId: hasApp ? slackAppConfigId : null,
+            slackChannelId: hasChannel ? slackChannelId.trim() : null,
+          },
         },
       },
     })
@@ -196,11 +301,84 @@ export function ProjectDetailPage() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">项目 ID</CardTitle>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Slack 通知配置
+            </CardTitle>
+            {!isEditingSlack && (
+              <Button variant="ghost" size="icon" onClick={handleStartEditSlack}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
-            <code className="rounded bg-muted px-2 py-1 text-xs">{project.id}</code>
+            {isEditingSlack ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Slack App</Label>
+                  <Select value={slackAppConfigId} onValueChange={setSlackAppConfigId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择 App（可选）" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {slackApps.map((app) => (
+                        <SelectItem key={app.id} value={app.id}>
+                          {app.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slackChannelId">Slack Channel ID</Label>
+                  <Input
+                    id="slackChannelId"
+                    value={slackChannelId}
+                    onChange={(e) => setSlackChannelId(e.target.value)}
+                    placeholder="C0123456789"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    在 Slack 频道右键选择「复制链接」，从链接中获取 Channel ID
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleCancelEditSlack}>
+                    取消
+                  </Button>
+                  <Button onClick={handleSaveSlack} disabled={updatingSlack}>
+                    {updatingSlack ? '保存中...' : '保存'}
+                    <Check className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2 text-sm">
+                {project.slackAppConfigId && project.slackChannelId ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">Slack App：</span>
+                      <Badge variant="secondary">
+                        {slackApps.find((a) => a.id === project.slackAppConfigId)?.name || '已配置'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">Channel ID：</span>
+                      <code className="rounded bg-muted px-2 py-0.5 text-xs">
+                        {project.slackChannelId}
+                      </code>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-2">
+                      Issue 完成时会自动将结果推送到 Slack 频道
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-muted-foreground">
+                    未配置。点击右上角编辑按钮配置 Slack 通知。
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

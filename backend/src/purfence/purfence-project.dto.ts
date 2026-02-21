@@ -18,4 +18,10 @@ export class PurfenceProjectDto extends BaseDto {
 
   @FilterableField()
   defaultBranch: string;
+
+  @FilterableField({ nullable: true })
+  slackAppConfigId?: string;
+
+  @FilterableField({ nullable: true })
+  slackChannelId?: string;
 }
