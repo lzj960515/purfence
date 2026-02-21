@@ -9,7 +9,22 @@ export const CREATE_ONE_PURFENCE_PROJECT_MUTATION = gql`
       localRootPath
       externalPath
       defaultBranch
+      slackAppConfigId
+      slackChannelId
       createdAt
+      updatedAt
+    }
+  }
+`
+
+export const UPDATE_ONE_PURFENCE_PROJECT_MUTATION = gql`
+  mutation UpdateOnePurfenceProject($input: UpdateOnePurfenceProjectInput!) {
+    updateOnePurfenceProject(input: $input) {
+      id
+      name
+      description
+      slackAppConfigId
+      slackChannelId
       updatedAt
     }
   }
@@ -39,6 +54,8 @@ export const PURFENCE_PROJECTS_QUERY = gql`
         name
         description
         localRootPath
+        slackAppConfigId
+        slackChannelId
         createdAt
         updatedAt
       }
@@ -70,6 +87,8 @@ export const PURFENCE_PROJECT_QUERY = gql`
       name
       description
       localRootPath
+      slackAppConfigId
+      slackChannelId
       createdAt
       updatedAt
     }

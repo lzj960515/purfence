@@ -219,22 +219,60 @@ Windows 示例：
 
   @Tool({
     name: 'updateProject',
-    description: '更新项目信息（名称和描述）',
-    parameters: z.object({
-      projectId: z.string().min(1).describe('项目 ID'),
-      name: z.string().min(1).max(128).optional().describe('项目名称'),
-      description: z.string().optional().describe('项目描述'),
-    }),
+    description: `更新项目信息（名称、描述、Slack 配置）
+
+Slack 配置说明：
+- slackAppConfigId: Slack App 配置 ID（从 PurfenceAppConfig 中获取）
+- slackChannelId: Slack 频道 ID
+- 两个参数必须同时提供或同时为空
+- 配置后，Issue 完成时会自动发送通知到指定 Slack 频道`,
+    parameters: z
+      .object({
+        projectId: z.string().min(1).describe('项目 ID'),
+        name: z.string().min(1).max(128).optional().describe('项目名称'),
+        description: z.string().optional().describe('项目描述'),
+        slackAppConfigId: z
+          .string()
+          .optional()
+          .describe('Slack App 配置 ID（用于发送通知）'),
+        slackChannelId: z.string().optional().describe('Slack 频道 ID'),
+      })
+      .superRefine((value, ctx) => {
+        const hasAppId = value.slackAppConfigId?.trim();
+        const hasChannelId = value.slackChannelId?.trim();
+
+        if (hasAppId && !hasChannelId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'slackChannelId is required when slackAppConfigId is provided',
+            path: ['slackChannelId'],
+          });
+        }
+
+        if (!hasAppId && hasChannelId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'slackAppConfigId is required when slackChannelId is provided',
+            path: ['slackAppConfigId'],
+          });
+        }
+      }),
     outputSchema: z.object({
       id: z.string(),
       name: z.string().nullable(),
       description: z.string().nullable(),
+      slackAppConfigId: z.string().nullable(),
+      slackChannelId: z.string().nullable(),
     }),
   })
   async updateProject(args: {
     projectId: string;
     name?: string;
     description?: string;
+    slackAppConfigId?: string;
+    slackChannelId?: string;
   }) {
     const project = await PurfenceProject.findOneOrFail({
       where: { id: args.projectId },
@@ -247,12 +285,22 @@ Windows 示例：
       project.description = args.description;
     }
 
+    // 更新 Slack 配置（允许设置为空来清除）
+    if (args.slackAppConfigId !== undefined) {
+      project.slackAppConfigId = args.slackAppConfigId?.trim() || undefined;
+    }
+    if (args.slackChannelId !== undefined) {
+      project.slackChannelId = args.slackChannelId?.trim() || undefined;
+    }
+
     await project.save();
 
     return {
       id: project.id,
       name: project.name ?? null,
       description: project.description ?? null,
+      slackAppConfigId: project.slackAppConfigId ?? null,
+      slackChannelId: project.slackChannelId ?? null,
     };
   }
 

@@ -47,6 +47,14 @@ type ScheduledTaskStreamEndedEvent = {
   slackChannelId?: string;
 };
 
+type IssueCompletedStreamEndedEvent = {
+  conversationId?: string;
+  issueId?: string;
+  projectId?: string;
+  slackAppConfigId?: string;
+  slackChannelId?: string;
+};
+
 function isSlackMessageEvent(event: unknown): event is SlackMessageEvent {
   if (!isRecord(event)) return false;
   if (event.type !== 'message') return false;
@@ -89,29 +97,94 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
   }
 
   @OnEvent('purfence.scheduled-task.stream-ended')
+  @OnEvent('purfence.evaluation.stream-ended')
   async onScheduledTaskStreamEnded(payload: ScheduledTaskStreamEndedEvent) {
     const conversationId = payload.conversationId?.trim();
     const slackAppConfigId = payload.slackAppConfigId?.trim();
     const slackChannelId = payload.slackChannelId?.trim();
-    if (!conversationId || !slackAppConfigId || !slackChannelId) {
-      return;
-    }
 
-    const config =
-      await this.appConfigService.getSlackRuntimeConfigById(slackAppConfigId);
-    if (!config) {
-      return;
-    }
-
-    const finalText = await this.messageService.latestTextMessage(
-      'purfence',
-      conversationId,
+    this.logger.log(
+      `Handling stream-ended event: conversationId=${conversationId}, channelId=${slackChannelId ? '[REDACTED]' : 'undefined'}`,
     );
-    if (!finalText) {
+
+    if (!conversationId || !slackAppConfigId || !slackChannelId) {
+      this.logger.debug('Missing required Slack notification fields, skipping');
       return;
     }
 
-    await this.postMarkdownByToken(config.botToken, slackChannelId, finalText);
+    try {
+      const config =
+        await this.appConfigService.getSlackRuntimeConfigById(slackAppConfigId);
+      if (!config) {
+        this.logger.warn(`Slack config not found: ${slackAppConfigId}`);
+        return;
+      }
+
+      const finalText = await this.messageService.latestTextMessage(
+        'purfence',
+        conversationId,
+      );
+      if (!finalText) {
+        this.logger.warn(`No final message found for conversation: ${conversationId}`);
+        return;
+      }
+
+      await this.postMarkdownByToken(config.botToken, slackChannelId, finalText);
+      this.logger.log(`Slack notification sent successfully to channel`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send Slack notification: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
+
+  @OnEvent('purfence.issue-completed.stream-ended')
+  async onIssueCompletedStreamEnded(payload: IssueCompletedStreamEndedEvent) {
+    const conversationId = payload.conversationId?.trim();
+    const issueId = payload.issueId?.trim();
+    const slackAppConfigId = payload.slackAppConfigId?.trim();
+    const slackChannelId = payload.slackChannelId?.trim();
+
+    this.logger.log(
+      `Handling issue-completed event: issueId=${issueId}, conversationId=${conversationId}`,
+    );
+
+    if (!conversationId || !slackAppConfigId || !slackChannelId) {
+      this.logger.debug('Missing required Slack notification fields, skipping');
+      return;
+    }
+
+    try {
+      const config =
+        await this.appConfigService.getSlackRuntimeConfigById(slackAppConfigId);
+      if (!config) {
+        this.logger.warn(`Slack config not found: ${slackAppConfigId}`);
+        return;
+      }
+
+      const finalText = await this.messageService.latestTextMessage(
+        'purfence',
+        conversationId,
+      );
+      if (!finalText) {
+        this.logger.warn(`No final message found for conversation: ${conversationId}`);
+        return;
+      }
+
+      // 添加 Issue 完成的格式化前缀
+      const message = issueId
+        ? `✅ *Issue 完成*\n\n${finalText}`
+        : finalText;
+
+      await this.postMarkdownByToken(config.botToken, slackChannelId, message);
+      this.logger.log(`Issue completion Slack notification sent successfully`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send Issue completion Slack notification: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 
   requestReload() {
