@@ -75,6 +75,7 @@ type SlackSession = {
   app: App;
   channel: string;
   threadTs: string;
+  isChannelProcessing: boolean;
   currentType: string;
   markdownBuffer: string;
   taskMessageTs: Map<string, string>;
@@ -327,6 +328,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
           event.channel,
           '当前并发会话过多，请稍后再试',
           threadTs,
+          isChannelProcessing,
         );
         return;
       }
@@ -339,6 +341,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
         app,
         channel: event.channel,
         threadTs,
+        isChannelProcessing,
         currentType: '',
         markdownBuffer: '',
         taskMessageTs: new Map<string, string>(),
@@ -392,6 +395,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
           event.channel,
           error instanceof Error ? error.message : String(error),
           threadTs,
+          isChannelProcessing,
         );
         this.activeSessions.delete(conversationId);
         this.activeChannels.delete(event.channel);
@@ -425,7 +429,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
       const session = this.activeSessions.get(conversationId);
       if (!session) return;
 
-      const { app, channel, threadTs } = session;
+      const { app, channel, threadTs, isChannelProcessing } = session;
 
       if (streamEvent === 'error') {
         await this.flushCurrentBlock(conversationId);
@@ -434,6 +438,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
           channel,
           String(payload.message || '执行失败'),
           threadTs,
+          isChannelProcessing,
         );
         return;
       }
@@ -464,7 +469,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
         const taskId = String(payload.id || '');
         const title = String(payload.content || '');
         if (!taskId || !title) return;
-        const messageTs = await this.postTaskCardStart(app, channel, taskId, title, threadTs);
+        const messageTs = await this.postTaskCardStart(app, channel, taskId, title, threadTs, isChannelProcessing);
         if (messageTs) {
           session.taskMessageTs.set(taskId, messageTs);
         }
@@ -476,7 +481,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
         const title = String(payload.toolName || '');
         if (!taskId || !title) return;
         const status = payload.status === 'error' ? 'error' : 'complete';
-        await this.postTaskCardResult(app, channel, taskId, title, status, threadTs, session.taskMessageTs);
+        await this.postTaskCardResult(app, channel, taskId, title, status, threadTs, isChannelProcessing, session.taskMessageTs);
 
         const artifacts = this.extractArtifactContents(payload.artifact);
         if (artifacts.length > 0) {
@@ -485,7 +490,7 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
             await this.purfenceSlackService.postArtifacts({
               client: app.client,
               channel,
-              threadTs,
+              threadTs: isChannelProcessing ? threadTs : undefined,
               artifacts,
             });
           } catch (error) {
@@ -546,17 +551,21 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
       }
 
       try {
-        await session.app.client.chat.postMessage({
+        // Only pass thread_ts when channel was already processing (new thread case)
+        const postMessageParams: Parameters<typeof session.app.client.chat.postMessage>[0] = {
           channel: session.channel,
           text: session.markdownBuffer,
-          thread_ts: session.threadTs,
           blocks: [
             {
               type: 'markdown',
               text: session.markdownBuffer,
             },
           ] as SlackBlock[],
-        });
+        };
+        if (session.isChannelProcessing) {
+          postMessageParams.thread_ts = session.threadTs;
+        }
+        await session.app.client.chat.postMessage(postMessageParams);
       } catch (error) {
         this.logger.error(
           `Failed to flush current block: ${error instanceof Error ? error.message : String(error)}`,
@@ -576,12 +585,12 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
     taskId: string,
     title: string,
     threadTs: string,
+    isChannelProcessing: boolean,
   ) {
     try {
-      const result = await app.client.chat.postMessage({
+      const postMessageParams: Parameters<typeof app.client.chat.postMessage>[0] = {
         channel,
         text: title,
-        thread_ts: threadTs,
         blocks: [
           {
             type: 'task_card',
@@ -590,7 +599,11 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
             status: 'in_progress',
           },
         ] as SlackBlock[],
-      });
+      };
+      if (isChannelProcessing) {
+        postMessageParams.thread_ts = threadTs;
+      }
+      const result = await app.client.chat.postMessage(postMessageParams);
 
       return result?.ts ? String(result.ts) : undefined;
     } catch (error) {
@@ -608,15 +621,15 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
     title: string,
     status: 'complete' | 'error',
     threadTs: string,
+    isChannelProcessing: boolean,
     taskMessageTs: Map<string, string>,
   ) {
     const ts = taskMessageTs.get(taskId);
     if (!ts) {
       try {
-        await app.client.chat.postMessage({
+        const postMessageParams: Parameters<typeof app.client.chat.postMessage>[0] = {
           channel,
           text: title,
-          thread_ts: threadTs,
           blocks: [
             {
               type: 'task_card',
@@ -625,7 +638,11 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
               status,
             },
           ] as SlackBlock[],
-        });
+        };
+        if (isChannelProcessing) {
+          postMessageParams.thread_ts = threadTs;
+        }
+        await app.client.chat.postMessage(postMessageParams);
       } catch (error) {
         this.logger.error(
           `Failed to post task card result: ${error instanceof Error ? error.message : String(error)}`,
@@ -656,19 +673,23 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
     taskMessageTs.delete(taskId);
   }
 
-  private async postErrorBlock(app: App, channel: string, message: string, threadTs?: string) {
+  private async postErrorBlock(app: App, channel: string, message: string, threadTs?: string, isChannelProcessing?: boolean) {
     try {
-      await app.client.chat.postMessage({
+      const postMessageParams: Parameters<typeof app.client.chat.postMessage>[0] = {
         channel,
         text: message,
-        thread_ts: threadTs,
         blocks: [
           {
             type: 'markdown',
             text: message,
           },
         ] as SlackBlock[],
-      });
+      };
+      // Only pass thread_ts when channel was already processing (new thread case)
+      if (isChannelProcessing && threadTs) {
+        postMessageParams.thread_ts = threadTs;
+      }
+      await app.client.chat.postMessage(postMessageParams);
     } catch (error) {
       this.logger.error(
         `Failed to post error block: ${error instanceof Error ? error.message : String(error)}`,
