@@ -47,5 +47,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/lzj960515/purfence/releases/latest/download/latest.json"
+      ],
+      "pubkey": ""
+    }
   }
 }

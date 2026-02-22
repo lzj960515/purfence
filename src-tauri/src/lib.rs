@@ -1,5 +1,6 @@
 mod codex;
 mod environment;
+mod update;
 
 use tauri::{Emitter, Manager};
 
@@ -14,6 +15,8 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // Ensure app data dir exists. Frontend sidecar spawn stores SQLite here.
             let data_dir = app.handle().path().app_data_dir()?;
@@ -60,7 +63,9 @@ pub fn run() {
             environment::install_builtin_agents_desktop,
             environment::desktop_skills_catalog,
             environment::install_desktop_skill,
-            environment::git_install_prompt_desktop
+            environment::git_install_prompt_desktop,
+            update::check_for_updates,
+            update::get_current_version
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
