@@ -29,7 +29,7 @@ import {
 } from '@/api/agent.api'
 import logoPng from '@/assets/purfence-logo.png'
 import { useUpdate } from '@/hooks/useUpdate'
-import { UpdateButton, UpdateDialog } from '@/components/update'
+import { UpdateDialog } from '@/components/update'
 
 const SIDEBAR_STATE_KEY = 'sidebar-history-expanded'
 
@@ -78,6 +78,7 @@ export function AppSidebar() {
     startDownload,
     cancelDownload,
     installAndRestart,
+    skipVersion,
   } = useUpdate()
 
   // Auto-open dialog when update is available
@@ -180,16 +181,9 @@ export function AppSidebar() {
                   <span className="text-sm font-semibold">紫微垣</span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <UpdateButton
-                  status={updateStatus}
-                  onClick={() => setUpdateDialogOpen(true)}
-                  collapsed={collapsed}
-                />
-                {!collapsed && (
-                  <SidebarTrigger className="h-8 w-8" />
-                )}
-              </div>
+              {!collapsed && (
+                <SidebarTrigger className="h-8 w-8" />
+              )}
             </div>
           </SidebarGroup>
 
@@ -306,6 +300,11 @@ export function AppSidebar() {
         onConfirm={startDownload}
         onCancel={cancelDownload}
         onInstallAndRestart={installAndRestart}
+        onSkipVersion={() => {
+          if (updateInfo?.version) {
+            skipVersion(updateInfo.version)
+          }
+        }}
       />
     </>
   )

@@ -6,12 +6,28 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { usePurfenceConfig } from '@/hooks/usePurfenceConfig'
+import { useUpdate } from '@/hooks/useUpdate'
+import { UpdateDialog } from '@/components/update'
+import { RefreshCw } from 'lucide-react'
 
 export function PurfenceConfigPage() {
   const { toast } = useToast()
   const { config, loading, error, saving, saveConfig } = usePurfenceConfig()
   const [projectsRootPath, setProjectsRootPath] = useState('')
   const [proxyUrl, setProxyUrl] = useState('')
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
+  const {
+    status,
+    updateInfo,
+    downloadProgress,
+    error: updateError,
+    currentVersion,
+    checkForUpdates,
+    startDownload,
+    cancelDownload,
+    installAndRestart,
+    skipVersion,
+  } = useUpdate()
 
   useEffect(() => {
     setProjectsRootPath(config?.projectsRootPath || '')
@@ -78,6 +94,18 @@ export function PurfenceConfigPage() {
     }
   }
 
+  const handleCheckForUpdates = async () => {
+    const hasUpdate = await checkForUpdates()
+    if (hasUpdate) {
+      setUpdateDialogOpen(true)
+    } else {
+      toast({
+        title: '检查完成',
+        description: '当前已是最新版本',
+      })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="pb-6 border-b">
@@ -123,27 +151,61 @@ export function PurfenceConfigPage() {
           </p>
 
           <div className="mt-6 border-t pt-6">
-          <Label htmlFor="proxy-url">代理地址</Label>
-          <div className="mt-3 flex gap-3 items-center">
-            <Input
-              id="proxy-url"
-              placeholder="http://127.0.0.1:7890"
-              value={proxyUrl}
-              onChange={(e) => setProxyUrl(e.target.value)}
-              disabled={loading || saving}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSave}
-              disabled={loading || saving || !projectsRootPath.trim()}
-            >
-              {saving ? '保存中...' : '保存'}
-            </Button>
+            <Label htmlFor="proxy-url">代理地址</Label>
+            <div className="mt-3 flex gap-3 items-center">
+              <Input
+                id="proxy-url"
+                placeholder="http://127.0.0.1:7890"
+                value={proxyUrl}
+                onChange={(e) => setProxyUrl(e.target.value)}
+                disabled={loading || saving}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSave}
+                disabled={loading || saving || !projectsRootPath.trim()}
+              >
+                {saving ? '保存中...' : '保存'}
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">留空表示不使用代理。</p>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">留空表示不使用代理。</p>
+
+          <div className="mt-6 border-t pt-6">
+            <Label>软件更新</Label>
+            <div className="mt-3 flex gap-3 items-center">
+              <span className="text-sm text-muted-foreground flex-1">
+                当前版本：{currentVersion || '未知'}
+              </span>
+              <Button
+                variant="outline"
+                onClick={handleCheckForUpdates}
+                disabled={status === 'checking'}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${status === 'checking' ? 'animate-spin' : ''}`} />
+                {status === 'checking' ? '检查中...' : '检查更新'}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      <UpdateDialog
+        open={updateDialogOpen}
+        onOpenChange={setUpdateDialogOpen}
+        status={status}
+        updateInfo={updateInfo}
+        downloadProgress={downloadProgress}
+        error={updateError}
+        onConfirm={startDownload}
+        onCancel={cancelDownload}
+        onInstallAndRestart={installAndRestart}
+        onSkipVersion={() => {
+          if (updateInfo?.version) {
+            skipVersion(updateInfo.version)
+          }
+        }}
+      />
     </div>
   )
 }

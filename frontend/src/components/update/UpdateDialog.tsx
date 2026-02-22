@@ -21,6 +21,7 @@ interface UpdateDialogProps {
   onConfirm: () => void
   onCancel: () => void
   onInstallAndRestart: () => void
+  onSkipVersion: () => void
 }
 
 export function UpdateDialog({
@@ -33,6 +34,7 @@ export function UpdateDialog({
   onConfirm,
   onCancel,
   onInstallAndRestart,
+  onSkipVersion,
 }: UpdateDialogProps) {
   const isDownloading = status === 'downloading'
   const isDownloaded = status === 'downloaded'
@@ -119,9 +121,12 @@ export function UpdateDialog({
           {!hasError && !isDownloading && !isDownloaded && (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                稍后提醒
+                稍后
               </Button>
-              <Button onClick={onConfirm}>立即下载</Button>
+              <Button variant="outline" onClick={() => { onSkipVersion(); onOpenChange(false); }}>
+                跳过此版本
+              </Button>
+              <Button onClick={onConfirm}>更新</Button>
             </>
           )}
 
