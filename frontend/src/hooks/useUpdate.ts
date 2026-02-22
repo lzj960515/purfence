@@ -38,11 +38,12 @@ interface UseUpdateReturn {
   currentVersion: string
 
   // Actions
-  checkForUpdates: () => Promise<void>
+  checkForUpdates: () => Promise<boolean>
   startDownload: () => Promise<void>
   cancelDownload: () => void
   installAndRestart: () => Promise<void>
   dismissUpdate: () => void
+  skipVersion: (version: string) => void
 }
 
 const CHECK_INTERVAL = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
@@ -89,9 +90,9 @@ export function useUpdate(): UseUpdateReturn {
     }
   }, [])
 
-  const checkForUpdates = useCallback(async () => {
+  const checkForUpdates = useCallback(async (): Promise<boolean> => {
     if (status === 'checking' || status === 'downloading') {
-      return
+      return false
     }
 
     setStatus('checking')
@@ -102,6 +103,14 @@ export function useUpdate(): UseUpdateReturn {
       const info = await invoke<UpdateInfo | null>('check_for_updates')
 
       if (info) {
+        // Check if this version has been skipped
+        const skippedVersion = localStorage.getItem('purfence:skippedVersion')
+        if (skippedVersion === info.version) {
+          // This version was skipped, don't show update
+          setStatus('idle')
+          return false
+        }
+
         setUpdateInfo(info)
 
         // Also check using Tauri updater plugin (for actual download)
@@ -111,13 +120,16 @@ export function useUpdate(): UseUpdateReturn {
         }
 
         setStatus('available')
+        return true
       } else {
         setStatus('idle')
+        return false
       }
     } catch (err) {
       console.error('Failed to check for updates:', err)
       setError(err instanceof Error ? err.message : String(err))
       setStatus('error')
+      return false
     }
   }, [status])
 
@@ -200,6 +212,14 @@ export function useUpdate(): UseUpdateReturn {
     setError(null)
   }, [])
 
+  const skipVersion = useCallback((version: string) => {
+    localStorage.setItem('purfence:skippedVersion', version)
+    setStatus('idle')
+    setUpdateInfo(null)
+    setDownloadProgress(null)
+    setError(null)
+  }, [])
+
   return {
     status,
     updateInfo,
@@ -211,5 +231,6 @@ export function useUpdate(): UseUpdateReturn {
     cancelDownload,
     installAndRestart,
     dismissUpdate,
+    skipVersion,
   }
 }
