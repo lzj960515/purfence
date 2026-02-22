@@ -295,14 +295,26 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
       const query = String(event.text || '').trim();
       if (!query) return;
 
-      // Use message ts as conversationId and thread identifier
-      const conversationId = event.ts;
+      // ✅ Fix Bug 2: Use thread_ts as conversationId for thread continuity
+      // First message: conversationId = ts
+      // Thread replies: conversationId = thread_ts (the root message ts)
+      const conversationId = event.thread_ts ?? event.ts;
       const threadTs = event.thread_ts ?? event.ts;
 
-      // Check if this specific thread is already being processed
-      if (this.activeSessions.has(conversationId)) {
-        // This thread is already being processed, skip
-        return;
+      // ✅ Fix Bug 1: Check if this specific thread is already being processed
+      const isProcessing = this.activeSessions.has(conversationId);
+
+      // Determine the final conversationId to use
+      let finalConversationId: string;
+      if (isProcessing) {
+        // ✅ Bug 1 fix: Only create new session when isProcessing=true
+        finalConversationId = `${conversationId}-${Date.now()}`;
+        this.logger.log(
+          `Thread ${conversationId} is processing, creating new session: ${finalConversationId}`,
+        );
+      } else {
+        // No processing in progress, use the original conversationId
+        finalConversationId = conversationId;
       }
 
       // Clean up timed-out sessions before checking limit
@@ -332,32 +344,34 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
         taskMessageTs: new Map<string, string>(),
         createdAt: Date.now(),
       };
-      this.activeSessions.set(conversationId, session);
-      this.logger.log(`Created session: conversationId=${conversationId}, threadTs=${threadTs}`);
+      this.activeSessions.set(finalConversationId, session);
+      this.logger.log(`Created session: conversationId=${finalConversationId}, threadTs=${threadTs}`);
 
-      // Send pre-reply in thread (non-critical, continue on failure)
-      try {
-        await app.client.chat.postMessage({
-          channel: event.channel,
-          text: '当前使用新会话中',
-          thread_ts: threadTs,
-        });
-      } catch (error) {
-        this.logger.error(
-          `Failed to send pre-reply: ${error instanceof Error ? error.message : String(error)}`,
-        );
-        // Continue with processing - pre-reply is not critical
+      // ✅ Fix Bug 3: Only send pre-reply when creating new session (isProcessing=true)
+      if (isProcessing) {
+        try {
+          await app.client.chat.postMessage({
+            channel: event.channel,
+            text: '当前使用新会话中',
+            thread_ts: threadTs,
+          });
+        } catch (error) {
+          this.logger.error(
+            `Failed to send pre-reply: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          // Continue with processing - pre-reply is not critical
+        }
       }
 
-      SocketService.registerStreamMirror(conversationId, {
+      SocketService.registerStreamMirror(finalConversationId, {
         handle: async (streamEvent, payload) => {
-          await this.handleMirrorEvent(conversationId, streamEvent, payload as StreamPayload);
+          await this.handleMirrorEvent(finalConversationId, streamEvent, payload as StreamPayload);
         },
-        close: async () => this.closeMirror(conversationId),
+        close: async () => this.closeMirror(finalConversationId),
       });
       try {
         await this.purfenceAgentService.streamZiwei({
-          threadId: conversationId,
+          threadId: finalConversationId,
           query,
           providerName,
           userId: event.user,
@@ -371,19 +385,19 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
           },
         });
       } catch (error) {
-        await this.flushCurrentBlock(conversationId);
+        await this.flushCurrentBlock(finalConversationId);
         await this.postErrorBlock(
           app,
           event.channel,
           error instanceof Error ? error.message : String(error),
           threadTs,
         );
-        this.activeSessions.delete(conversationId);
-        this.logger.log(`Removed session due to error: conversationId=${conversationId}`);
+        this.activeSessions.delete(finalConversationId);
+        this.logger.log(`Removed session due to error: conversationId=${finalConversationId}`);
 
         // Safely unregister stream mirror with proper error handling
         try {
-          await SocketService.unregisterStreamMirror(conversationId);
+          await SocketService.unregisterStreamMirror(finalConversationId);
         } catch (cleanupError) {
           this.logger.error(
             `Failed to unregister stream mirror: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`,
