@@ -1,12 +1,11 @@
 import { Tool } from '@app/my-agent';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ToolExecuteOptions } from '@voltagent/core';
 import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceExecutionService } from '../purfence-execution.service';
 import { PurfenceIssue } from '../purfence-issue.entity';
 import { IssueOrigin, PurfenceStatus } from '../purfence-status.enum';
-import { CommonService } from '../../common/common.service';
 
 /**
  * 天府（tianfu）Agent 专用工具
@@ -19,8 +18,6 @@ import { CommonService } from '../../common/common.service';
  */
 @Injectable()
 export class TianfuTools {
-  private readonly logger = new Logger(TianfuTools.name);
-
   constructor(
     private readonly issueService: PurfenceIssueService,
     private readonly executionService: PurfenceExecutionService,
@@ -109,23 +106,6 @@ export class TianfuTools {
         success: false,
         message: `合并冲突: ${result.conflict.message}。请用 delegateTask 执行 git merge main 解决冲突后重试`,
       };
-    }
-
-    // Issue 完成成功，触发 Slack 通知事件
-    if (slackAppConfigId && slackChannelId) {
-      try {
-        CommonService.emit('purfence.issue-completed.stream-ended', {
-          conversationId: executionId,
-          issueId: result.issue.id,
-          projectId: result.issue.projectId,
-          slackAppConfigId,
-          slackChannelId,
-        });
-      } catch (error) {
-        this.logger.error(
-          `Failed to emit Slack notification event for issue ${result.issue.id}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
     }
 
     return {
