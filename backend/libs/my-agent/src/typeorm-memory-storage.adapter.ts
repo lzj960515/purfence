@@ -1,20 +1,39 @@
-import type {
-  Conversation,
-  ConversationQueryOptions,
-  CreateConversationInput,
-  GetMessagesOptions,
-  StorageAdapter,
-  WorkflowRunQuery,
-  WorkflowStateEntry,
-  WorkingMemoryScope,
-} from '@voltagent/core';
-import { ConversationAlreadyExistsError } from '@voltagent/core';
+/**
+ * @deprecated 此文件已废弃，请直接使用 MemoryStorageService
+ * 保留此文件是为了向后兼容，将在下一版本中移除
+ */
+
 import type { UIMessage } from 'ai';
 import { In } from 'typeorm';
 import { AgentMemoryConversation } from './agent-memory-conversation.ai.entity';
 import { AgentMemoryMessage } from './agent-memory-message.ai.entity';
 import { AgentWorkingMemory } from './agent-working-memory.ai.entity';
 import { AgentWorkflowState } from './agent-workflow-state.ai.entity';
+import {
+  Conversation,
+  GetMessagesOptions,
+  CreateConversationInput,
+  ConversationQueryOptions,
+  WorkingMemoryQuery,
+  WorkingMemoryEntry,
+  WorkflowStateEntry,
+  WorkflowRunQuery,
+  WorkingMemoryScope,
+  ConversationAlreadyExistsError,
+} from './memory-storage.service';
+
+export {
+  Conversation,
+  GetMessagesOptions,
+  CreateConversationInput,
+  ConversationQueryOptions,
+  WorkingMemoryQuery,
+  WorkingMemoryEntry,
+  WorkflowStateEntry,
+  WorkflowRunQuery,
+  WorkingMemoryScope,
+  ConversationAlreadyExistsError,
+};
 
 function toIso(d: Date) {
   return d.toISOString();
@@ -32,7 +51,11 @@ function toConversation(entity: AgentMemoryConversation): Conversation {
   };
 }
 
-export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
+/**
+ * @deprecated 请使用 MemoryStorageService
+ * 此适配器保留是为了向后兼容，内部实现已改为直接使用 TypeORM 实体
+ */
+export class TypeOrmMemoryStorageAdapter {
   // =========================================================================
   // Message Operations
   // =========================================================================
@@ -72,8 +95,7 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     userId: string,
     conversationId: string,
     options?: GetMessagesOptions,
-  ): Promise<UIMessage<{ createdAt: Date }>[]>
-  {
+  ): Promise<UIMessage<{ createdAt: Date }>[]> {
     const { limit, before, after, roles } = options || {};
     const qb = AgentMemoryMessage.createQueryBuilder('m')
       .where('m.userId = :userId', { userId })
@@ -174,8 +196,8 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     if (options.resourceId)
       qb.andWhere('c.resourceId = :resourceId', { resourceId: options.resourceId });
 
-    const orderDirection = options.orderDirection ?? 'DESC';
-    const orderBy = options.orderBy ?? 'updated_at';
+    const orderDirection = (options as any).orderDirection ?? 'DESC';
+    const orderBy = (options as any).orderBy ?? 'updated_at';
     const orderColumn =
       orderBy === 'created_at'
         ? 'c.createdAt'
@@ -184,8 +206,8 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
           : 'c.updatedAt';
     qb.orderBy(orderColumn, orderDirection);
 
-    if (options.offset && options.offset > 0) qb.skip(options.offset);
-    if (options.limit && options.limit > 0) qb.take(options.limit);
+    if ((options as any).offset && (options as any).offset > 0) qb.skip((options as any).offset);
+    if ((options as any).limit && (options as any).limit > 0) qb.take((options as any).limit);
 
     const entities = await qb.getMany();
     return entities.map(toConversation);
@@ -205,7 +227,7 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
   ): Promise<Conversation> {
     const entity = await AgentMemoryConversation.findOne({ where: { id } });
     if (!entity) {
-      // VoltAgent expects conversation to exist; match behavior by creating it.
+      // 如果会话不存在，创建新会话（保持与原行为一致）
       const created = AgentMemoryConversation.create({
         id,
         resourceId: String(updates.resourceId ?? ''),
@@ -277,12 +299,12 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     }
 
     const entity = AgentWorkingMemory.create({
-      scope: params.scope,
+      scope: params.scope as 'user' | 'conversation',
       userId: params.userId,
       conversationId: params.conversationId,
       content: params.content,
     });
-    await entity.save();
+    await (entity as any).save();
   }
 
   async deleteWorkingMemory(params: {
@@ -312,11 +334,11 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     const qb = AgentWorkflowState.createQueryBuilder('w');
     if (query.workflowId) qb.andWhere('w.workflowId = :workflowId', { workflowId: query.workflowId });
     if (query.status) qb.andWhere('w.status = :status', { status: query.status });
-    if (query.from) qb.andWhere('w.createdAt >= :from', { from: query.from });
-    if (query.to) qb.andWhere('w.createdAt <= :to', { to: query.to });
+    if ((query as any).from) qb.andWhere('w.createdAt >= :from', { from: (query as any).from });
+    if ((query as any).to) qb.andWhere('w.createdAt <= :to', { to: (query as any).to });
     qb.orderBy('w.createdAt', 'DESC');
-    if (query.offset && query.offset > 0) qb.skip(query.offset);
-    if (query.limit && query.limit > 0) qb.take(query.limit);
+    if ((query as any).offset && (query as any).offset > 0) qb.skip((query as any).offset);
+    if ((query as any).limit && (query as any).limit > 0) qb.take((query as any).limit);
     const entities = await qb.getMany();
     return entities.map((e) => this.toWorkflowState(e));
   }
@@ -330,10 +352,6 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
       input: state.input,
       context: state.context?.map(([k, v]) => [String(k), v]) as any,
       workflowState: state.workflowState,
-      suspension: state.suspension,
-      events: state.events,
-      output: state.output,
-      cancellation: state.cancellation,
       userId: state.userId,
       conversationId: state.conversationId,
       metadata: state.metadata,
@@ -349,12 +367,9 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     if (!entity) {
       const state = updates as WorkflowStateEntry;
       await this.setWorkflowState(executionId, {
-        id: executionId,
         workflowId: state.workflowId ?? '',
         workflowName: state.workflowName ?? '',
         status: (state.status as any) ?? 'running',
-        createdAt: state.createdAt ?? new Date(),
-        updatedAt: state.updatedAt ?? new Date(),
         ...state,
       });
       return;
@@ -383,18 +398,6 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
         case 'workflowState':
           entity.workflowState = v;
           break;
-        case 'suspension':
-          entity.suspension = v;
-          break;
-        case 'events':
-          entity.events = v;
-          break;
-        case 'output':
-          entity.output = v;
-          break;
-        case 'cancellation':
-          entity.cancellation = v;
-          break;
         case 'userId':
           entity.userId = v;
           break;
@@ -420,22 +423,17 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
 
   private toWorkflowState(entity: AgentWorkflowState): WorkflowStateEntry {
     return {
-      id: String(entity.id),
       workflowId: entity.workflowId,
       workflowName: entity.workflowName,
       status: entity.status,
       input: entity.input,
       context: (entity.context as any) ?? undefined,
       workflowState: entity.workflowState,
-      suspension: entity.suspension as any,
-      events: entity.events as any,
-      output: entity.output,
-      cancellation: entity.cancellation as any,
       userId: entity.userId,
       conversationId: entity.conversationId,
       metadata: entity.metadata,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
     };
   }
 }

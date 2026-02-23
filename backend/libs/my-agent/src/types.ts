@@ -1,11 +1,31 @@
 import type { AnthropicProviderOptions } from '@ai-sdk/anthropic';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import type { MCPConfiguration, Toolkit } from '@voltagent/core';
 import { UIMessage } from 'ai';
 import z from 'zod';
 
-type MCPServers = ConstructorParameters<typeof MCPConfiguration>[0]['servers'];
+// ============================================================================
+// MCP 服务器配置类型（替代 @voltagent/core 的 MCPConfiguration）
+// ============================================================================
+
+export interface MCPServerConfig {
+  command: string;
+  args?: string[];
+  env?: Record<string, string>;
+}
+
+export type MCPServers = Record<string, MCPServerConfig>;
+
 type Models = OpenAIResponsesProviderOptions | AnthropicProviderOptions;
+
+// ============================================================================
+// Toolkit 类型（替代 @voltagent/core 的 Toolkit）
+// ============================================================================
+
+export interface Toolkit {
+  name: string;
+  description?: string;
+  tools: any[];
+}
 
 export interface MyAgentModuleOptions {
   headers?: Record<string, string>;
