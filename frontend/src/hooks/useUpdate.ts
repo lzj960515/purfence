@@ -13,6 +13,9 @@ export interface UpdateInfo {
   releaseNotes?: string
   downloadUrl?: string
   pubDate?: string
+  // Backend may return snake_case fields
+  current_version?: string
+  pub_date?: string
 }
 
 export interface DownloadProgress {
@@ -63,8 +66,11 @@ export function useUpdate(): UseUpdateReturn {
   // Get current version on mount
   useEffect(() => {
     invoke<string>('get_current_version')
-      .then(setCurrentVersion)
-      .catch((err) => console.error('Failed to get current version:', err))
+      .then((version) => {
+        console.log('[useUpdate] Current version:', version)
+        setCurrentVersion(version)
+      })
+      .catch((err) => console.error('[useUpdate] Failed to get current version:', err))
   }, [])
 
   // Set up periodic check
@@ -100,13 +106,23 @@ export function useUpdate(): UseUpdateReturn {
 
     try {
       // First check using our GitHub API
-      const info = await invoke<UpdateInfo | null>('check_for_updates')
+      const rawInfo = await invoke<UpdateInfo | null>('check_for_updates')
 
-      if (info) {
+      if (rawInfo) {
+        // Normalize field names (backend returns snake_case, frontend uses camelCase)
+        const info: UpdateInfo = {
+          ...rawInfo,
+          currentVersion: rawInfo.currentVersion || rawInfo.current_version || '',
+          pubDate: rawInfo.pubDate || rawInfo.pub_date,
+        }
+
+        console.log('[useUpdate] Update info received:', info)
+
         // Check if this version has been skipped
         const skippedVersion = localStorage.getItem('purfence:skippedVersion')
         if (skippedVersion === info.version) {
           // This version was skipped, don't show update
+          console.log('[useUpdate] Version skipped:', info.version)
           setStatus('idle')
           return false
         }
@@ -126,18 +142,23 @@ export function useUpdate(): UseUpdateReturn {
         return false
       }
     } catch (err) {
-      console.error('Failed to check for updates:', err)
-      setError(err instanceof Error ? err.message : String(err))
+      console.error('[useUpdate] Failed to check for updates:', err)
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      setError(errorMessage)
       setStatus('error')
+      // Don't return false here, let the error state be handled by the UI
       return false
     }
   }, [status])
 
   const startDownload = useCallback(async () => {
     if (!updateManifest) {
+      console.error('[useUpdate] No update manifest available')
       setError('没有可用的更新')
       return
     }
+
+    console.log('[useUpdate] Starting download...')
 
     setStatus('downloading')
     setError(null)
@@ -176,13 +197,15 @@ export function useUpdate(): UseUpdateReturn {
     } catch (err) {
       // Check if it was aborted
       if (abortControllerRef.current?.signal.aborted) {
+        console.log('[useUpdate] Download aborted')
         setStatus('available')
         setDownloadProgress(null)
         return
       }
 
-      console.error('Failed to download update:', err)
-      setError(err instanceof Error ? err.message : String(err))
+      console.error('[useUpdate] Failed to download update:', err)
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      setError(errorMessage)
       setStatus('error')
       setDownloadProgress(null)
     }
@@ -198,10 +221,12 @@ export function useUpdate(): UseUpdateReturn {
 
   const installAndRestart = useCallback(async () => {
     try {
+      console.log('[useUpdate] Restarting app to install update...')
       await relaunch()
     } catch (err) {
-      console.error('Failed to restart app:', err)
-      setError(err instanceof Error ? err.message : String(err))
+      console.error('[useUpdate] Failed to restart app:', err)
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      setError(errorMessage)
     }
   }, [])
 

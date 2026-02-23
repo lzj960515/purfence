@@ -30,6 +30,7 @@ import {
 import logoPng from '@/assets/purfence-logo.png'
 import { useUpdate } from '@/hooks/useUpdate'
 import { UpdateDialog } from '@/components/update'
+import { ErrorBoundary } from '@/components/error'
 
 const SIDEBAR_STATE_KEY = 'sidebar-history-expanded'
 
@@ -290,22 +291,43 @@ export function AppSidebar() {
       </Sidebar>
 
       {/* Update Dialog */}
-      <UpdateDialog
-        open={updateDialogOpen}
-        onOpenChange={setUpdateDialogOpen}
-        status={updateStatus}
-        updateInfo={updateInfo}
-        downloadProgress={downloadProgress}
-        error={updateError}
-        onConfirm={startDownload}
-        onCancel={cancelDownload}
-        onInstallAndRestart={installAndRestart}
-        onSkipVersion={() => {
-          if (updateInfo?.version) {
-            skipVersion(updateInfo.version)
-          }
-        }}
-      />
+      <ErrorBoundary
+        fallback={
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-background rounded-lg p-6 max-w-sm mx-4 shadow-lg">
+              <h3 className="text-lg font-semibold mb-2">更新提示</h3>
+              <p className="text-muted-foreground mb-4">
+                检测到新版本，但更新弹窗加载失败。请稍后重试或手动检查更新。
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setUpdateDialogOpen(false)}
+                  className="flex-1 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <UpdateDialog
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
+          status={updateStatus}
+          updateInfo={updateInfo}
+          downloadProgress={downloadProgress}
+          error={updateError}
+          onConfirm={startDownload}
+          onCancel={cancelDownload}
+          onInstallAndRestart={installAndRestart}
+          onSkipVersion={() => {
+            if (updateInfo?.version) {
+              skipVersion(updateInfo.version)
+            }
+          }}
+        />
+      </ErrorBoundary>
     </>
   )
 }

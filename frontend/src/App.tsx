@@ -14,6 +14,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ScheduledTaskSettingsPage } from '@/pages/ScheduledTaskSettingsPage'
 import { AppConfigPage } from '@/pages/AppConfigPage'
 import { SkillsSettingsPage } from '@/pages/SkillsSettingsPage'
+import { ErrorBoundary } from '@/components/error'
 
 function RootRedirect() {
   return hasOnboardingCompleted() ? (
@@ -25,29 +26,31 @@ function RootRedirect() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/" element={<AdminLayout><Outlet /></AdminLayout>}>
-          <Route index element={<RootRedirect />} />
-          <Route path="projects" element={<ProjectListPage />} />
-          <Route path="projects/:id" element={<ProjectDetailPage />} />
-          <Route path="issues/:id" element={<IssueDetailPage />} />
-          <Route path="agent" element={<AgentPage />} />
-          <Route path="settings" element={<SettingsPage />}>
-            <Route index element={<Navigate to="/settings/base" replace />} />
-            <Route path="base" element={<PurfenceConfigPage />} />
-            <Route path="providers" element={<ProviderConfigPage />} />
-            <Route path="claude-code" element={<ClaudeCodeConfigPage />} />
-            <Route path="environment" element={<EnvironmentSettingsPage />} />
-            <Route path="scheduled-tasks" element={<ScheduledTaskSettingsPage />} />
-            <Route path="app" element={<AppConfigPage />} />
-            <Route path="skills" element={<SkillsSettingsPage />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/" element={<AdminLayout><Outlet /></AdminLayout>}>
+            <Route index element={<RootRedirect />} />
+            <Route path="projects" element={<ProjectListPage />} />
+            <Route path="projects/:id" element={<ProjectDetailPage />} />
+            <Route path="issues/:id" element={<IssueDetailPage />} />
+            <Route path="agent" element={<AgentPage />} />
+            <Route path="settings" element={<SettingsPage />}>
+              <Route index element={<Navigate to="/settings/base" replace />} />
+              <Route path="base" element={<PurfenceConfigPage />} />
+              <Route path="providers" element={<ProviderConfigPage />} />
+              <Route path="claude-code" element={<ClaudeCodeConfigPage />} />
+              <Route path="environment" element={<EnvironmentSettingsPage />} />
+              <Route path="scheduled-tasks" element={<ScheduledTaskSettingsPage />} />
+              <Route path="app" element={<AppConfigPage />} />
+              <Route path="skills" element={<SkillsSettingsPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-      <Toaster />
-    </BrowserRouter>
+        </Routes>
+        <Toaster />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

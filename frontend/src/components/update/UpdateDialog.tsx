@@ -11,11 +11,17 @@ import { Button } from '@/components/ui/button'
 import { DownloadProgress } from './DownloadProgress'
 import type { UpdateInfo, DownloadProgress as DownloadProgressType, UpdateStatus } from '@/hooks/useUpdate'
 
+// Extended UpdateInfo type to handle both camelCase and snake_case from backend
+interface ExtendedUpdateInfo extends UpdateInfo {
+  current_version?: string
+  pub_date?: string
+}
+
 interface UpdateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   status: UpdateStatus
-  updateInfo: UpdateInfo | null
+  updateInfo: ExtendedUpdateInfo | null
   downloadProgress: DownloadProgressType | null
   error: string | null
   onConfirm: () => void
@@ -40,7 +46,8 @@ export function UpdateDialog({
   const isDownloaded = status === 'downloaded'
   const hasError = status === 'error'
 
-  const formatVersion = (version: string) => {
+  const formatVersion = (version: string | undefined | null) => {
+    if (!version) return 'v?'
     return version.startsWith('v') ? version : `v${version}`
   }
 
@@ -75,11 +82,11 @@ export function UpdateDialog({
                 <>
                   <p>
                     <span className="font-medium">{formatVersion(updateInfo.version)}</span>
-                    {' '}（当前版本：{formatVersion(updateInfo.currentVersion)}）
+                    {' '}（当前版本：{formatVersion(updateInfo.currentVersion ?? updateInfo.current_version)}）
                   </p>
-                  {updateInfo.pubDate && (
+                  {(updateInfo.pubDate ?? updateInfo.pub_date) && (
                     <p className="text-xs text-muted-foreground">
-                      发布日期：{new Date(updateInfo.pubDate).toLocaleDateString('zh-CN')}
+                      发布日期：{new Date(updateInfo.pubDate ?? updateInfo.pub_date!).toLocaleDateString('zh-CN')}
                     </p>
                   )}
                 </>
