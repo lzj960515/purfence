@@ -1,8 +1,22 @@
 import { Logger } from '@nestjs/common';
-import { extractText } from '@voltagent/core';
 import { UIMessage } from 'ai';
 
 const logger = new Logger();
+
+/**
+ * 从 UIMessage 中提取文本内容
+ * 替代 @voltagent/core 的 extractText 函数
+ */
+function extractText(message: UIMessage): string {
+  if (!message.parts || message.parts.length === 0) {
+    return '';
+  }
+
+  return message.parts
+    .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+    .map((part) => part.text)
+    .join('');
+}
 
 describe('Message Helper', () => {
   it('extract text from message', async () => {

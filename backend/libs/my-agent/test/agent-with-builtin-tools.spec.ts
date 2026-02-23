@@ -2,7 +2,6 @@ import { Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import myAgentConfig from '@src/common/configs/my-agent.config';
-import { Agent } from '@voltagent/core';
 import { LlmService, MyAgent, MyAgentModule, MyAgentService } from '../src';
 
 const logger = new Logger();
@@ -74,13 +73,13 @@ describe('AgentWithBuiltinTools', () => {
   });
 
   describe('web search invoke', () => {
-    let agent: Agent;
+    let agent: MyAgent;
 
     it('should answer questions using web search', async () => {
       const webSearchTool = llm.createAnthropicTool(({ webSearch_20250305 }) =>
         webSearch_20250305({ maxUses: 3 }),
       );
-      const agent = service.createAgent({
+      agent = service.createAgent({
         name: 'web-search-agent',
         prompt: `You are an AI assistant with access to a web search tool. Use the tool to find relevant information to answer user queries accurately.`,
         tools: [webSearchTool],
