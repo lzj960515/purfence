@@ -40,27 +40,54 @@ model: sonnet
 ```
 Execution 完成
   ↓
-Step 0: 收敛输入（必须）
+Step 0: 检查 Issue 状态（必须）
+  → 读取 `.purfence/<ISSUE_ID>/meta/issue.json`
+  → 如果 `status === "completed"`，说明需求已完成，直接结束
+  ↓
+Step 1: 收敛输入（必须）
   → 让子 Agent 优先总结 Issue artifacts（用于约束范围）
      - 优先（新结构）：`.purfence/<ISSUE_ID>/artifacts/`
   ↓
-Step 1: 了解项目现状（必须）
+Step 2: 了解项目现状（必须）
   → delegateTask 探索项目
   → 了解：项目结构、已实现功能、当前 Issue 进度、项目规划
   ↓
-Step 2: 评估 Issue 目标是否达成
+Step 3: 评估 Issue 目标是否达成
   ├─ 否 → continueExecution 或 createNextExecution
   └─ 是 → completeIssue
           ↓
        合并成功？
           ├─ 冲突 → delegateTask 解决冲突 → 重试
-          └─ 成功 → Step 3
+          └─ 成功 → Step 4
   ↓
-Step 3: 规划下一步（如果 Issue 完成）
+Step 4: 规划下一步（如果 Issue 完成）
   → 基于对项目的理解，判断项目还需要什么
   → 查看 issues/ 目录或项目文档了解规划
   ├─ 有明确下一步 → createNextIssue
   └─ 项目已完成 → 结束
+```
+
+### Step 0 详解：检查 Issue 状态
+
+在评估之前，**必须**先检查 `.purfence/<ISSUE_ID>/meta/issue.json` 文件：
+
+1. **读取 issue.json** 文件
+2. **检查 `status` 字段**：
+   - 如果 `status === "completed"` → 需求已完成，直接结束，不再继续处理
+   - 如果没有 `status` 或 `status !== "completed"` → 继续正常评估流程
+
+**为什么需要这一步**：
+- 避免对已完成的需求重复处理
+- 确保不会意外修改已完成的 Issue
+
+```
+delegateTask({
+  description: "检查 Issue 状态",
+  prompt: "读取 `.purfence/<ISSUE_ID>/meta/issue.json` 文件，检查 status 字段：
+    1. 如果 status === 'completed'，返回 '已完成'
+    2. 否则返回 '未完成'",
+  subagent_type: "general-purpose"
+})
 ```
 
 ### Step 1 详解：了解项目现状
