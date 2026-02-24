@@ -28,7 +28,7 @@ export class RemoteGitResolver {
 
   @Mutation(() => RemoteRepositoryConfigDto)
   async configureRemoteRepository(
-    @Args() args: ConfigureRemoteRepositoryArgs,
+    @Args('input') args: ConfigureRemoteRepositoryArgs,
   ): Promise<RemoteRepositoryConfigDto> {
     const config = await this.remoteGitService.configure(
       args.projectId,
@@ -55,7 +55,7 @@ export class RemoteGitResolver {
 
   @Mutation(() => RemoteRepositoryConnectionTestResultDto)
   async testRemoteRepositoryConnection(
-    @Args() args: TestRemoteRepositoryConnectionArgs,
+    @Args('input') args: TestRemoteRepositoryConnectionArgs,
   ): Promise<RemoteRepositoryConnectionTestResultDto> {
     const result = await this.remoteGitService.testConnection(
       args.type,

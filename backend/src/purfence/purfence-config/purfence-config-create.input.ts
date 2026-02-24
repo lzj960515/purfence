@@ -1,5 +1,5 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class PurfenceConfigCreateInput {
@@ -13,4 +13,9 @@ export class PurfenceConfigCreateInput {
   @IsOptional()
   @IsString()
   proxyUrl?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  maxIssueConcurrency?: number;
 }

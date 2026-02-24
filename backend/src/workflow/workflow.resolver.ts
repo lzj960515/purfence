@@ -33,7 +33,7 @@ export class WorkflowResolver {
 
   @Mutation(() => WorkflowConfigDto)
   async configureWorkflow(
-    @Args() args: ConfigureWorkflowArgs,
+    @Args('input') args: ConfigureWorkflowArgs,
   ): Promise<WorkflowConfigDto> {
     const config = await this.workflowService.configure(
       args.projectId,

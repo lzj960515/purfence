@@ -1,5 +1,5 @@
 import { BaseDto } from '@app/shared';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType('PurfenceConfig')
 export class PurfenceConfigDto extends BaseDto {
@@ -8,4 +8,7 @@ export class PurfenceConfigDto extends BaseDto {
 
   @Field({ nullable: true })
   proxyUrl?: string;
+
+  @Field(() => Int, { nullable: true })
+  maxIssueConcurrency?: number;
 }

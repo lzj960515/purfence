@@ -14,9 +14,120 @@ export type Scalars = {
   Float: { input: number; output: number; }
   DateTime: { input: any; output: any; }
   JSON: { input: any; output: any; }
+  URL: { input: any; output: any; }
   _Any: { input: any; output: any; }
   federation__FieldSet: { input: any; output: any; }
   link__Import: { input: any; output: any; }
+};
+
+export type AgentArtifact = {
+  __typename?: 'AgentArtifact';
+  content: Maybe<AgentArtifactContentDto>;
+  conversationId: Maybe<Scalars['ID']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  toolName: Scalars['String']['output'];
+  type: Maybe<AgentArtifactType>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type AgentArtifactConnection = {
+  __typename?: 'AgentArtifactConnection';
+  /** Array of nodes. */
+  nodes: Array<AgentArtifact>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AgentArtifactContentDto = {
+  chunk: Maybe<Scalars['Boolean']['output']>;
+  footer: Maybe<Scalars['Boolean']['output']>;
+  type: AgentArtifactType;
+};
+
+export type AgentArtifactFileContentDto = AgentArtifactContentDto & {
+  __typename?: 'AgentArtifactFileContentDto';
+  chunk: Maybe<Scalars['Boolean']['output']>;
+  fileType: AgentArtifactFileType;
+  fileUrl: Scalars['URL']['output'];
+  filename: Scalars['String']['output'];
+  footer: Maybe<Scalars['Boolean']['output']>;
+  type: AgentArtifactType;
+};
+
+/** Type of file artifact */
+export type AgentArtifactFileType =
+  | 'DOCX'
+  | 'PDF'
+  | 'XLSX';
+
+export type AgentArtifactFilter = {
+  and: InputMaybe<Array<AgentArtifactFilter>>;
+  conversationId: InputMaybe<IdFilterComparison>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  or: InputMaybe<Array<AgentArtifactFilter>>;
+  toolName: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type AgentArtifactImageContentDto = AgentArtifactContentDto & {
+  __typename?: 'AgentArtifactImageContentDto';
+  chunk: Maybe<Scalars['Boolean']['output']>;
+  footer: Maybe<Scalars['Boolean']['output']>;
+  type: AgentArtifactType;
+  url: Scalars['URL']['output'];
+};
+
+export type AgentArtifactSort = {
+  direction: SortDirection;
+  field: AgentArtifactSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type AgentArtifactSortFields =
+  | 'conversationId'
+  | 'createdAt'
+  | 'id'
+  | 'toolName'
+  | 'updatedAt';
+
+/** Type of agent artifact content */
+export type AgentArtifactType =
+  | 'FILE'
+  | 'IMAGE';
+
+export type AgentArtifactUpdateInput = {
+  published: Scalars['Boolean']['input'];
+};
+
+/** Third-party app integration type */
+export type AppConfigType =
+  | 'SLACK';
+
+export type AppConfigTypeFilterComparison = {
+  eq: InputMaybe<AppConfigType>;
+  gt: InputMaybe<AppConfigType>;
+  gte: InputMaybe<AppConfigType>;
+  iLike: InputMaybe<AppConfigType>;
+  in: InputMaybe<Array<AppConfigType>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  like: InputMaybe<AppConfigType>;
+  lt: InputMaybe<AppConfigType>;
+  lte: InputMaybe<AppConfigType>;
+  neq: InputMaybe<AppConfigType>;
+  notILike: InputMaybe<AppConfigType>;
+  notIn: InputMaybe<Array<AppConfigType>>;
+  notLike: InputMaybe<AppConfigType>;
+};
+
+export type BooleanFieldComparison = {
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ClaudeCodeConfig = {
@@ -106,6 +217,16 @@ export type CodexOAuthInfoObject = {
   tokenType: Scalars['String']['output'];
 };
 
+export type ConfigureRemoteRepositoryArgs = {
+  config: RemoteRepositoryConfigInput;
+  projectId: Scalars['ID']['input'];
+};
+
+export type ConfigureWorkflowArgs = {
+  config: WorkflowConfigInput;
+  projectId: Scalars['ID']['input'];
+};
+
 export type CreateManyPurfenceIssuesInput = {
   /** Array of records to create */
   purfenceIssues: Array<PurfenceIssueCreateInput>;
@@ -116,6 +237,21 @@ export type CreateOneClaudeCodeConfigInput = {
   claudeCodeConfig: ClaudeCodeConfigCreateInput;
 };
 
+export type CreateOneModelProviderConfigDtoInput = {
+  /** The record to create */
+  modelProviderConfigDto: ModelProviderConfigCreateInput;
+};
+
+export type CreateOnePurfenceAppConfigInput = {
+  /** The record to create */
+  purfenceAppConfig: PurfenceAppConfigCreateInput;
+};
+
+export type CreateOnePurfenceConfigInput = {
+  /** The record to create */
+  purfenceConfig: PurfenceConfigCreateInput;
+};
+
 export type CreateOnePurfenceIssueInput = {
   /** The record to create */
   purfenceIssue: PurfenceIssueCreateInput;
@@ -124,16 +260,6 @@ export type CreateOnePurfenceIssueInput = {
 export type CreateOnePurfenceProjectInput = {
   /** The record to create */
   purfenceProject: PurfenceProjectCreateInput;
-};
-
-export type CreateOneModelProviderConfigDtoInput = {
-  /** The record to create */
-  modelProviderConfigDto: ModelProviderConfigCreateInput;
-};
-
-export type CreateOnePurfenceConfigInput = {
-  /** The record to create */
-  purfenceConfig: PurfenceConfigCreateInput;
 };
 
 export type DateFieldComparison = {
@@ -177,6 +303,21 @@ export type DeleteOneClaudeCodeConfigInput = {
   id: Scalars['ID']['input'];
 };
 
+export type DeleteOneModelProviderConfigDtoInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceAppConfigInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOnePurfenceConfigInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
 export type DeleteOnePurfenceExecutionInput = {
   /** The id of the record to delete. */
   id: Scalars['ID']['input'];
@@ -191,324 +332,25 @@ export type DeleteOnePurfenceProjectInput = {
   id: Scalars['ID']['input'];
 };
 
-export type DeleteOneModelProviderConfigDtoInput = {
-  /** The id of the record to delete. */
-  id: Scalars['ID']['input'];
-};
+export type ExecutionStage =
+  | 'tianfu'
+  | 'tianji';
 
-export type DeleteOnePurfenceConfigInput = {
-  /** The id of the record to delete. */
-  id: Scalars['ID']['input'];
-};
-
-export type PurfenceExecution = {
-  __typename?: 'PurfenceExecution';
-  branchName: Maybe<Scalars['String']['output']>;
-  conversationId: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  error: Maybe<Scalars['String']['output']>;
-  executionDir: Maybe<Scalars['String']['output']>;
-  goal: Maybe<Scalars['String']['output']>;
-  /** ID */
-  id: Scalars['ID']['output'];
-  issueId: Scalars['String']['output'];
-  jobQueryUrl: Maybe<Scalars['String']['output']>;
-  parentExecutionId: Maybe<Scalars['String']['output']>;
-  projectId: Scalars['String']['output'];
-  status: PurfenceStatus;
-  updatedAt: Scalars['DateTime']['output'];
-  worktreePath: Maybe<Scalars['String']['output']>;
-};
-
-export type PurfenceExecutionConnection = {
-  __typename?: 'PurfenceExecutionConnection';
-  /** Array of nodes. */
-  nodes: Array<PurfenceExecution>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PurfenceExecutionDeleteFilter = {
-  and: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
-  conversationId: InputMaybe<StringFieldComparison>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  issueId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
-  projectId: InputMaybe<StringFieldComparison>;
-  status: InputMaybe<PurfenceStatusFilterComparison>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceExecutionDeleteResponse = {
-  __typename?: 'PurfenceExecutionDeleteResponse';
-  branchName: Maybe<Scalars['String']['output']>;
-  conversationId: Maybe<Scalars['String']['output']>;
-  createdAt: Maybe<Scalars['DateTime']['output']>;
-  error: Maybe<Scalars['String']['output']>;
-  executionDir: Maybe<Scalars['String']['output']>;
-  goal: Maybe<Scalars['String']['output']>;
-  /** ID */
-  id: Maybe<Scalars['ID']['output']>;
-  issueId: Maybe<Scalars['String']['output']>;
-  jobQueryUrl: Maybe<Scalars['String']['output']>;
-  parentExecutionId: Maybe<Scalars['String']['output']>;
-  projectId: Maybe<Scalars['String']['output']>;
-  status: Maybe<PurfenceStatus>;
-  updatedAt: Maybe<Scalars['DateTime']['output']>;
-  worktreePath: Maybe<Scalars['String']['output']>;
-};
-
-export type PurfenceExecutionFilter = {
-  and: InputMaybe<Array<PurfenceExecutionFilter>>;
-  conversationId: InputMaybe<StringFieldComparison>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  issueId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceExecutionFilter>>;
-  projectId: InputMaybe<StringFieldComparison>;
-  status: InputMaybe<PurfenceStatusFilterComparison>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceExecutionSort = {
-  direction: SortDirection;
-  field: PurfenceExecutionSortFields;
-  nulls: InputMaybe<SortNulls>;
-};
-
-export type PurfenceExecutionSortFields =
-  | 'conversationId'
-  | 'createdAt'
-  | 'id'
-  | 'issueId'
-  | 'projectId'
-  | 'status'
-  | 'updatedAt';
-
-export type PurfenceExecutionUpdateFilter = {
-  and: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
-  conversationId: InputMaybe<StringFieldComparison>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  issueId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
-  projectId: InputMaybe<StringFieldComparison>;
-  status: InputMaybe<PurfenceStatusFilterComparison>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceExecutionUpdateInput = {
-  error: InputMaybe<Scalars['String']['input']>;
-  goal: InputMaybe<Scalars['String']['input']>;
-  status: InputMaybe<PurfenceStatus>;
-};
-
-export type PurfenceIssue = {
-  __typename?: 'PurfenceIssue';
-  createdAt: Scalars['DateTime']['output'];
-  description: Scalars['String']['output'];
-  /** ID */
-  id: Scalars['ID']['output'];
-  latestExecutionId: Maybe<Scalars['String']['output']>;
-  projectId: Scalars['String']['output'];
-  status: PurfenceStatus;
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-  workdir: Maybe<Scalars['String']['output']>;
-};
-
-export type PurfenceIssueConnection = {
-  __typename?: 'PurfenceIssueConnection';
-  /** Array of nodes. */
-  nodes: Array<PurfenceIssue>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PurfenceIssueCreateInput = {
-  dependsOnIssueId: InputMaybe<Scalars['ID']['input']>;
-  description: Scalars['String']['input'];
-  projectId: Scalars['ID']['input'];
-  slug: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-};
-
-export type PurfenceIssueFilter = {
-  and: InputMaybe<Array<PurfenceIssueFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  latestExecutionId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceIssueFilter>>;
-  projectId: InputMaybe<StringFieldComparison>;
-  status: InputMaybe<PurfenceStatusFilterComparison>;
-  title: InputMaybe<StringFieldComparison>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceIssueSort = {
-  direction: SortDirection;
-  field: PurfenceIssueSortFields;
-  nulls: InputMaybe<SortNulls>;
-};
-
-export type PurfenceIssueSortFields =
-  | 'createdAt'
-  | 'id'
-  | 'latestExecutionId'
-  | 'projectId'
-  | 'status'
-  | 'title'
-  | 'updatedAt';
-
-export type PurfenceIssueUpdateFilter = {
-  and: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  latestExecutionId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
-  projectId: InputMaybe<StringFieldComparison>;
-  status: InputMaybe<PurfenceStatusFilterComparison>;
-  title: InputMaybe<StringFieldComparison>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceIssueUpdateInput = {
-  description: InputMaybe<Scalars['String']['input']>;
-  status: InputMaybe<PurfenceStatus>;
-  title: InputMaybe<Scalars['String']['input']>;
-};
-
-export type PurfenceProject = {
-  __typename?: 'PurfenceProject';
-  createdAt: Scalars['DateTime']['output'];
-  defaultBranch: Scalars['String']['output'];
-  description: Maybe<Scalars['String']['output']>;
-  externalPath: Maybe<Scalars['String']['output']>;
-  /** ID */
-  id: Scalars['ID']['output'];
-  localRootPath: Scalars['String']['output'];
-  name: Maybe<Scalars['String']['output']>;
-  slackAppConfigId: Maybe<Scalars['String']['output']>;
-  slackChannelId: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type PurfenceProjectConnection = {
-  __typename?: 'PurfenceProjectConnection';
-  /** Array of nodes. */
-  nodes: Array<PurfenceProject>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PurfenceProjectCreateInput = {
-  defaultBranch: InputMaybe<Scalars['String']['input']>;
-  description: InputMaybe<Scalars['String']['input']>;
-  externalPath: InputMaybe<Scalars['String']['input']>;
-  name: InputMaybe<Scalars['String']['input']>;
-  slug: Scalars['String']['input'];
-};
-
-export type PurfenceProjectDeleteFilter = {
-  and: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  defaultBranch: InputMaybe<StringFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  localRootPath: InputMaybe<StringFieldComparison>;
-  name: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceProjectDeleteResponse = {
-  __typename?: 'PurfenceProjectDeleteResponse';
-  createdAt: Maybe<Scalars['DateTime']['output']>;
-  defaultBranch: Maybe<Scalars['String']['output']>;
-  description: Maybe<Scalars['String']['output']>;
-  externalPath: Maybe<Scalars['String']['output']>;
-  /** ID */
-  id: Maybe<Scalars['ID']['output']>;
-  localRootPath: Maybe<Scalars['String']['output']>;
-  name: Maybe<Scalars['String']['output']>;
-  slackAppConfigId: Maybe<Scalars['String']['output']>;
-  slackChannelId: Maybe<Scalars['String']['output']>;
-  updatedAt: Maybe<Scalars['DateTime']['output']>;
-};
-
-export type PurfenceProjectFilter = {
-  and: InputMaybe<Array<PurfenceProjectFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  defaultBranch: InputMaybe<StringFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  localRootPath: InputMaybe<StringFieldComparison>;
-  name: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceProjectFilter>>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceProjectSort = {
-  direction: SortDirection;
-  field: PurfenceProjectSortFields;
-  nulls: InputMaybe<SortNulls>;
-};
-
-export type PurfenceProjectSortFields =
-  | 'createdAt'
-  | 'defaultBranch'
-  | 'id'
-  | 'localRootPath'
-  | 'name'
-  | 'updatedAt';
-
-export type PurfenceProjectUpdateFilter = {
-  and: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  defaultBranch: InputMaybe<StringFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  localRootPath: InputMaybe<StringFieldComparison>;
-  name: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceProjectUpdateInput = {
-  description: InputMaybe<Scalars['String']['input']>;
-  name: InputMaybe<Scalars['String']['input']>;
-  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
-  slackChannelId: InputMaybe<Scalars['String']['input']>;
-};
-
-export type PurfenceStatus =
-  | 'budget_exhausted'
-  | 'done'
-  | 'failed'
-  | 'needs_approval'
-  | 'needs_user'
-  | 'open'
-  | 'running';
-
-export type PurfenceStatusFilterComparison = {
-  eq: InputMaybe<PurfenceStatus>;
-  gt: InputMaybe<PurfenceStatus>;
-  gte: InputMaybe<PurfenceStatus>;
-  iLike: InputMaybe<PurfenceStatus>;
-  in: InputMaybe<Array<PurfenceStatus>>;
+export type ExecutionStageFilterComparison = {
+  eq: InputMaybe<ExecutionStage>;
+  gt: InputMaybe<ExecutionStage>;
+  gte: InputMaybe<ExecutionStage>;
+  iLike: InputMaybe<ExecutionStage>;
+  in: InputMaybe<Array<ExecutionStage>>;
   is: InputMaybe<Scalars['Boolean']['input']>;
   isNot: InputMaybe<Scalars['Boolean']['input']>;
-  like: InputMaybe<PurfenceStatus>;
-  lt: InputMaybe<PurfenceStatus>;
-  lte: InputMaybe<PurfenceStatus>;
-  neq: InputMaybe<PurfenceStatus>;
-  notILike: InputMaybe<PurfenceStatus>;
-  notIn: InputMaybe<Array<PurfenceStatus>>;
-  notLike: InputMaybe<PurfenceStatus>;
+  like: InputMaybe<ExecutionStage>;
+  lt: InputMaybe<ExecutionStage>;
+  lte: InputMaybe<ExecutionStage>;
+  neq: InputMaybe<ExecutionStage>;
+  notILike: InputMaybe<ExecutionStage>;
+  notIn: InputMaybe<Array<ExecutionStage>>;
+  notLike: InputMaybe<ExecutionStage>;
 };
 
 export type IdFilterComparison = {
@@ -527,6 +369,16 @@ export type IdFilterComparison = {
   notIn: InputMaybe<Array<Scalars['ID']['input']>>;
   notLike: InputMaybe<Scalars['ID']['input']>;
 };
+
+export type ImportRemoteIssueInput = {
+  projectId: Scalars['String']['input'];
+  remoteIssueId: Scalars['String']['input'];
+};
+
+export type IssueOrigin =
+  | 'ai'
+  | 'remote'
+  | 'user';
 
 export type ModelProviderConfigCreateInput = {
   apiKey: InputMaybe<Scalars['String']['input']>;
@@ -621,33 +473,69 @@ export type ModelProviderConfigUpdateInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  completeIssue: PurfenceIssue;
+  configureRemoteRepository: RemoteRepositoryConfig;
+  configureWorkflow: WorkflowConfig;
   createManyPurfenceIssues: Array<PurfenceIssue>;
   createOneClaudeCodeConfig: ClaudeCodeConfig;
+  createOneModelProviderConfigDto: ModelProviderConfigDto;
+  createOnePurfenceAppConfig: PurfenceAppConfig;
+  createOnePurfenceConfig: PurfenceConfig;
   createOnePurfenceIssue: PurfenceIssue;
   createOnePurfenceProject: PurfenceProject;
-  createOneModelProviderConfigDto: ModelProviderConfigDto;
-  createOnePurfenceConfig: PurfenceConfig;
+  createPurfenceScheduledTask: PurfenceScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneClaudeCodeConfig: ClaudeCodeConfigDeleteResponse;
+  deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
+  deleteOnePurfenceAppConfig: PurfenceAppConfigDeleteResponse;
+  deleteOnePurfenceConfig: PurfenceConfigDeleteResponse;
   deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
-  deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
-  deleteOnePurfenceConfig: PurfenceConfigDeleteResponse;
+  deletePurfenceScheduledTask: Scalars['ID']['output'];
+  deleteRemoteRepository: Scalars['Boolean']['output'];
+  deleteWorkflowConfig: Scalars['Boolean']['output'];
   handleCodexOAuthCallback: OAuthCallbackResponse;
+  importRemoteIssue: PurfenceIssue;
   initiateCodexOAuth: OAuthAuthorization;
+  manualMergeIssue: PurfenceIssue;
+  manualPushIssue: PurfenceIssue;
   refreshCodexToken: ModelProviderConfigDto;
+  runPurfenceScheduledTask: Scalars['ID']['output'];
+  startIssue: Scalars['ID']['output'];
+  startRemoteIssue: PurfenceIssue;
+  testRemoteRepositoryConnection: RemoteRepositoryConnectionTestResult;
   toggleModelProviderConfig: ModelProviderConfigDto;
   updateManyPurfenceExecutions: UpdateManyResponse;
   updateManyPurfenceIssues: UpdateManyResponse;
   updateManyPurfenceProjects: UpdateManyResponse;
+  updateOneAgentArtifact: AgentArtifact;
   updateOneClaudeCodeConfig: ClaudeCodeConfig;
+  updateOneModelProviderConfigDto: ModelProviderConfigDto;
+  updateOnePurfenceAppConfig: PurfenceAppConfig;
+  updateOnePurfenceConfig: PurfenceConfig;
   updateOnePurfenceExecution: PurfenceExecution;
   updateOnePurfenceIssue: PurfenceIssue;
   updateOnePurfenceProject: PurfenceProject;
-  updateOneModelProviderConfigDto: ModelProviderConfigDto;
-  updateOnePurfenceConfig: PurfenceConfig;
+  updatePurfenceScheduledTask: PurfenceScheduledTask;
+  updateRemoteRepository: RemoteRepositoryConfig;
+  updateWorkflowConfig: WorkflowConfig;
+};
+
+
+export type MutationCompleteIssueArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
+export type MutationConfigureRemoteRepositoryArgs = {
+  input: ConfigureRemoteRepositoryArgs;
+};
+
+
+export type MutationConfigureWorkflowArgs = {
+  input: ConfigureWorkflowArgs;
 };
 
 
@@ -661,6 +549,21 @@ export type MutationCreateOneClaudeCodeConfigArgs = {
 };
 
 
+export type MutationCreateOneModelProviderConfigDtoArgs = {
+  input: CreateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationCreateOnePurfenceAppConfigArgs = {
+  input: CreateOnePurfenceAppConfigInput;
+};
+
+
+export type MutationCreateOnePurfenceConfigArgs = {
+  input: CreateOnePurfenceConfigInput;
+};
+
+
 export type MutationCreateOnePurfenceIssueArgs = {
   input: CreateOnePurfenceIssueInput;
 };
@@ -671,13 +574,8 @@ export type MutationCreateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationCreateOneModelProviderConfigDtoArgs = {
-  input: CreateOneModelProviderConfigDtoInput;
-};
-
-
-export type MutationCreateOnePurfenceConfigArgs = {
-  input: CreateOnePurfenceConfigInput;
+export type MutationCreatePurfenceScheduledTaskArgs = {
+  input: PurfenceScheduledTaskCreateInput;
 };
 
 
@@ -696,6 +594,21 @@ export type MutationDeleteOneClaudeCodeConfigArgs = {
 };
 
 
+export type MutationDeleteOneModelProviderConfigDtoArgs = {
+  input: DeleteOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationDeleteOnePurfenceAppConfigArgs = {
+  input: DeleteOnePurfenceAppConfigInput;
+};
+
+
+export type MutationDeleteOnePurfenceConfigArgs = {
+  input: DeleteOnePurfenceConfigInput;
+};
+
+
 export type MutationDeleteOnePurfenceExecutionArgs = {
   input: DeleteOnePurfenceExecutionInput;
 };
@@ -711,13 +624,18 @@ export type MutationDeleteOnePurfenceProjectArgs = {
 };
 
 
-export type MutationDeleteOneModelProviderConfigDtoArgs = {
-  input: DeleteOneModelProviderConfigDtoInput;
+export type MutationDeletePurfenceScheduledTaskArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
-export type MutationDeleteOnePurfenceConfigArgs = {
-  input: DeleteOnePurfenceConfigInput;
+export type MutationDeleteRemoteRepositoryArgs = {
+  projectId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteWorkflowConfigArgs = {
+  projectId: Scalars['String']['input'];
 };
 
 
@@ -728,13 +646,48 @@ export type MutationHandleCodexOAuthCallbackArgs = {
 };
 
 
+export type MutationImportRemoteIssueArgs = {
+  input: ImportRemoteIssueInput;
+};
+
+
 export type MutationInitiateCodexOAuthArgs = {
   redirectUri: Scalars['String']['input'];
 };
 
 
+export type MutationManualMergeIssueArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
+export type MutationManualPushIssueArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
 export type MutationRefreshCodexTokenArgs = {
   configId: Scalars['ID']['input'];
+};
+
+
+export type MutationRunPurfenceScheduledTaskArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationStartIssueArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationStartRemoteIssueArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
+export type MutationTestRemoteRepositoryConnectionArgs = {
+  input: TestRemoteRepositoryConnectionArgs;
 };
 
 
@@ -759,8 +712,28 @@ export type MutationUpdateManyPurfenceProjectsArgs = {
 };
 
 
+export type MutationUpdateOneAgentArtifactArgs = {
+  input: UpdateOneAgentArtifactInput;
+};
+
+
 export type MutationUpdateOneClaudeCodeConfigArgs = {
   input: UpdateOneClaudeCodeConfigInput;
+};
+
+
+export type MutationUpdateOneModelProviderConfigDtoArgs = {
+  input: UpdateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationUpdateOnePurfenceAppConfigArgs = {
+  input: UpdateOnePurfenceAppConfigInput;
+};
+
+
+export type MutationUpdateOnePurfenceConfigArgs = {
+  input: UpdateOnePurfenceConfigInput;
 };
 
 
@@ -779,13 +752,21 @@ export type MutationUpdateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationUpdateOneModelProviderConfigDtoArgs = {
-  input: UpdateOneModelProviderConfigDtoInput;
+export type MutationUpdatePurfenceScheduledTaskArgs = {
+  id: Scalars['ID']['input'];
+  update: PurfenceScheduledTaskUpdateInput;
 };
 
 
-export type MutationUpdateOnePurfenceConfigArgs = {
-  input: UpdateOnePurfenceConfigInput;
+export type MutationUpdateRemoteRepositoryArgs = {
+  input: UpdateRemoteRepositoryInput;
+  projectId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateWorkflowConfigArgs = {
+  input: UpdateWorkflowConfigInput;
+  projectId: Scalars['String']['input'];
 };
 
 export type OAuthAuthorization = {
@@ -840,11 +821,84 @@ export type ProviderTypeFilterComparison = {
   notLike: InputMaybe<ProviderType>;
 };
 
+export type PurfenceAppConfig = {
+  __typename?: 'PurfenceAppConfig';
+  config: Maybe<Scalars['JSON']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  enabled: Scalars['Boolean']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  type: AppConfigType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PurfenceAppConfigConnection = {
+  __typename?: 'PurfenceAppConfigConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceAppConfig>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceAppConfigCreateInput = {
+  config: InputMaybe<Scalars['JSON']['input']>;
+  enabled: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  type: AppConfigType;
+};
+
+export type PurfenceAppConfigDeleteResponse = {
+  __typename?: 'PurfenceAppConfigDeleteResponse';
+  config: Maybe<Scalars['JSON']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  enabled: Maybe<Scalars['Boolean']['output']>;
+  /** ID */
+  id: Maybe<Scalars['ID']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  type: Maybe<AppConfigType>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PurfenceAppConfigFilter = {
+  and: InputMaybe<Array<PurfenceAppConfigFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceAppConfigFilter>>;
+  type: InputMaybe<AppConfigTypeFilterComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceAppConfigSort = {
+  direction: SortDirection;
+  field: PurfenceAppConfigSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type PurfenceAppConfigSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'name'
+  | 'type'
+  | 'updatedAt';
+
+export type PurfenceAppConfigUpdateInput = {
+  config: InputMaybe<Scalars['JSON']['input']>;
+  enabled: InputMaybe<Scalars['Boolean']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  type: InputMaybe<AppConfigType>;
+};
+
 export type PurfenceConfig = {
   __typename?: 'PurfenceConfig';
   createdAt: Scalars['DateTime']['output'];
   /** ID */
   id: Scalars['ID']['output'];
+  maxIssueConcurrency: Maybe<Scalars['Int']['output']>;
+  projectsRootPath: Maybe<Scalars['String']['output']>;
   proxyUrl: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -860,6 +914,8 @@ export type PurfenceConfigConnection = {
 };
 
 export type PurfenceConfigCreateInput = {
+  maxIssueConcurrency: InputMaybe<Scalars['Int']['input']>;
+  projectsRootPath: InputMaybe<Scalars['String']['input']>;
   proxyUrl: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -868,6 +924,8 @@ export type PurfenceConfigDeleteResponse = {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   /** ID */
   id: Maybe<Scalars['ID']['output']>;
+  maxIssueConcurrency: Maybe<Scalars['Int']['output']>;
+  projectsRootPath: Maybe<Scalars['String']['output']>;
   proxyUrl: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
@@ -892,14 +950,457 @@ export type PurfenceConfigSortFields =
   | 'updatedAt';
 
 export type PurfenceConfigUpdateInput = {
+  maxIssueConcurrency: InputMaybe<Scalars['Int']['input']>;
+  projectsRootPath: InputMaybe<Scalars['String']['input']>;
   proxyUrl: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceExecution = {
+  __typename?: 'PurfenceExecution';
+  branchName: Maybe<Scalars['String']['output']>;
+  conversationId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  error: Maybe<Scalars['String']['output']>;
+  executionDir: Maybe<Scalars['String']['output']>;
+  goal: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  issueId: Scalars['String']['output'];
+  jobQueryUrl: Maybe<Scalars['String']['output']>;
+  parentExecutionId: Maybe<Scalars['String']['output']>;
+  projectId: Scalars['String']['output'];
+  stage: ExecutionStage;
+  status: PurfenceStatus;
+  updatedAt: Scalars['DateTime']['output'];
+  worktreePath: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceExecutionConnection = {
+  __typename?: 'PurfenceExecutionConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceExecution>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceExecutionDeleteFilter = {
+  and: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
+  conversationId: InputMaybe<StringFieldComparison>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  issueId: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceExecutionDeleteFilter>>;
+  projectId: InputMaybe<StringFieldComparison>;
+  stage: InputMaybe<ExecutionStageFilterComparison>;
+  status: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionDeleteResponse = {
+  __typename?: 'PurfenceExecutionDeleteResponse';
+  branchName: Maybe<Scalars['String']['output']>;
+  conversationId: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  error: Maybe<Scalars['String']['output']>;
+  executionDir: Maybe<Scalars['String']['output']>;
+  goal: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Maybe<Scalars['ID']['output']>;
+  issueId: Maybe<Scalars['String']['output']>;
+  jobQueryUrl: Maybe<Scalars['String']['output']>;
+  parentExecutionId: Maybe<Scalars['String']['output']>;
+  projectId: Maybe<Scalars['String']['output']>;
+  stage: Maybe<ExecutionStage>;
+  status: Maybe<PurfenceStatus>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  worktreePath: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceExecutionFilter = {
+  and: InputMaybe<Array<PurfenceExecutionFilter>>;
+  conversationId: InputMaybe<StringFieldComparison>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  issueId: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceExecutionFilter>>;
+  projectId: InputMaybe<StringFieldComparison>;
+  stage: InputMaybe<ExecutionStageFilterComparison>;
+  status: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionSort = {
+  direction: SortDirection;
+  field: PurfenceExecutionSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type PurfenceExecutionSortFields =
+  | 'conversationId'
+  | 'createdAt'
+  | 'id'
+  | 'issueId'
+  | 'projectId'
+  | 'stage'
+  | 'status'
+  | 'updatedAt';
+
+export type PurfenceExecutionUpdateFilter = {
+  and: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
+  conversationId: InputMaybe<StringFieldComparison>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  issueId: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceExecutionUpdateFilter>>;
+  projectId: InputMaybe<StringFieldComparison>;
+  stage: InputMaybe<ExecutionStageFilterComparison>;
+  status: InputMaybe<PurfenceStatusFilterComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceExecutionUpdateInput = {
+  error: InputMaybe<Scalars['String']['input']>;
+  goal: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<PurfenceStatus>;
+};
+
+export type PurfenceIssue = {
+  __typename?: 'PurfenceIssue';
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  latestExecutionId: Maybe<Scalars['String']['output']>;
+  projectId: Scalars['String']['output'];
+  status: PurfenceStatus;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  workdir: Maybe<Scalars['String']['output']>;
+};
+
+export type PurfenceIssueConnection = {
+  __typename?: 'PurfenceIssueConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceIssue>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceIssueCreateInput = {
+  dependsOnIssueId: InputMaybe<Scalars['ID']['input']>;
+  description: Scalars['String']['input'];
+  origin: InputMaybe<IssueOrigin>;
+  projectId: Scalars['ID']['input'];
+  slug: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type PurfenceIssueFilter = {
+  and: InputMaybe<Array<PurfenceIssueFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  latestExecutionId: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceIssueFilter>>;
+  projectId: InputMaybe<StringFieldComparison>;
+  status: InputMaybe<PurfenceStatusFilterComparison>;
+  title: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceIssueSort = {
+  direction: SortDirection;
+  field: PurfenceIssueSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type PurfenceIssueSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'latestExecutionId'
+  | 'projectId'
+  | 'status'
+  | 'title'
+  | 'updatedAt';
+
+export type PurfenceIssueUpdateFilter = {
+  and: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  latestExecutionId: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceIssueUpdateFilter>>;
+  projectId: InputMaybe<StringFieldComparison>;
+  status: InputMaybe<PurfenceStatusFilterComparison>;
+  title: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceIssueUpdateInput = {
+  description: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<PurfenceStatus>;
+  title: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceProject = {
+  __typename?: 'PurfenceProject';
+  createdAt: Scalars['DateTime']['output'];
+  defaultBranch: Scalars['String']['output'];
+  description: Maybe<Scalars['String']['output']>;
+  externalPath: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  localRootPath: Scalars['String']['output'];
+  name: Maybe<Scalars['String']['output']>;
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PurfenceProjectConnection = {
+  __typename?: 'PurfenceProjectConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceProject>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceProjectCreateInput = {
+  defaultBranch: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['String']['input']>;
+  externalPath: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  slug: Scalars['String']['input'];
+};
+
+export type PurfenceProjectDeleteFilter = {
+  and: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  defaultBranch: InputMaybe<StringFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  localRootPath: InputMaybe<StringFieldComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceProjectDeleteFilter>>;
+  slackAppConfigId: InputMaybe<StringFieldComparison>;
+  slackChannelId: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectDeleteResponse = {
+  __typename?: 'PurfenceProjectDeleteResponse';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  defaultBranch: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  externalPath: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Maybe<Scalars['ID']['output']>;
+  localRootPath: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PurfenceProjectFilter = {
+  and: InputMaybe<Array<PurfenceProjectFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  defaultBranch: InputMaybe<StringFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  localRootPath: InputMaybe<StringFieldComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceProjectFilter>>;
+  slackAppConfigId: InputMaybe<StringFieldComparison>;
+  slackChannelId: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectSort = {
+  direction: SortDirection;
+  field: PurfenceProjectSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type PurfenceProjectSortFields =
+  | 'createdAt'
+  | 'defaultBranch'
+  | 'id'
+  | 'localRootPath'
+  | 'name'
+  | 'slackAppConfigId'
+  | 'slackChannelId'
+  | 'updatedAt';
+
+export type PurfenceProjectUpdateFilter = {
+  and: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  defaultBranch: InputMaybe<StringFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  localRootPath: InputMaybe<StringFieldComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceProjectUpdateFilter>>;
+  slackAppConfigId: InputMaybe<StringFieldComparison>;
+  slackChannelId: InputMaybe<StringFieldComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceProjectUpdateInput = {
+  description: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceScheduledTask = {
+  __typename?: 'PurfenceScheduledTask';
+  createdAt: Scalars['DateTime']['output'];
+  cronExpr: Maybe<Scalars['String']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  kind: PurfenceScheduledTaskKind;
+  lastError: Maybe<Scalars['String']['output']>;
+  lastRunAt: Maybe<Scalars['DateTime']['output']>;
+  lastStatus: Maybe<PurfenceScheduledTaskLastStatus>;
+  name: Scalars['String']['output'];
+  nextRunAt: Maybe<Scalars['DateTime']['output']>;
+  prompt: Scalars['String']['output'];
+  runAt: Maybe<Scalars['DateTime']['output']>;
+  runCount: Scalars['Int']['output'];
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type PurfenceScheduledTaskConnection = {
+  __typename?: 'PurfenceScheduledTaskConnection';
+  /** Array of nodes. */
+  nodes: Array<PurfenceScheduledTask>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PurfenceScheduledTaskCreateInput = {
+  cronExpr: InputMaybe<Scalars['String']['input']>;
+  enabled: InputMaybe<Scalars['Boolean']['input']>;
+  kind: PurfenceScheduledTaskKind;
+  name: Scalars['String']['input'];
+  prompt: Scalars['String']['input'];
+  runAt: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceScheduledTaskFilter = {
+  and: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  enabled: InputMaybe<BooleanFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  kind: InputMaybe<PurfenceScheduledTaskKindFilterComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type PurfenceScheduledTaskKind =
+  | 'one_time'
+  | 'recurring';
+
+export type PurfenceScheduledTaskKindFilterComparison = {
+  eq: InputMaybe<PurfenceScheduledTaskKind>;
+  gt: InputMaybe<PurfenceScheduledTaskKind>;
+  gte: InputMaybe<PurfenceScheduledTaskKind>;
+  iLike: InputMaybe<PurfenceScheduledTaskKind>;
+  in: InputMaybe<Array<PurfenceScheduledTaskKind>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  like: InputMaybe<PurfenceScheduledTaskKind>;
+  lt: InputMaybe<PurfenceScheduledTaskKind>;
+  lte: InputMaybe<PurfenceScheduledTaskKind>;
+  neq: InputMaybe<PurfenceScheduledTaskKind>;
+  notILike: InputMaybe<PurfenceScheduledTaskKind>;
+  notIn: InputMaybe<Array<PurfenceScheduledTaskKind>>;
+  notLike: InputMaybe<PurfenceScheduledTaskKind>;
+};
+
+export type PurfenceScheduledTaskLastStatus =
+  | 'failed'
+  | 'success';
+
+export type PurfenceScheduledTaskSort = {
+  direction: SortDirection;
+  field: PurfenceScheduledTaskSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type PurfenceScheduledTaskSortFields =
+  | 'createdAt'
+  | 'enabled'
+  | 'id'
+  | 'kind'
+  | 'name'
+  | 'updatedAt';
+
+export type PurfenceScheduledTaskUpdateInput = {
+  cronExpr: InputMaybe<Scalars['String']['input']>;
+  enabled: InputMaybe<Scalars['Boolean']['input']>;
+  kind: InputMaybe<PurfenceScheduledTaskKind>;
+  name: InputMaybe<Scalars['String']['input']>;
+  prompt: InputMaybe<Scalars['String']['input']>;
+  runAt: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PurfenceStatus =
+  | 'budget_exhausted'
+  | 'done'
+  | 'failed'
+  | 'needs_approval'
+  | 'needs_user'
+  | 'open'
+  | 'running';
+
+export type PurfenceStatusFilterComparison = {
+  eq: InputMaybe<PurfenceStatus>;
+  gt: InputMaybe<PurfenceStatus>;
+  gte: InputMaybe<PurfenceStatus>;
+  iLike: InputMaybe<PurfenceStatus>;
+  in: InputMaybe<Array<PurfenceStatus>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  like: InputMaybe<PurfenceStatus>;
+  lt: InputMaybe<PurfenceStatus>;
+  lte: InputMaybe<PurfenceStatus>;
+  neq: InputMaybe<PurfenceStatus>;
+  notILike: InputMaybe<PurfenceStatus>;
+  notIn: InputMaybe<Array<PurfenceStatus>>;
+  notLike: InputMaybe<PurfenceStatus>;
 };
 
 export type Query = {
   __typename?: 'Query';
   _service: _Service;
+  agentArtifact: AgentArtifact;
+  agentArtifacts: AgentArtifactConnection;
+  canCompleteIssue: Scalars['Boolean']['output'];
   claudeCodeConfig: ClaudeCodeConfig;
   claudeCodeConfigs: ClaudeCodeConfigConnection;
+  getAvailableIssueTransitions: Array<PurfenceStatus>;
+  /** ping test */
+  hello: Maybe<Scalars['JSON']['output']>;
+  importedRemoteIssues: Array<PurfenceIssue>;
+  modelProviderConfigDto: ModelProviderConfigDto;
+  modelProviderConfigDtos: ModelProviderConfigDtoConnection;
+  purfenceAppConfig: PurfenceAppConfig;
+  purfenceAppConfigs: PurfenceAppConfigConnection;
+  purfenceConfig: PurfenceConfig;
+  purfenceConfigs: PurfenceConfigConnection;
   purfenceExecution: PurfenceExecution;
   purfenceExecutions: PurfenceExecutionConnection;
   purfenceIssue: PurfenceIssue;
@@ -908,12 +1409,29 @@ export type Query = {
   purfenceProject: PurfenceProject;
   purfenceProjects: PurfenceProjectConnection;
   purfenceReadIssueArtifactFile: Scalars['String']['output'];
-  /** ping test */
-  hello: Maybe<Scalars['JSON']['output']>;
-  modelProviderConfigDto: ModelProviderConfigDto;
-  modelProviderConfigDtos: ModelProviderConfigDtoConnection;
-  purfenceConfig: PurfenceConfig;
-  purfenceConfigs: PurfenceConfigConnection;
+  purfenceScheduledTask: PurfenceScheduledTask;
+  purfenceScheduledTasks: PurfenceScheduledTaskConnection;
+  remoteIssues: Array<RemoteIssueDto>;
+  remoteRepositoryConfig: Maybe<RemoteRepositoryConfig>;
+  workflowConfig: Maybe<WorkflowConfig>;
+  workflowConfigOrDefault: WorkflowConfig;
+};
+
+
+export type QueryAgentArtifactArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryAgentArtifactsArgs = {
+  filter?: AgentArtifactFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<AgentArtifactSort>;
+};
+
+
+export type QueryCanCompleteIssueArgs = {
+  issueId: Scalars['ID']['input'];
 };
 
 
@@ -926,6 +1444,52 @@ export type QueryClaudeCodeConfigsArgs = {
   filter?: ClaudeCodeConfigFilter;
   paging?: OffsetPaging;
   sorting?: Array<ClaudeCodeConfigSort>;
+};
+
+
+export type QueryGetAvailableIssueTransitionsArgs = {
+  issueId: Scalars['ID']['input'];
+};
+
+
+export type QueryImportedRemoteIssuesArgs = {
+  projectId: Scalars['String']['input'];
+};
+
+
+export type QueryModelProviderConfigDtoArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryModelProviderConfigDtosArgs = {
+  filter?: ModelProviderConfigDtoFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<ModelProviderConfigDtoSort>;
+};
+
+
+export type QueryPurfenceAppConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceAppConfigsArgs = {
+  filter?: PurfenceAppConfigFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceAppConfigSort>;
+};
+
+
+export type QueryPurfenceConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPurfenceConfigsArgs = {
+  filter?: PurfenceConfigFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<PurfenceConfigSort>;
 };
 
 
@@ -976,27 +1540,35 @@ export type QueryPurfenceReadIssueArtifactFileArgs = {
 };
 
 
-export type QueryModelProviderConfigDtoArgs = {
+export type QueryPurfenceScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
 
-export type QueryModelProviderConfigDtosArgs = {
-  filter?: ModelProviderConfigDtoFilter;
+export type QueryPurfenceScheduledTasksArgs = {
+  filter?: PurfenceScheduledTaskFilter;
   paging?: OffsetPaging;
-  sorting?: Array<ModelProviderConfigDtoSort>;
+  sorting?: Array<PurfenceScheduledTaskSort>;
 };
 
 
-export type QueryPurfenceConfigArgs = {
-  id: Scalars['ID']['input'];
+export type QueryRemoteIssuesArgs = {
+  projectId: Scalars['String']['input'];
 };
 
 
-export type QueryPurfenceConfigsArgs = {
-  filter?: PurfenceConfigFilter;
-  paging?: OffsetPaging;
-  sorting?: Array<PurfenceConfigSort>;
+export type QueryRemoteRepositoryConfigArgs = {
+  projectId: Scalars['String']['input'];
+};
+
+
+export type QueryWorkflowConfigArgs = {
+  projectId: Scalars['String']['input'];
+};
+
+
+export type QueryWorkflowConfigOrDefaultArgs = {
+  projectId: Scalars['String']['input'];
 };
 
 export type QuotaInfo = {
@@ -1005,6 +1577,60 @@ export type QuotaInfo = {
   total: Scalars['Int']['output'];
   used: Scalars['Int']['output'];
 };
+
+export type RemoteIssueDto = {
+  __typename?: 'RemoteIssueDto';
+  assignees: Array<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description: Maybe<Scalars['String']['output']>;
+  labels: Array<Scalars['String']['output']>;
+  remoteIssueId: Scalars['String']['output'];
+  remoteIssueNumber: Scalars['Int']['output'];
+  remoteUrl: Scalars['String']['output'];
+  state: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type RemoteRepositoryConfig = {
+  __typename?: 'RemoteRepositoryConfig';
+  createdAt: Scalars['DateTime']['output'];
+  defaultBranch: Scalars['String']['output'];
+  errorMessage: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
+  projectId: Scalars['String']['output'];
+  status: RemoteRepositoryStatus;
+  type: RemoteRepositoryType;
+  updatedAt: Scalars['DateTime']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type RemoteRepositoryConfigInput = {
+  defaultBranch: InputMaybe<Scalars['String']['input']>;
+  token: Scalars['String']['input'];
+  type: RemoteRepositoryType;
+  url: Scalars['String']['input'];
+};
+
+export type RemoteRepositoryConnectionTestResult = {
+  __typename?: 'RemoteRepositoryConnectionTestResult';
+  error: Maybe<Scalars['String']['output']>;
+  permissions: Maybe<Array<Scalars['String']['output']>>;
+  success: Scalars['Boolean']['output'];
+};
+
+/** Remote repository connection status */
+export type RemoteRepositoryStatus =
+  | 'CONNECTED'
+  | 'ERROR'
+  | 'EXPIRED';
+
+/** Remote repository type: gitlab or github */
+export type RemoteRepositoryType =
+  | 'GITHUB'
+  | 'GITLAB';
 
 /** Sort Directions */
 export type SortDirection =
@@ -1031,6 +1657,12 @@ export type StringFieldComparison = {
   notILike: InputMaybe<Scalars['String']['input']>;
   notIn: InputMaybe<Array<Scalars['String']['input']>>;
   notLike: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TestRemoteRepositoryConnectionArgs = {
+  token: Scalars['String']['input'];
+  type: RemoteRepositoryType;
+  url: Scalars['String']['input'];
 };
 
 export type UpdateManyPurfenceExecutionsInput = {
@@ -1060,11 +1692,39 @@ export type UpdateManyResponse = {
   updatedCount: Scalars['Int']['output'];
 };
 
+export type UpdateOneAgentArtifactInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: AgentArtifactUpdateInput;
+};
+
 export type UpdateOneClaudeCodeConfigInput = {
   /** The id of the record to update */
   id: Scalars['ID']['input'];
   /** The update to apply. */
   update: ClaudeCodeConfigUpdateInput;
+};
+
+export type UpdateOneModelProviderConfigDtoInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: ModelProviderConfigUpdateInput;
+};
+
+export type UpdateOnePurfenceAppConfigInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceAppConfigUpdateInput;
+};
+
+export type UpdateOnePurfenceConfigInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: PurfenceConfigUpdateInput;
 };
 
 export type UpdateOnePurfenceExecutionInput = {
@@ -1088,19 +1748,47 @@ export type UpdateOnePurfenceProjectInput = {
   update: PurfenceProjectUpdateInput;
 };
 
-export type UpdateOneModelProviderConfigDtoInput = {
-  /** The id of the record to update */
-  id: Scalars['ID']['input'];
-  /** The update to apply. */
-  update: ModelProviderConfigUpdateInput;
+export type UpdateRemoteRepositoryInput = {
+  defaultBranch: InputMaybe<Scalars['String']['input']>;
+  token: InputMaybe<Scalars['String']['input']>;
+  type: InputMaybe<RemoteRepositoryType>;
+  url: InputMaybe<Scalars['String']['input']>;
 };
 
-export type UpdateOnePurfenceConfigInput = {
-  /** The id of the record to update */
-  id: Scalars['ID']['input'];
-  /** The update to apply. */
-  update: PurfenceConfigUpdateInput;
+export type UpdateWorkflowConfigInput = {
+  autoCreateIssue: InputMaybe<Scalars['Boolean']['input']>;
+  autoMerge: InputMaybe<Scalars['Boolean']['input']>;
+  autoPush: InputMaybe<Scalars['Boolean']['input']>;
+  mode: InputMaybe<WorkflowMode>;
+  requireManualApproval: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+export type WorkflowConfig = {
+  __typename?: 'WorkflowConfig';
+  autoCreateIssue: Scalars['Boolean']['output'];
+  autoMerge: Scalars['Boolean']['output'];
+  autoPush: Scalars['Boolean']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  mode: WorkflowMode;
+  projectId: Scalars['String']['output'];
+  requireManualApproval: Scalars['Boolean']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type WorkflowConfigInput = {
+  autoCreateIssue: InputMaybe<Scalars['Boolean']['input']>;
+  autoMerge: InputMaybe<Scalars['Boolean']['input']>;
+  autoPush: InputMaybe<Scalars['Boolean']['input']>;
+  mode: WorkflowMode;
+  requireManualApproval: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Workflow mode: standalone or collaborative */
+export type WorkflowMode =
+  | 'COLLABORATIVE'
+  | 'STANDALONE';
 
 export type _Service = {
   __typename?: '_Service';
@@ -1113,90 +1801,31 @@ export type Link__Purpose =
   /** `SECURITY` features provide metadata necessary to securely resolve fields. */
   | 'SECURITY';
 
-export type CreateOnePurfenceProjectMutationVariables = Exact<{
-  input: CreateOnePurfenceProjectInput;
+export type GetAppConfigsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAppConfigsQuery = { __typename?: 'Query', purfenceAppConfigs: { __typename?: 'PurfenceAppConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceAppConfig', id: string, name: string, type: AppConfigType, enabled: boolean, config: any | null, createdAt: any, updatedAt: any }> } };
+
+export type CreateAppConfigMutationVariables = Exact<{
+  input: CreateOnePurfenceAppConfigInput;
 }>;
 
 
-export type CreateOnePurfenceProjectMutation = { __typename?: 'Mutation', createOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, externalPath: string | null, defaultBranch: string, createdAt: any, updatedAt: any } };
+export type CreateAppConfigMutation = { __typename?: 'Mutation', createOnePurfenceAppConfig: { __typename?: 'PurfenceAppConfig', id: string, name: string, type: AppConfigType, enabled: boolean, config: any | null, createdAt: any, updatedAt: any } };
 
-export type CreateOnePurfenceIssueMutationVariables = Exact<{
-  input: CreateOnePurfenceIssueInput;
+export type UpdateAppConfigMutationVariables = Exact<{
+  input: UpdateOnePurfenceAppConfigInput;
 }>;
 
 
-export type CreateOnePurfenceIssueMutation = { __typename?: 'Mutation', createOnePurfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, createdAt: any, updatedAt: any, workdir: string | null } };
+export type UpdateAppConfigMutation = { __typename?: 'Mutation', updateOnePurfenceAppConfig: { __typename?: 'PurfenceAppConfig', id: string, name: string, type: AppConfigType, enabled: boolean, config: any | null, createdAt: any, updatedAt: any } };
 
-export type PurfenceProjectsQueryVariables = Exact<{
-  paging: InputMaybe<OffsetPaging>;
-  filter: InputMaybe<PurfenceProjectFilter>;
-  sorting: InputMaybe<Array<PurfenceProjectSort> | PurfenceProjectSort>;
+export type DeleteAppConfigMutationVariables = Exact<{
+  input: DeleteOnePurfenceAppConfigInput;
 }>;
 
 
-export type PurfenceProjectsQuery = { __typename?: 'Query', purfenceProjects: { __typename?: 'PurfenceProjectConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, createdAt: any, updatedAt: any }> } };
-
-export type PurfenceIssueQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type PurfenceIssueQuery = { __typename?: 'Query', purfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, workdir: string | null, createdAt: any, updatedAt: any } };
-
-export type PurfenceProjectQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type PurfenceProjectQuery = { __typename?: 'Query', purfenceProject: { __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, createdAt: any, updatedAt: any } };
-
-export type PurfenceIssuesQueryVariables = Exact<{
-  paging: InputMaybe<OffsetPaging>;
-  filter: InputMaybe<PurfenceIssueFilter>;
-  sorting: InputMaybe<Array<PurfenceIssueSort> | PurfenceIssueSort>;
-}>;
-
-
-export type PurfenceIssuesQuery = { __typename?: 'Query', purfenceIssues: { __typename?: 'PurfenceIssueConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, createdAt: any, updatedAt: any }> } };
-
-export type PurfenceExecutionsQueryVariables = Exact<{
-  paging: InputMaybe<OffsetPaging>;
-  filter: InputMaybe<PurfenceExecutionFilter>;
-  sorting: InputMaybe<Array<PurfenceExecutionSort> | PurfenceExecutionSort>;
-}>;
-
-
-export type PurfenceExecutionsQuery = { __typename?: 'Query', purfenceExecutions: { __typename?: 'PurfenceExecutionConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceExecution', id: string, projectId: string, issueId: string, goal: string | null, status: PurfenceStatus, branchName: string | null, worktreePath: string | null, executionDir: string | null, error: string | null, createdAt: any, updatedAt: any }> } };
-
-export type DeleteOnePurfenceIssueMutationVariables = Exact<{
-  input: DeleteOnePurfenceIssueInput;
-}>;
-
-
-export type DeleteOnePurfenceIssueMutation = { __typename?: 'Mutation', deleteOnePurfenceIssue: string };
-
-export type InitiateCodexOAuthMutationVariables = Exact<{
-  redirectUri: Scalars['String']['input'];
-}>;
-
-
-export type InitiateCodexOAuthMutation = { __typename?: 'Mutation', initiateCodexOAuth: { __typename?: 'OAuthAuthorization', authorizationUrl: string, state: string } };
-
-export type HandleCodexOAuthCallbackMutationVariables = Exact<{
-  code: Scalars['String']['input'];
-  state: Scalars['String']['input'];
-  redirectUri: Scalars['String']['input'];
-}>;
-
-
-export type HandleCodexOAuthCallbackMutation = { __typename?: 'Mutation', handleCodexOAuthCallback: { __typename?: 'OAuthCallbackResponse', email: string, quota: { __typename?: 'QuotaInfo', total: number, used: number, remaining: number }, oauthInfo: { __typename?: 'CodexOAuthInfoObject', accessToken: string, refreshToken: string, idToken: string | null, tokenType: string, scope: string | null, expiresAt: number, accountId: string | null } } };
-
-export type RefreshCodexTokenMutationVariables = Exact<{
-  configId: Scalars['ID']['input'];
-}>;
-
-
-export type RefreshCodexTokenMutation = { __typename?: 'Mutation', refreshCodexToken: { __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean, createdAt: any, updatedAt: any } };
+export type DeleteAppConfigMutation = { __typename?: 'Mutation', deleteOnePurfenceAppConfig: { __typename?: 'PurfenceAppConfigDeleteResponse', id: string | null } };
 
 export type GetClaudeCodeConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1221,6 +1850,29 @@ export type GetProviderOptionsForClaudeQueryVariables = Exact<{ [key: string]: n
 
 
 export type GetProviderOptionsForClaudeQuery = { __typename?: 'Query', modelProviderConfigDtos: { __typename?: 'ModelProviderConfigDtoConnection', nodes: Array<{ __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean }> } };
+
+export type InitiateCodexOAuthMutationVariables = Exact<{
+  redirectUri: Scalars['String']['input'];
+}>;
+
+
+export type InitiateCodexOAuthMutation = { __typename?: 'Mutation', initiateCodexOAuth: { __typename?: 'OAuthAuthorization', authorizationUrl: string, state: string } };
+
+export type HandleCodexOAuthCallbackMutationVariables = Exact<{
+  code: Scalars['String']['input'];
+  state: Scalars['String']['input'];
+  redirectUri: Scalars['String']['input'];
+}>;
+
+
+export type HandleCodexOAuthCallbackMutation = { __typename?: 'Mutation', handleCodexOAuthCallback: { __typename?: 'OAuthCallbackResponse', email: string, quota: { __typename?: 'QuotaInfo', total: number, used: number, remaining: number }, oauthInfo: { __typename?: 'CodexOAuthInfoObject', accessToken: string, refreshToken: string, idToken: string | null, tokenType: string, scope: string | null, expiresAt: number, accountId: string | null } } };
+
+export type RefreshCodexTokenMutationVariables = Exact<{
+  configId: Scalars['ID']['input'];
+}>;
+
+
+export type RefreshCodexTokenMutation = { __typename?: 'Mutation', refreshCodexToken: { __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean, createdAt: any, updatedAt: any } };
 
 export type GetProviderConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1266,18 +1918,131 @@ export type ToggleProviderEnabledMutation = { __typename?: 'Mutation', toggleMod
 export type GetPurfenceConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetPurfenceConfigsQuery = { __typename?: 'Query', purfenceConfigs: { __typename?: 'PurfenceConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceConfig', id: string, proxyUrl: string | null, createdAt: any, updatedAt: any }> } };
+export type GetPurfenceConfigsQuery = { __typename?: 'Query', purfenceConfigs: { __typename?: 'PurfenceConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any }> } };
 
 export type CreatePurfenceConfigMutationVariables = Exact<{
   input: CreateOnePurfenceConfigInput;
 }>;
 
 
-export type CreatePurfenceConfigMutation = { __typename?: 'Mutation', createOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, proxyUrl: string | null, createdAt: any, updatedAt: any } };
+export type CreatePurfenceConfigMutation = { __typename?: 'Mutation', createOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any } };
 
 export type UpdatePurfenceConfigMutationVariables = Exact<{
   input: UpdateOnePurfenceConfigInput;
 }>;
 
 
-export type UpdatePurfenceConfigMutation = { __typename?: 'Mutation', updateOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, proxyUrl: string | null, createdAt: any, updatedAt: any } };
+export type UpdatePurfenceConfigMutation = { __typename?: 'Mutation', updateOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any } };
+
+export type CreateOnePurfenceProjectMutationVariables = Exact<{
+  input: CreateOnePurfenceProjectInput;
+}>;
+
+
+export type CreateOnePurfenceProjectMutation = { __typename?: 'Mutation', createOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, externalPath: string | null, defaultBranch: string, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any } };
+
+export type UpdateOnePurfenceProjectMutationVariables = Exact<{
+  input: UpdateOnePurfenceProjectInput;
+}>;
+
+
+export type UpdateOnePurfenceProjectMutation = { __typename?: 'Mutation', updateOnePurfenceProject: { __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, slackAppConfigId: string | null, slackChannelId: string | null, updatedAt: any } };
+
+export type CreateOnePurfenceIssueMutationVariables = Exact<{
+  input: CreateOnePurfenceIssueInput;
+}>;
+
+
+export type CreateOnePurfenceIssueMutation = { __typename?: 'Mutation', createOnePurfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, createdAt: any, updatedAt: any, workdir: string | null } };
+
+export type PurfenceProjectsQueryVariables = Exact<{
+  paging: InputMaybe<OffsetPaging>;
+  filter: InputMaybe<PurfenceProjectFilter>;
+  sorting: InputMaybe<Array<PurfenceProjectSort> | PurfenceProjectSort>;
+}>;
+
+
+export type PurfenceProjectsQuery = { __typename?: 'Query', purfenceProjects: { __typename?: 'PurfenceProjectConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any }> } };
+
+export type PurfenceIssueQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PurfenceIssueQuery = { __typename?: 'Query', purfenceIssue: { __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, workdir: string | null, createdAt: any, updatedAt: any } };
+
+export type PurfenceProjectQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PurfenceProjectQuery = { __typename?: 'Query', purfenceProject: { __typename?: 'PurfenceProject', id: string, name: string | null, description: string | null, localRootPath: string, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any } };
+
+export type PurfenceIssuesQueryVariables = Exact<{
+  paging: InputMaybe<OffsetPaging>;
+  filter: InputMaybe<PurfenceIssueFilter>;
+  sorting: InputMaybe<Array<PurfenceIssueSort> | PurfenceIssueSort>;
+}>;
+
+
+export type PurfenceIssuesQuery = { __typename?: 'Query', purfenceIssues: { __typename?: 'PurfenceIssueConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceIssue', id: string, projectId: string, title: string, description: string, status: PurfenceStatus, latestExecutionId: string | null, createdAt: any, updatedAt: any }> } };
+
+export type PurfenceExecutionsQueryVariables = Exact<{
+  paging: InputMaybe<OffsetPaging>;
+  filter: InputMaybe<PurfenceExecutionFilter>;
+  sorting: InputMaybe<Array<PurfenceExecutionSort> | PurfenceExecutionSort>;
+}>;
+
+
+export type PurfenceExecutionsQuery = { __typename?: 'Query', purfenceExecutions: { __typename?: 'PurfenceExecutionConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceExecution', id: string, projectId: string, issueId: string, goal: string | null, status: PurfenceStatus, branchName: string | null, worktreePath: string | null, executionDir: string | null, error: string | null, createdAt: any, updatedAt: any }> } };
+
+export type DeleteOnePurfenceIssueMutationVariables = Exact<{
+  input: DeleteOnePurfenceIssueInput;
+}>;
+
+
+export type DeleteOnePurfenceIssueMutation = { __typename?: 'Mutation', deleteOnePurfenceIssue: string };
+
+export type StartIssueMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StartIssueMutation = { __typename?: 'Mutation', startIssue: string };
+
+export type PurfenceScheduledTasksQueryVariables = Exact<{
+  paging: InputMaybe<OffsetPaging>;
+  sorting: InputMaybe<Array<PurfenceScheduledTaskSort> | PurfenceScheduledTaskSort>;
+}>;
+
+
+export type PurfenceScheduledTasksQuery = { __typename?: 'Query', purfenceScheduledTasks: { __typename?: 'PurfenceScheduledTaskConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceScheduledTask', id: string, name: string, prompt: string, kind: PurfenceScheduledTaskKind, cronExpr: string | null, runAt: any | null, enabled: boolean, nextRunAt: any | null, lastRunAt: any | null, lastStatus: PurfenceScheduledTaskLastStatus | null, lastError: string | null, runCount: number, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any }> } };
+
+export type CreatePurfenceScheduledTaskMutationVariables = Exact<{
+  input: PurfenceScheduledTaskCreateInput;
+}>;
+
+
+export type CreatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', createPurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+
+export type UpdatePurfenceScheduledTaskMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  update: PurfenceScheduledTaskUpdateInput;
+}>;
+
+
+export type UpdatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', updatePurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+
+export type DeletePurfenceScheduledTaskMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePurfenceScheduledTaskMutation = { __typename?: 'Mutation', deletePurfenceScheduledTask: string };
+
+export type RunPurfenceScheduledTaskMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RunPurfenceScheduledTaskMutation = { __typename?: 'Mutation', runPurfenceScheduledTask: string };
