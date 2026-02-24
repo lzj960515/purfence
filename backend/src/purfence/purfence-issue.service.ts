@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { cp, rm } from 'node:fs/promises';
+import { cp, rm, readFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -264,6 +264,9 @@ export class PurfenceIssueService {
     issue.workdir = undefined;
     await issue.save();
 
+    // 更新 issue.json 文件，添加完成状态
+    await this.updateIssueJsonStatus(worktreePath, issueId);
+
     return { success: true, issue };
   }
 
@@ -394,6 +397,52 @@ ${issueDescription.trim()}
 
     // Ensure artifact directory exists (agents will create files inside).
     await ensureDir(path.join(sourcePlanDir, 'artifacts'));
+  }
+
+  /**
+   * 更新 issue.json 文件，添加完成状态
+   *
+   * @param worktreePath - Issue 的 worktree 路径
+   * @param issueId - Issue ID
+   */
+  private async updateIssueJsonStatus(
+    worktreePath: string,
+    issueId: string,
+  ): Promise<void> {
+    try {
+      const issueJsonPath = path.join(
+        worktreePath,
+        '.purfence',
+        issueId,
+        'meta',
+        'issue.json',
+      );
+
+      // 读取现有 issue.json
+      const content = await readFile(issueJsonPath, 'utf-8');
+      const issueJson = JSON.parse(content) as {
+        issueId: string;
+        createdAt: string;
+        status?: string;
+        completedAt?: string;
+      };
+
+      // 更新状态
+      issueJson.status = 'completed';
+      issueJson.completedAt = new Date().toISOString();
+
+      // 写回文件
+      await writeText(issueJsonPath, JSON.stringify(issueJson, null, 2));
+
+      this.logger.log(
+        `[updateIssueJsonStatus] ${issueId} issue.json updated with status=completed`,
+      );
+    } catch (error) {
+      // 如果更新失败，记录日志但不阻断主流程
+      this.logger.warn(
+        `[updateIssueJsonStatus] ${issueId} failed to update issue.json: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   /**
