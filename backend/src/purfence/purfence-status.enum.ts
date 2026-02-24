@@ -19,3 +19,15 @@ export enum IssueOrigin {
 }
 
 registerEnumType(IssueOrigin, { name: 'IssueOrigin' });
+
+/**
+ * Execution 执行阶段
+ * - tianji: 天机阶段（调度、分配任务）
+ * - tianfu: 天府阶段（评估、规划下一步）
+ */
+export enum ExecutionStage {
+  tianji = 'tianji',
+  tianfu = 'tianfu',
+}
+
+registerEnumType(ExecutionStage, { name: 'ExecutionStage' });

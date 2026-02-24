@@ -1,7 +1,7 @@
 import { BaseDto } from '@app/shared';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { FilterableField } from '@ptc-org/nestjs-query-graphql';
-import { PurfenceStatus } from './purfence-status.enum';
+import { PurfenceStatus, ExecutionStage } from './purfence-status.enum';
 
 @ObjectType('PurfenceExecution')
 export class PurfenceExecutionDto extends BaseDto {
@@ -22,6 +22,9 @@ export class PurfenceExecutionDto extends BaseDto {
 
   @FilterableField(() => PurfenceStatus)
   status: PurfenceStatus;
+
+  @FilterableField(() => ExecutionStage)
+  stage: ExecutionStage;
 
   @Field({ nullable: true })
   branchName?: string;

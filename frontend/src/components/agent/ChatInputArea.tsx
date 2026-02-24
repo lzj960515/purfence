@@ -10,6 +10,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Paperclip, ArrowUp, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { AgentType, AgentOption } from '@/lib/socket-agent'
+import { AGENT_OPTIONS } from '@/lib/socket-agent'
 
 interface ProviderOption {
   name: string
@@ -24,6 +26,12 @@ interface ChatInputAreaProps {
   providerOptions?: ProviderOption[]
   selectedProviderName?: string
   onProviderChange?: (providerName: string) => void
+  /** 是否显示 Agent 选择器（execution 模式） */
+  showAgentSelector?: boolean
+  /** 当前选中的 Agent */
+  selectedAgent?: AgentType
+  /** Agent 切换回调 */
+  onAgentChange?: (agent: AgentType) => void
 }
 
 export function ChatInputArea({
@@ -35,6 +43,9 @@ export function ChatInputArea({
   providerOptions = [],
   selectedProviderName,
   onProviderChange,
+  showAgentSelector = false,
+  selectedAgent = 'tianji',
+  onAgentChange,
 }: ChatInputAreaProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -111,6 +122,26 @@ export function ChatInputArea({
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Agent 选择器（execution 模式下显示） */}
+            {showAgentSelector && (
+              <Select
+                value={selectedAgent}
+                onValueChange={(value) => onAgentChange?.(value as AgentType)}
+                disabled={disabled || isSending}
+              >
+                <SelectTrigger className="h-8 w-auto min-w-[80px] rounded-full border-0 bg-muted px-3 text-sm font-medium text-foreground shadow-none hover:bg-muted/80 focus:ring-0 focus:ring-offset-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="end">
+                  {AGENT_OPTIONS.map((agent) => (
+                    <SelectItem key={agent.value} value={agent.value}>
+                      {agent.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             {providerOptions.length > 0 && selectedProviderName ? (
               <Select
                 value={selectedProviderName}

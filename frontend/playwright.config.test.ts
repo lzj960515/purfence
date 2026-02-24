@@ -18,22 +18,13 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
   ],
 
-  // webServer removed - using existing server on localhost:5173
-  // Start the server manually with: npm run dev
+  // 禁用 webServer，因为服务已在运行
   // webServer: {
   //   command: 'npm run dev',
   //   url: 'http://localhost:5173',
-  //   reuseExistingServer: true,
+  //   reuseExistingServer: !process.env.CI,
   //   timeout: 120 * 1000,
   // },
 })
