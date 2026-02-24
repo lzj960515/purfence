@@ -324,6 +324,67 @@ export class PurfenceIssueService {
     }
   }
 
+  /**
+   * Create worktree for remote issue
+   * Remote issues use branch naming: issue/{issueId}-{branchSuffix}
+   * Worktree directory: worktrees/{remoteIssueNumber}-{slug}
+   */
+  async createWorktreeForRemoteIssue(issueId: string): Promise<PurfenceIssue> {
+    const issue = await PurfenceIssue.findOneOrFail({ where: { id: issueId } });
+
+    if (!issue.remoteIssueData) {
+      throw new Error(`Issue ${issueId} is not a remote issue`);
+    }
+
+    if (issue.workdir) {
+      return issue;
+    }
+
+    const project = await PurfenceProject.findOneOrFail({
+      where: { id: issue.projectId },
+    });
+
+    const projectsRoot =
+      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectRootPath =
+      project.localRootPath ||
+      path.join(projectsRoot, project.slug || project.id);
+    const repoPath = path.join(projectRootPath, 'repo');
+
+    // Branch name: issue/{issueId}-{branchSuffix}
+    const branchName = `issue/${issueId}-${issue.branchSuffix}`;
+
+    // Worktree path: worktrees/{remoteIssueNumber}-{slug}
+    const worktreePath = path.join(
+      projectRootPath,
+      'worktrees',
+      `${issue.remoteIssueData.remoteIssueNumber}-${issue.slug || issueId}`,
+    );
+
+    await this.ensureWorktree({
+      repoPath,
+      worktreePath,
+      branchName,
+      defaultBranch: project.defaultBranch || 'main',
+    });
+    await this.syncAttachments({ projectRootPath, worktreePath });
+
+    await this.createSourcePlanStructure(
+      worktreePath,
+      issueId,
+      issue.title,
+      issue.description,
+    );
+
+    issue.workdir = worktreePath;
+    await issue.save();
+
+    this.logger.log(
+      `Created worktree for remote issue ${issueId} at ${worktreePath}`,
+    );
+    return issue;
+  }
+
   /** 同步附件到 worktree */
   private async syncAttachments(opts: {
     projectRootPath: string;

@@ -15,6 +15,7 @@ registerEnumType(PurfenceStatus, { name: 'PurfenceStatus' });
 export enum IssueOrigin {
   user = 'user',
   ai = 'ai',
+  remote = 'remote',
 }
 
 registerEnumType(IssueOrigin, { name: 'IssueOrigin' });

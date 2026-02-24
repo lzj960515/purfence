@@ -1,7 +1,20 @@
 import { BaseEntity, IDColumnOpts } from '@app/shared';
 import { Column, Entity, Index, ManyToOne, JoinColumn } from 'typeorm';
-import { PurfenceStatus } from './purfence-status.enum';
-import { IssueOrigin } from './purfence-status.enum';
+import { PurfenceStatus, IssueOrigin } from './purfence-status.enum';
+
+export interface RemoteIssueData {
+  remoteIssueId: string;
+  remoteIssueNumber: number;
+  remoteUrl: string;
+  remoteState: string;
+  lastSyncedAt: Date;
+  syncedData?: {
+    title: string;
+    description: string;
+    labels: string[];
+    assignees: string[];
+  };
+}
 
 @Index(['projectId'])
 @Index(['dependsOnIssueId'])
@@ -37,4 +50,10 @@ export class PurfenceIssue extends BaseEntity {
 
   @Column({ type: 'varchar', length: 32, default: IssueOrigin.user })
   origin: IssueOrigin;
+
+  @Column({ type: 'varchar', length: 8, nullable: true })
+  branchSuffix?: string;
+
+  @Column({ type: 'json', nullable: true })
+  remoteIssueData?: RemoteIssueData;
 }

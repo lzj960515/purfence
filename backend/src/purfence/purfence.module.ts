@@ -129,5 +129,10 @@ import { PurfenceAppConfigModule } from './app-config/purfence-app-config.module
     ProviderModelService,
     PurfenceAgentService,
   ],
+  exports: [
+    PurfenceIssueService,
+    PurfenceExecutionService,
+    PurfenceProjectService,
+  ],
 })
 export class PurfenceModule {}
