@@ -71,4 +71,4 @@ experiments/**/*.js.map
 /data/
 /.claude
 /.project-purfence
-/docs
+/docs*.dmg
