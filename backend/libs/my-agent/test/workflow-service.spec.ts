@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ToolExecuteOptions } from '@voltagent/core';
 import { z } from 'zod';
 import myAgentConfig from '@src/common/configs/my-agent.config';
 import typeormBiConfig from '@src/common/configs/typeorm-ai.config';
 import {
   MyAgentModule,
   Tool,
-  ToolExecuteOptions,
   WorkflowConfig,
   WorkflowState,
   WorkflowService,

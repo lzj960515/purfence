@@ -1,16 +1,14 @@
 import { MyUtil } from '@app/shared';
 import { Injectable } from '@nestjs/common';
-import { type ToolUIPart, type UIMessage } from 'ai';
+import { extractText, GetMessagesOptions, Memory } from '@voltagent/core';
+import { convertToModelMessages, type ToolUIPart, type UIMessage } from 'ai';
 import _ from 'lodash';
 import { AgentConversationSession } from './agent-conversation-sessions.ai.entity';
 import { bridgePrompt } from './prompt';
 import type { ChatOptions } from './types';
 import { MyAgent } from './my-agent';
+import { convertToLanguageModelPrompt } from 'ai/internal';
 import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
-import {
-  MemoryStorageService,
-  GetMessagesOptions,
-} from './memory-storage.service';
 
 interface MessageFormatOptions {
   includeToolResults?: boolean;
@@ -19,18 +17,18 @@ interface MessageFormatOptions {
 
 @Injectable()
 export class MessageService {
-  constructor(private readonly memoryStorage: MemoryStorageService) {}
+  constructor(private readonly memory: Memory) {}
 
   async getMessages(
     userId: string,
     conversationId: string,
     options?: GetMessagesOptions,
   ) {
-    return this.memoryStorage.getMessages(userId, conversationId, options);
+    return this.memory.getMessages(userId, conversationId, options);
   }
 
   async updateConversationTitle(conversationId: string, title: string) {
-    return this.memoryStorage.updateConversation(conversationId, {
+    return this.memory.updateConversation(conversationId, {
       title,
     });
   }
@@ -66,13 +64,13 @@ export class MessageService {
   }
 
   async latestTextMessage(userId: string, conversationId: string) {
-    const messages = await this.memoryStorage.getMessages(userId, conversationId);
+    const messages = await this.memory.getMessages(userId, conversationId);
     const lastMessage = _.last(messages);
-    return this.extractTextFromUIMessage(lastMessage);
+    return extractText(lastMessage);
   }
 
   async deleteConversation(conversationId: string) {
-    return this.memoryStorage.deleteConversation(conversationId);
+    return this.memory.deleteConversation(conversationId);
   }
 
   extractText(messages: UIMessage[]) {
@@ -80,7 +78,7 @@ export class MessageService {
       .map((it) => {
         return {
           role: it.role,
-          text: this.extractTextFromUIMessage(it),
+          text: extractText(it),
         };
       })
       .value();
@@ -89,21 +87,10 @@ export class MessageService {
   extractRawText(messages: UIMessage[]) {
     return _.chain(messages)
       .map((it) => {
-        return this.extractTextFromUIMessage(it);
+        return extractText(it);
       })
       .join('')
       .value();
-  }
-
-  /**
-   * 从 UIMessage 中提取文本内容
-   */
-  private extractTextFromUIMessage(message: UIMessage | undefined): string {
-    if (!message) return '';
-    return message.parts
-      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-      .map((part) => part.text)
-      .join('');
   }
 
   async isSessionFull(session: AgentConversationSession, myAgent: MyAgent) {
@@ -114,26 +101,35 @@ export class MessageService {
   }
 
   async countTokens(session: AgentConversationSession, myAgent: MyAgent) {
-    const uiMessages = await this.memoryStorage.getMessages(
+    const uiMessages = await this.memory.getMessages(
       session.userId,
       session.id,
     );
     if (_.isEmpty(uiMessages)) {
       return false;
     }
-    const systemMessage = myAgent.getInstructions();
+    const systemMessage = myAgent.getAgent().instructions;
     if (systemMessage && typeof systemMessage === 'string') {
       uiMessages.unshift({
         id: MyUtil.uuid(),
         role: 'system',
         parts: [{ type: 'text', text: systemMessage }],
-      } as UIMessage);
+      });
     }
 
-    // 使用 AI SDK 的 countTokens 或估算
+    const messages = await convertToModelMessages(uiMessages);
+
+    const prompt = await convertToLanguageModelPrompt({
+      prompt: {
+        messages,
+      },
+      supportedUrls: {},
+      download: undefined,
+    });
+
     return await myAgent
       .getMyModel()
-      .countTokens?.(uiMessages as any, myAgent.getTools());
+      .countTokens(prompt, myAgent.getAgent().getTools());
   }
 
   async buildBridgeMessage(
@@ -143,10 +139,10 @@ export class MessageService {
     message?: ChatOptions['message'],
   ) {
     // 取所有的历史消息中的 user 文本
-    const messages = await this.memoryStorage.getMessages(userId, sessionId, {
+    const messages = await this.memory.getMessages(userId, sessionId, {
       roles: ['user'],
     });
-    const userMessages = messages.map((m) => this.extractTextFromUIMessage(m));
+    const userMessages = messages.map((m) => extractText(m));
 
     const bridge = bridgePrompt(userMessages, summary);
     const bridgeMessage: UIMessage = {
@@ -178,7 +174,7 @@ export class MessageService {
     if (_.isArray(input) && !_.isEmpty(input)) {
       const first = input[0];
       if ('parts' in first) {
-        return input as UIMessage[];
+        return input;
       }
     }
     throw new Error('Invalid input, only support string or UIMessage[]');
@@ -186,7 +182,7 @@ export class MessageService {
 
   private async formatMessage(
     conversationId: string,
-    messages: UIMessage[],
+    messages: UIMessage<{ createdAt: Date; isBridgeMessage?: boolean }>[],
     options: MessageFormatOptions,
   ) {
     options = _.defaults(options, {
@@ -206,7 +202,7 @@ export class MessageService {
       [k: string]: any;
     }[] = [];
     for (const message of messages) {
-      if ((message.metadata as any)?.isBridgeMessage) {
+      if (message.metadata?.isBridgeMessage) {
         continue;
       }
       let index = 0;
@@ -217,7 +213,7 @@ export class MessageService {
             role: roleMap[message.role],
             type: part.type,
             content: part.text,
-            createdAt: (message.metadata as any)?.createdAt,
+            createdAt: message.metadata?.createdAt,
           });
         }
         if (part.type === 'file') {
@@ -227,7 +223,7 @@ export class MessageService {
             type: 'file',
             mediaType: part.mediaType,
             content: part.url,
-            createdAt: (message.metadata as any)?.createdAt,
+            createdAt: message.metadata?.createdAt,
           });
         }
         if (part.type === 'reasoning') {
@@ -236,7 +232,7 @@ export class MessageService {
             role: roleMap[message.role],
             type: 'thinking',
             content: part.text,
-            createdAt: (message.metadata as any)?.createdAt,
+            createdAt: message.metadata?.createdAt,
           });
         }
         if (options.includeToolResults && part.type.startsWith('tool-')) {
@@ -252,7 +248,7 @@ export class MessageService {
             role: roleMap[message.role],
             type: 'tool_text',
             content: toolName,
-            createdAt: (message.metadata as any)?.createdAt,
+            createdAt: message.metadata?.createdAt,
           });
 
           const artifact = options.includeArtifact
@@ -273,7 +269,7 @@ export class MessageService {
             content: toolPart.output?.value,
             status: toolPart.output?.value?.error ? 'error' : undefined,
             artifact,
-            createdAt: (message.metadata as any)?.createdAt,
+            createdAt: message.metadata?.createdAt,
           });
         }
         index++;
