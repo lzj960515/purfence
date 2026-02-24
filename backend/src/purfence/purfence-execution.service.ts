@@ -13,7 +13,7 @@ import {
 import { PurfenceIssue } from './purfence-issue.entity';
 import { PurfenceProject } from './purfence-project.entity';
 import { PurfenceExecution } from './purfence-execution.entity';
-import { PurfenceStatus } from './purfence-status.enum';
+import { PurfenceStatus, ExecutionStage } from './purfence-status.enum';
 import { PurfenceAgentService } from './agent.service';
 
 @Injectable()
@@ -94,6 +94,7 @@ export class PurfenceExecutionService {
 
     const tianjiPrompt = getAgentPrompt('tianji');
     execution.status = PurfenceStatus.running;
+    execution.stage = ExecutionStage.tianji;
     await execution.save();
 
     const goalLine = execution.goal?.trim()
@@ -159,6 +160,10 @@ ${goalLine}
     });
 
     const tianfuPrompt = getAgentPrompt('tianfu');
+
+    // 更新 stage 为 tianfu（天府评估阶段）
+    execution.stage = ExecutionStage.tianfu;
+    await execution.save();
 
     const userMessage = `刚才的任务执行完了，现在需要你评估：这个 Issue 是否已经完成？如果完成了，下一步应该做什么？
 

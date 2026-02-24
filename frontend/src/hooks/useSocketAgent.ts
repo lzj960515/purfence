@@ -3,6 +3,7 @@ import type { Socket } from 'socket.io-client';
 import {
   createAgentSocket,
   type ChatArgs,
+  type ChatExecutionArgs,
   type ChatArtifact,
   type ChatMessage,
   type ConnectionState,
@@ -45,6 +46,8 @@ interface UseSocketAgentReturn {
   sessionClose: (args: SessionOpenArgs) => void;
   sessionTerminate: (threadId: string) => void;
   sendMessage: (args: ChatArgs) => void;
+  /** 发送 execution 模式的消息，使用 chat_execution 事件 */
+  sendExecutionMessage: (args: ChatExecutionArgs) => void;
   clearMessages: () => void;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 }
@@ -315,6 +318,25 @@ export function useSocketAgent(): UseSocketAgentReturn {
     [],
   );
 
+  // 发送 execution 模式的消息（使用 chat_execution 事件）
+  const sendExecutionMessage = useCallback(
+    (args: ChatExecutionArgs) => {
+      pendingArtifactsRef.current = [];
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: 'user',
+          content: args.message,
+          timestamp: new Date(),
+        },
+      ]);
+
+      socketRef.current?.emit('chat_execution', args);
+    },
+    [],
+  );
+
   // 清空消息
   const clearMessages = useCallback(() => {
     pendingArtifactsRef.current = [];
@@ -339,6 +361,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
     sessionClose,
     sessionTerminate,
     sendMessage,
+    sendExecutionMessage,
     clearMessages,
     setMessages,
   };

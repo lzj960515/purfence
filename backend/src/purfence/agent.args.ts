@@ -2,6 +2,7 @@ import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -81,4 +82,30 @@ export class ChatAnyArgs {
   @IsOptional()
   @IsString()
   imageUrl: string;
+}
+
+/**
+ * chat_execution 事件参数
+ * 用于继续执行指定的 Execution
+ */
+export class ChatExecutionArgs {
+  @IsNotEmpty()
+  @IsString()
+  message: string;
+
+  @IsNotEmpty()
+  @IsString()
+  conversationId: string;
+
+  @IsNotEmpty()
+  @IsIn(['tianji', 'tianfu'])
+  agent: 'tianji' | 'tianfu';
+
+  @IsNotEmpty()
+  @IsString()
+  executionId: string;
+
+  @IsOptional()
+  @IsString()
+  providerName?: string;
 }

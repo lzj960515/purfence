@@ -5,7 +5,8 @@ import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
 import { useProviderConfigs } from '@/hooks/useProviderConfigs';
 import { fetchConversationMessages } from '@/api/agent.api';
-import type { ChatMessage } from '@/lib/socket-agent';
+import type { ChatMessage, AgentType } from '@/lib/socket-agent';
+import { AGENT_OPTIONS as agentOptions } from '@/lib/socket-agent';
 
 export function AgentPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +15,11 @@ export function AgentPage() {
   const [selectedProviderName, setSelectedProviderName] = useState<string>('');
   const autoSentThreadRef = useRef<string>('');
   const { configs } = useProviderConfigs();
+
+  // Execution 模式相关状态
+  const [isExecutionMode, setIsExecutionMode] = useState(false);
+  const [executionId, setExecutionId] = useState<string>('');
+  const [selectedAgent, setSelectedAgent] = useState<AgentType>('tianji');
 
   const activeProviderOptions = configs
     .filter((config) => config.isEnabled)
@@ -29,6 +35,7 @@ export function AgentPage() {
     sessionClose,
     sessionTerminate,
     sendMessage,
+    sendExecutionMessage,
     clearMessages,
     setMessages,
   } = useSocketAgent();
@@ -140,6 +147,23 @@ export function AgentPage() {
   const sourceFromUrl = searchParams.get('source');
   const prefillFromUrl = searchParams.get('prefill') || '';
   const autoSendFromUrl = searchParams.get('autoSend') === '1';
+  // Execution 模式相关参数
+  const executionIdFromUrl = searchParams.get('executionId');
+  const agentFromUrl = searchParams.get('agent') as AgentType | null;
+
+  // 解析 execution 模式参数
+  useEffect(() => {
+    if (sourceFromUrl === 'execution' && executionIdFromUrl) {
+      setIsExecutionMode(true);
+      setExecutionId(executionIdFromUrl);
+      if (agentFromUrl && (agentFromUrl === 'tianji' || agentFromUrl === 'tianfu')) {
+        setSelectedAgent(agentFromUrl);
+      }
+    } else {
+      setIsExecutionMode(false);
+      setExecutionId('');
+    }
+  }, [sourceFromUrl, executionIdFromUrl, agentFromUrl]);
 
   useEffect(() => {
     if (activeProviderOptions.length === 0) {
@@ -208,17 +232,40 @@ export function AgentPage() {
   const handleSendMessage = useCallback(
     (query: string) => {
       if (!threadId) return;
-      sendMessage({
-        threadId,
-        query,
-        providerName: selectedProviderName || undefined,
-      });
+
+      if (isExecutionMode && executionId) {
+        // Execution 模式：使用 chat_execution 事件
+        sendExecutionMessage({
+          message: query,
+          conversationId: threadId,
+          agent: selectedAgent,
+          executionId,
+          providerName: selectedProviderName || undefined,
+        });
+      } else {
+        // 普通模式：使用 chat 事件
+        sendMessage({
+          threadId,
+          query,
+          providerName: selectedProviderName || undefined,
+        });
+      }
+
       // 发送第一条消息后，输入框移至底部
       if (isFirstMessage) {
         setIsFirstMessage(false);
       }
     },
-    [threadId, sendMessage, isFirstMessage, selectedProviderName],
+    [
+      threadId,
+      sendMessage,
+      sendExecutionMessage,
+      isFirstMessage,
+      selectedProviderName,
+      isExecutionMode,
+      executionId,
+      selectedAgent,
+    ],
   );
 
   // 停止生成
@@ -267,6 +314,9 @@ export function AgentPage() {
             providerOptions={activeProviderOptions}
             selectedProviderName={selectedProviderName}
             onProviderChange={setSelectedProviderName}
+            showAgentSelector={isExecutionMode}
+            selectedAgent={selectedAgent}
+            onAgentChange={setSelectedAgent}
           />
           
           <div className="mt-8 flex flex-wrap justify-center gap-2 max-w-2xl opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards">
@@ -297,6 +347,9 @@ export function AgentPage() {
               providerOptions={activeProviderOptions}
               selectedProviderName={selectedProviderName}
               onProviderChange={setSelectedProviderName}
+              showAgentSelector={isExecutionMode}
+              selectedAgent={selectedAgent}
+              onAgentChange={setSelectedAgent}
             />
           </div>
         </>

@@ -7,6 +7,7 @@ import { PurfenceScheduledTaskModule } from '../scheduled-task/purfence-schedule
 import { PurfenceTools } from './purfence.tools';
 import { TaskTools } from './task.tools';
 import { TianfuTools } from './tianfu.tools';
+import { ExecutionTools } from './execution.tools';
 
 const tools = [];
 
@@ -21,6 +22,7 @@ const tools = [];
     PurfenceTools,
     TaskTools,
     TianfuTools,
+    ExecutionTools,
   ],
   exports: [
     ...tools,
@@ -30,6 +32,7 @@ const tools = [];
     PurfenceTools,
     TaskTools,
     TianfuTools,
+    ExecutionTools,
   ],
 })
 export class ToolsModule {}

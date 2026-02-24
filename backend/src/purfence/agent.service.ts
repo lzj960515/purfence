@@ -1,8 +1,10 @@
 import { MyAgentService, getAgentPrompt } from '@app/my-agent';
 import { SocketService } from '@app/my-agent/socket.service';
 import { MyUtil } from '@app/shared';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProviderModelService } from './provider-model.service';
+import { PurfenceExecution } from './purfence-execution.entity';
+import { ExecutionStage } from './purfence-status.enum';
 
 const ZIWEI_TOOLS = [
   'createProject',
@@ -23,8 +25,26 @@ const TIANXIANG_TOOLS = [
   'getCurrentTime',
 ] as const;
 
+// 天机（Tianji）工具集 - 用于调度、分配任务
+const TIANJI_TOOLS = [
+  'delegateTask',
+  'getCurrentTime',
+] as const;
+
+// 天府（Tianfu）工具集 - 用于评估、规划下一步
+const TIANFU_TOOLS = [
+  'continueExecution',
+  'createNextExecution',
+  'completeIssue',
+  'createNextIssue',
+  'delegateTask',
+  'getCurrentTime',
+] as const;
+
 @Injectable()
 export class PurfenceAgentService {
+  private readonly logger = new Logger(PurfenceAgentService.name);
+
   constructor(
     private readonly myAgentService: MyAgentService,
     private readonly providerModelService: ProviderModelService,
@@ -114,5 +134,67 @@ export class PurfenceAgentService {
         },
       }),
     );
+  }
+
+  /**
+   * 根据 agent 类型继续执行 Execution
+   * - tianji: 使用天机 Agent（调度、分配任务）
+   * - tianfu: 使用天府 Agent（评估、规划下一步）
+   */
+  async streamExecutionAgent(params: {
+    threadId: string;
+    query: string;
+    agent: 'tianji' | 'tianfu';
+    executionId: string;
+    providerName?: string;
+    context?: Record<string, unknown>;
+  }) {
+    const { threadId, query, agent, executionId, providerName, context } = params;
+
+    this.logger.log(
+      `streamExecutionAgent: executionId=${executionId}, agent=${agent}`,
+    );
+
+    // 获取 Execution 信息
+    const execution = await PurfenceExecution.findOne({
+      where: { id: executionId },
+    });
+
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    // 更新 stage
+    const newStage = agent === 'tianji' ? ExecutionStage.tianji : ExecutionStage.tianfu;
+    execution.stage = newStage;
+    await execution.save();
+
+    this.logger.log(`Updated execution ${executionId} stage to ${newStage}`);
+
+    // 根据 agent 类型选择提示词和工具集
+    const prompt = getAgentPrompt(agent);
+    if (!prompt) {
+      throw new Error(`${agent} agent prompt not found`);
+    }
+
+    const tools = agent === 'tianji' ? [...TIANJI_TOOLS] : [...TIANFU_TOOLS];
+
+    // 构建 context
+    const streamContext = {
+      executionId,
+      issueId: execution.issueId,
+      event: agent === 'tianji' ? 'purfence.execution.evaluate' : 'purfence.evaluation.stream-ended',
+      ...context,
+    };
+
+    await this.streamAgent({
+      threadId,
+      query,
+      agentName: agent,
+      prompt,
+      tools,
+      providerName,
+      context: streamContext,
+    });
   }
 }

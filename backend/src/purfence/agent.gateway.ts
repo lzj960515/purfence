@@ -13,7 +13,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Namespace, Socket } from 'socket.io';
-import type { ChatAnyArgs, SseSocketArgs } from './agent.args';
+import type { ChatAnyArgs, ChatExecutionArgs, SseSocketArgs } from './agent.args';
 import { PurfenceAgentService } from './agent.service';
 
 @WebSocketGateway({
@@ -97,6 +97,30 @@ export class AgentGateway
     await this.purfenceAgentService.streamZiwei({
       threadId,
       query,
+      providerName,
+    });
+  }
+
+  /**
+   * 处理 chat_execution 事件
+   * 根据指定的 agent 类型（tianji/tianfu）继续执行 Execution
+   */
+  @SubscribeMessage('chat_execution')
+  async handleChatExecution(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() args: ChatExecutionArgs,
+  ) {
+    const { message, conversationId, agent, executionId, providerName } = args;
+
+    this.logger.log(
+      `chat_execution: executionId=${executionId}, agent=${agent}, conversationId=${conversationId}`,
+    );
+
+    await this.purfenceAgentService.streamExecutionAgent({
+      threadId: conversationId,
+      query: message,
+      agent,
+      executionId,
       providerName,
     });
   }
