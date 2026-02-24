@@ -1,4 +1,4 @@
-import { Tool, ToolExecuteOptions } from '@app/my-agent';
+import { Tool } from '@app/my-agent';
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { Like } from 'typeorm';
@@ -9,6 +9,7 @@ import { PurfenceIssue } from '../purfence-issue.entity';
 import { PurfenceProject } from '../purfence-project.entity';
 import { PurfenceStatus } from '../purfence-status.enum';
 import { AgentArtifact } from '../artifact/agent-artifact.ai.entity';
+import { ToolExecuteOptions } from '@voltagent/core';
 import {
   AgentArtifactFileType,
   AgentArtifactType,
@@ -613,7 +614,7 @@ Slack 通知配置（可选）：
       unixMs: z.number(),
     }),
   })
-  async getCurrentTime() {
+  getCurrentTime() {
     const now = new Date();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     return {

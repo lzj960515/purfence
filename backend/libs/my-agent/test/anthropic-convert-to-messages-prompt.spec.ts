@@ -2,7 +2,7 @@ import { convertToAnthropicMessagesPrompt } from '@ai-sdk/anthropic';
 import type { LanguageModelV3Prompt, SharedV3Warning } from '@ai-sdk/provider';
 import { asSchema, createToolNameMapping } from '@ai-sdk/provider-utils';
 import Anthropic from '@anthropic-ai/sdk';
-import { tool as aiTool } from 'ai';
+import { createTool, ToolManager } from '@voltagent/core';
 import { convertToModelMessages } from 'ai';
 import z from 'zod';
 
@@ -46,8 +46,8 @@ describe('Anthropic: convertToAnthropicMessagesPrompt', () => {
   });
 
   it('countTokens: system + tools + tool use/results (end-to-end)', async () => {
-    // 使用 AI SDK 的 tool 函数替代 @voltagent/core 的 createTool
-    const getWeatherTool = aiTool({
+    const getWeatherTool = createTool({
+      name: 'get_weather',
       description: 'Get the current weather in a given location',
       parameters: z.object({
         location: z
@@ -61,13 +61,12 @@ describe('Anthropic: convertToAnthropicMessagesPrompt', () => {
       }),
     });
 
-    // 准备工具用于执行
-    const preparedTools: Record<string, any> = {
-      get_weather: {
-        ...getWeatherTool,
-        execute: (args: any) => getWeatherTool.execute?.(args, { toolCallId: 'test', messages: [] }),
-      },
-    };
+    const toolManager = new ToolManager([getWeatherTool]);
+    const createToolExecuteFunction = (tool: any) => (args: any) =>
+      tool.execute(args);
+    const preparedTools = toolManager.prepareToolsForExecution(
+      createToolExecuteFunction,
+    );
 
     const anthropicTools = await Promise.all(
       Object.entries(preparedTools).map(async ([name, tool]) => ({

@@ -1,6 +1,7 @@
-import { Tool, ToolExecuteOptions } from '@app/my-agent';
+import { Tool } from '@app/my-agent';
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
+import { ToolExecuteOptions } from '@voltagent/core';
 import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceExecutionService } from '../purfence-execution.service';
 import { PurfenceIssue } from '../purfence-issue.entity';
