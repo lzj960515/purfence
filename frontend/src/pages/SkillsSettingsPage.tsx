@@ -105,6 +105,12 @@ export function SkillsSettingsPage() {
       })
 
       await fetchCatalog()
+    } catch (error) {
+      toast({
+        title: '安装失败',
+        description: error instanceof Error ? error.message : '未知错误',
+        variant: 'destructive',
+      })
     } finally {
       setInstallingName(null)
     }
