@@ -3,20 +3,17 @@ import { Log } from '@nest-mods/log';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommonService } from '@src/common';
-import {
-  streamText,
-  generateText,
-  type UIMessage,
-  type ToolSet,
-  type StreamTextResult,
-  type GenerateTextResult,
-} from 'ai';
-
-// 本地定义 CoreMessage 类型
-interface CoreMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string | any[];
-}
+import VoltAgent, {
+  Agent,
+  BaseGenerationOptions,
+  InMemoryStorageAdapter,
+  Memory,
+  StreamTextOptions,
+  AgentOptions as VoltAgentOptions,
+  VoltAgentTextStreamPart,
+  Workflow,
+} from '@voltagent/core';
+import { Output, type Tool } from 'ai';
 import _ from 'lodash';
 import {
   catchError,
@@ -41,12 +38,11 @@ import {
   getErrorActionType,
   shouldRetryError,
 } from './agent-sse-error-mapping';
-import { AgentLifecycleService } from './agent-lifecycle.service';
 import { LlmService } from './llm.service';
-import { MemoryStorageService } from './memory-storage.service';
 import { MessageService } from './message.service';
 import { MyModel } from './model';
 import { MyAgent } from './my-agent';
+import { MyAgentHooks } from './my-agent-hooks';
 import { summarizationSystemPrompt, summarizationUserPrompt } from './prompt';
 import { SocketService } from './socket.service';
 import { ToolsService } from './tools.service';
@@ -54,50 +50,23 @@ import {
   AgentOptions,
   ChatOptions,
   GenerateTextOutputOptions,
+  IndexedKnowledgeBaseOptions,
+  KnowledgeBaseAttachment,
   ModelOptions,
   MyAgentModuleOptions,
 } from './types';
 import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
-
-// ============================================================================
-// 生成选项类型（替代 @voltagent/core 的 BaseGenerationOptions）
-// ============================================================================
-
-export interface GenerationOptions {
-  userId?: string;
-  conversationId?: string;
-  context?: Record<string, any>;
-  providerOptions?: Record<string, any>;
-  headers?: Record<string, string>;
-  abortSignal?: AbortSignal;
-  modelOptions?: ModelOptions;
-}
-
-// ============================================================================
-// 流式响应块类型（替代 @voltagent/core 的 VoltAgentTextStreamPart）
-// ============================================================================
-
-export type StreamPart =
-  | { type: 'text-delta'; id: string; text: string }
-  | { type: 'reasoning-delta'; id: string; text: string }
-  | { type: 'tool-input-start'; id: string; toolName: string; input: any }
-  | { type: 'tool-result'; toolCallId: string; toolName: string; output: any }
-  | { type: 'finish'; id: string; usage?: { promptTokens: number; completionTokens: number; totalTokens: number } }
-  | { type: 'error'; error: Error };
-
-// ============================================================================
-// MyAgentService - 使用 AI SDK 替代 @voltagent/core
-// ============================================================================
 
 @Injectable()
 export class MyAgentService {
   constructor(
     private configService: ConfigService,
     private toolsService: ToolsService,
-    private memoryStorage: MemoryStorageService,
-    private agentLifecycle: AgentLifecycleService,
+    private memory: Memory,
+    private myHooks: MyAgentHooks,
     private llmService: LlmService,
     private messageService: MessageService,
+    @Optional() private voltAgent?: VoltAgent,
   ) {}
 
   private conversationAbortCtrls: Map<string, AbortController> = new Map();
@@ -201,38 +170,35 @@ export class MyAgentService {
       chatOptions,
     );
 
-    // 使用 AI SDK 的 generateText 替代 voltagent 的 generateText
-    const response = await this.generateTextWithSDK(
-      myAgent,
-      chatOptions.message,
-      generationOptions,
-    );
+    const response = await myAgent
+      .getAgent()
+      .generateText(chatOptions.message, generationOptions);
 
     if (!generateTextOutputOptions) {
       return response.text;
     }
-
-    // 创建总结 agent 用于结构化输出
     const summarizeAgent = this.createAgent({
-      name: myAgent.getName(),
-      model: myAgent.getModelName() as any,
+      name: myAgent.getAgent().name,
+      model: myAgent.getAgent().getModelName() as any,
       prompt: `You are a helpful assistant that summarizes the conversation.`,
     });
 
-    const result = await this.generateObjectWithSDK(
-      summarizeAgent,
+    const output = Output.object({ schema: generateTextOutputOptions.schema });
+    const result = await summarizeAgent.generateText(
       generateTextOutputOptions.prompt,
-      generateTextOutputOptions.schema,
-      chatOptions,
+      {
+        ...(chatOptions as any),
+        output,
+      },
     );
-    return result as z.infer<T>;
+    return result.output as z.infer<T>;
   }
 
   private generationOptions(
     myModel: MyModel,
     options: ChatOptions,
     signal?: AbortSignal,
-  ): GenerationOptions {
+  ): BaseGenerationOptions {
     const providerOptions = myModel.providerOptions();
     const headers = myModel.headers();
     return {
@@ -240,6 +206,7 @@ export class MyAgentService {
       providerOptions,
       headers,
       abortSignal: signal,
+      contextLimit: 100,
     };
   }
 
@@ -247,21 +214,38 @@ export class MyAgentService {
     const { name, model, modelOptions, prompt, tools, subAgentsOptions } =
       options;
 
-    const subAgents = _.map(subAgentsOptions, (op) => this.createAgent(op));
+    const subAgents = _.map(subAgentsOptions, (op) =>
+      this.createAgent(op).getAgent(),
+    );
     const resolvedModelOptions: ModelOptions = modelOptions || { model };
     const myModel = this.llmService.get(resolvedModelOptions);
     const resolvedModel = resolvedModelOptions.model;
 
-    // 创建 MyAgent 实例，不再依赖 voltagent 的 Agent 类
-    return new MyAgent({
+    const agent: Agent = new Agent({
       name,
       instructions: prompt,
       model: myModel.model(),
       tools: this.getAgentTools(tools, resolvedModel),
-      memory: options.memory,
+      memory: this.getMemory(options.memory),
+      hooks: this.myHooks.getHooks(),
       maxSteps: 300,
       subAgents,
-    }, this, myModel);
+      supervisorConfig: {
+        throwOnStreamError: true,
+        fullStreamEventForwarding: {
+          types: ['tool-input-start', 'tool-result'],
+        },
+      },
+    });
+    return new MyAgent(agent, this, myModel);
+  }
+
+  registerAgent(agent: Agent) {
+    this.voltAgent?.registerAgent(agent);
+  }
+
+  registerWorkflow(workflow: Workflow<any, any>) {
+    this.voltAgent?.registerWorkflow(workflow);
   }
 
   private getAgentTools(
@@ -276,11 +260,22 @@ export class MyAgentService {
         return tool;
       })
       .flatten()
-      .value();
+      .value() as VoltAgentOptions['tools'];
+  }
+
+  private getMemory(memory: AgentOptions['memory']) {
+    switch (memory) {
+      case false:
+        return undefined;
+      case 'in-memory':
+        return new Memory({ storage: new InMemoryStorageAdapter() });
+      default:
+        return this.memory;
+    }
   }
 
   async createStream(
-    generationOptions: GenerationOptions,
+    generationOptions: BaseGenerationOptions,
     myAgent: MyAgent,
     message: ChatOptions['message'],
     compress: boolean,
@@ -293,170 +288,11 @@ export class MyAgentService {
       compress,
     );
     generationOptions.conversationId = session.id;
-
-    // 使用 AI SDK 的 streamText 替代 voltagent 的 streamText
-    const response = await this.streamTextWithSDK(
-      myAgent,
-      _message,
-      generationOptions,
-    );
+    const response = await myAgent
+      .getAgent()
+      .streamText(_message, generationOptions);
 
     return this.createErrorThrowingStream(response.fullStream);
-  }
-
-  /**
-   * 使用 AI SDK 的 streamText
-   */
-  private async streamTextWithSDK(
-    myAgent: MyAgent,
-    message: string | UIMessage[],
-    options: GenerationOptions,
-  ): Promise<StreamTextResult<ToolSet, any>> {
-    const model = myAgent.getModel();
-    const tools = myAgent.getTools();
-    const instructions = myAgent.getInstructions();
-
-    // 转换消息格式
-    const messages = await this.buildMessages(message, options.conversationId, options.userId);
-
-    // 触发开始事件
-    this.agentLifecycle.emitStart({
-      agentName: myAgent.getName(),
-      conversationId: options.conversationId,
-      userId: options.userId,
-      input: message,
-      context: options.context ? new Map(Object.entries(options.context)) : new Map(),
-    });
-
-    const result = streamText({
-      model,
-      messages: messages as any,
-      tools: tools as unknown as ToolSet,
-      system: instructions,
-      providerOptions: options.providerOptions,
-      abortSignal: options.abortSignal,
-      onStepFinish: this.agentLifecycle.createStepFinishCallback(
-        myAgent.getName(),
-        options.conversationId,
-        options.userId,
-        options.context || {},
-      ) as any,
-    });
-
-    return result;
-  }
-
-  /**
-   * 使用 AI SDK 的 generateText
-   */
-  private async generateTextWithSDK(
-    myAgent: MyAgent,
-    message: string | UIMessage[],
-    options: GenerationOptions,
-  ): Promise<GenerateTextResult<ToolSet, any>> {
-    const model = myAgent.getModel();
-    const tools = myAgent.getTools();
-    const instructions = myAgent.getInstructions();
-
-    // 转换消息格式
-    const messages = await this.buildMessages(message, options.conversationId, options.userId);
-
-    const result = await generateText({
-      model,
-      messages: messages as any,
-      tools: tools as unknown as ToolSet,
-      system: instructions,
-      providerOptions: options.providerOptions,
-      abortSignal: options.abortSignal,
-    });
-
-    return result;
-  }
-
-  /**
-   * 使用 AI SDK 生成结构化对象
-   */
-  private async generateObjectWithSDK<T extends z.ZodType>(
-    myAgent: MyAgent,
-    prompt: string,
-    schema: T,
-    chatOptions?: ChatOptions,
-  ): Promise<z.infer<T>> {
-    const model = myAgent.getModel();
-
-    const messages: CoreMessage[] = [
-      { role: 'system', content: myAgent.getInstructions() || 'You are a helpful assistant.' },
-      { role: 'user', content: prompt },
-    ];
-
-    const result = await generateText({
-      model,
-      messages: messages as any,
-      providerOptions: chatOptions?.modelOptions
-        ? this.llmService.get(chatOptions.modelOptions).providerOptions()
-        : undefined,
-    });
-
-    // 尝试解析 JSON 输出
-    try {
-      const parsed = JSON.parse(result.text);
-      return schema.parse(parsed);
-    } catch (error) {
-      this.logger.error('Failed to parse structured output:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * 构建消息列表
-   */
-  private async buildMessages(
-    message: string | UIMessage[],
-    conversationId?: string,
-    userId?: string,
-  ): Promise<CoreMessage[]> {
-    const messages: CoreMessage[] = [];
-
-    // 加载历史消息
-    if (conversationId && userId) {
-      const historyMessages = await this.memoryStorage.getMessages(userId, conversationId);
-      for (const msg of historyMessages) {
-        messages.push({
-          role: msg.role as any,
-          content: this.convertPartsToContent(msg.parts),
-        } as CoreMessage);
-      }
-    }
-
-    // 添加当前消息
-    if (typeof message === 'string') {
-      messages.push({ role: 'user', content: message });
-    } else if (Array.isArray(message)) {
-      // 处理 UIMessage 数组
-      for (const msg of message) {
-        messages.push({
-          role: msg.role as any,
-          content: this.convertPartsToContent(msg.parts),
-        } as CoreMessage);
-      }
-    }
-
-    return messages;
-  }
-
-  /**
-   * 转换 UIMessage parts 为 AI SDK content 格式
-   */
-  private convertPartsToContent(parts: any[]): string | any[] {
-    if (!parts || parts.length === 0) return '';
-    if (parts.length === 1 && parts[0].type === 'text') {
-      return parts[0].text;
-    }
-    return parts.map((part) => {
-      if (part.type === 'text') return { type: 'text', text: part.text };
-      if (part.type === 'file') return { type: 'image', image: part.url };
-      return part;
-    });
   }
 
   /**
@@ -464,13 +300,13 @@ export class MyAgentService {
    * 这样可以让 RxJS 的 retry 和 catchError 正常工作
    */
   private createErrorThrowingStream(
-    baseStream: AsyncIterable<any>,
-  ): AsyncIterable<StreamPart> {
-    const self = this;
+    baseStream: AsyncIterable<VoltAgentTextStreamPart>,
+  ): AsyncIterable<VoltAgentTextStreamPart> {
     return (async function* () {
       for await (const chunk of baseStream) {
-        // 检测 AI SDK 的错误类型
+        // 检测到 error 事件时抛出错误
         if (chunk.type === 'error') {
+          // 将 AI SDK 的 error 事件转换为可抛出的错误
           const error =
             chunk.error instanceof Error
               ? chunk.error
@@ -478,66 +314,16 @@ export class MyAgentService {
           throw error;
         }
 
-        // 转换 AI SDK 事件为内部 StreamPart 格式
-        const converted = self.convertAIStreamChunk(chunk);
-        if (converted) {
-          yield converted;
-        }
+        // 正常事件直接 yield
+        yield chunk;
       }
     })();
   }
 
-  /**
-   * 转换 AI SDK 流事件为内部格式
-   */
-  private convertAIStreamChunk(chunk: any): StreamPart | null {
-    switch (chunk.type) {
-      case 'text-delta':
-        return {
-          type: 'text-delta',
-          id: chunk.toolCallId || 'text',
-          text: chunk.textDelta || chunk.text,
-        };
-      case 'reasoning':
-      case 'reasoning-delta':
-        return {
-          type: 'reasoning-delta',
-          id: 'reasoning',
-          text: chunk.textDelta || chunk.text,
-        };
-      case 'tool-call':
-        return {
-          type: 'tool-input-start',
-          id: chunk.toolCallId,
-          toolName: chunk.toolName,
-          input: chunk.args,
-        };
-      case 'tool-result':
-        return {
-          type: 'tool-result',
-          toolCallId: chunk.toolCallId,
-          toolName: chunk.toolName,
-          output: chunk.result,
-        };
-      case 'finish':
-        return {
-          type: 'finish',
-          id: 'finish',
-          usage: chunk.usage ? {
-            promptTokens: chunk.usage.promptTokens,
-            completionTokens: chunk.usage.completionTokens,
-            totalTokens: chunk.usage.totalTokens,
-          } : undefined,
-        };
-      default:
-        return null;
-    }
-  }
-
   private formatObservable(
-    ob: Observable<StreamPart>,
+    ob: Observable<VoltAgentTextStreamPart>,
     chatOptions: Pick<
-      GenerationOptions,
+      StreamTextOptions,
       'userId' | 'conversationId' | 'context'
     >,
   ) {
@@ -563,9 +349,9 @@ export class MyAgentService {
   }
 
   private formatMessage(
-    chunk: StreamPart,
+    chunk: VoltAgentTextStreamPart<{ [k: string]: Tool }>,
     chatOptions: Pick<
-      GenerationOptions,
+      StreamTextOptions,
       'userId' | 'conversationId' | 'context'
     >,
   ) {
@@ -613,6 +399,7 @@ export class MyAgentService {
           toolName: chunk.toolName,
           type: 'tool_result',
           content: chunk.output,
+          //  output: { error: true }
           status: chunk.output?.error ? 'error' : undefined,
           artifact,
         })),
@@ -753,7 +540,7 @@ export class MyAgentService {
   ) {
     const summarizer = this.createAgent({
       name: 'summarize-conversation',
-      model: myAgent.getModelName() as any,
+      model: myAgent.getAgent().getModelName() as any,
       prompt: summarizationSystemPrompt,
       memory: false,
     });
@@ -762,21 +549,19 @@ export class MyAgentService {
       ? summarizationUserPrompt(JSON.stringify(currentMessages))
       : summarizationUserPrompt();
 
-    const messages = await this.memoryStorage.getMessages(userId, conversationId);
-    const messagesWithPrompt: CoreMessage[] = [
-      ...messages.map((m) => ({
-        role: m.role as any,
-        content: this.convertPartsToContent(m.parts),
-      }) as CoreMessage),
-      { role: 'user', content: prompt },
-    ];
-
-    const result = await this.generateTextWithSDK(
-      summarizer,
-      messagesWithPrompt as any,
-      { userId, conversationId },
-    );
-    return result.text;
+    const messages = await this.memory.getMessages(userId, conversationId);
+    messages.push({
+      id: MyUtil.uuid(),
+      role: 'user',
+      parts: [
+        {
+          type: 'text',
+          text: prompt,
+        },
+      ],
+    });
+    const res = await summarizer.generateText(messages);
+    return res.text;
   }
 
   getTools() {
@@ -799,12 +584,12 @@ export class MyAgentService {
     name,
     options,
   }: {
-    input: string | UIMessage[];
+    input: Parameters<Agent['generateText']>[0];
     prompt?: string;
     schema: T;
     model?: AgentOptions['model'];
     name?: string;
-    options?: any;
+    options?: Parameters<Agent['generateText']>[1];
   }): Promise<z.infer<T>> {
     const agent = this.createAgent({
       name: name || 'generate-text',
@@ -814,13 +599,12 @@ export class MyAgentService {
       memory: false,
     });
 
-    const result = await this.generateObjectWithSDK(
-      agent,
-      typeof input === 'string' ? input : JSON.stringify(input),
-      schema,
-      options,
-    );
-    return result;
+    const output = Output.object({ schema });
+    const resp = await agent.generateText(input, {
+      ...options,
+      output,
+    });
+    return resp.output as z.infer<T>;
   }
 
   private get config() {
