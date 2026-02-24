@@ -8,4 +8,7 @@ export class PurfenceConfig extends BaseEntity {
 
   @Column({ type: 'varchar', length: 512, nullable: true })
   proxyUrl?: string;
+
+  @Column({ type: 'int', default: 2 })
+  maxIssueConcurrency: number;
 }

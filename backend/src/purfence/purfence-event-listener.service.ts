@@ -6,6 +6,7 @@ import { PurfenceProjectService } from './purfence-project.service';
 import { PurfenceIssueService } from './purfence-issue.service';
 import { PurfenceIssue } from './purfence-issue.entity';
 import { IssueOrigin, PurfenceStatus } from './purfence-status.enum';
+import { IssueQueueService } from './issue-queue/issue-queue.service';
 
 /**
  * Event listener service for Purfence module.
@@ -21,12 +22,15 @@ export class PurfenceEventListenerService {
     private readonly executionService: PurfenceExecutionService,
     private readonly projectService: PurfenceProjectService,
     private readonly issueService: PurfenceIssueService,
+    private readonly issueQueueService: IssueQueueService,
   ) {}
 
   /**
    * Handle purfence.issue.created event
    * Triggered by: PurfenceIssueSubscriber.afterInsert
    * Delay: 1000ms
+   *
+   * 新流程：将 Issue 加入队列，由 IssueSchedulerService 调度执行
    */
   @OnEvent('purfence.issue.created')
   async handleIssueCreated(payload: { issueId: string }) {
@@ -37,23 +41,29 @@ export class PurfenceEventListenerService {
         where: { id: issueId },
       });
 
-      // Skip AI-originated issues
+      // AI 发起的 Issue 直接标记为 needs_user，不入队
       if (issue.origin === IssueOrigin.ai) {
         if (issue.status !== PurfenceStatus.needs_user) {
           issue.status = PurfenceStatus.needs_user;
           await issue.save();
         }
         this.logger.log(
-          `Skipping init for AI-originated issue: ${issueId}`,
+          `Skipping queue for AI-originated issue: ${issueId}`,
         );
         return;
       }
 
       this.logger.log(
-        `Handling purfence.issue.created for issue: ${issueId}`,
+        `Enqueueing issue ${issueId} for processing`,
       );
 
-      await this.issueService.startIssue(issueId);
+      // 将 Issue 加入队列，等待调度器执行
+      await this.issueQueueService.enqueue(issueId, {
+        projectId: issue.projectId,
+        title: issue.title,
+        description: issue.description,
+        origin: issue.origin,
+      });
     } catch (error) {
       this.logger.error(
         `Failed to handle purfence.issue.created for issue ${payload.issueId}: ${error.message}`,

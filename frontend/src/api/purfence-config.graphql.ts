@@ -8,6 +8,7 @@ export const GET_PURFENCE_CONFIGS = gql`
         id
         projectsRootPath
         proxyUrl
+        maxIssueConcurrency
         createdAt
         updatedAt
       }
@@ -16,13 +17,12 @@ export const GET_PURFENCE_CONFIGS = gql`
 `
 
 export const CREATE_PURFENCE_CONFIG = gql`
-  mutation CreatePurfenceConfig(
-    $input: CreateOnePurfenceConfigInput!
-  ) {
+  mutation CreatePurfenceConfig($input: CreateOnePurfenceConfigInput!) {
     createOnePurfenceConfig(input: $input) {
       id
       projectsRootPath
       proxyUrl
+      maxIssueConcurrency
       createdAt
       updatedAt
     }
@@ -30,13 +30,12 @@ export const CREATE_PURFENCE_CONFIG = gql`
 `
 
 export const UPDATE_PURFENCE_CONFIG = gql`
-  mutation UpdatePurfenceConfig(
-    $input: UpdateOnePurfenceConfigInput!
-  ) {
+  mutation UpdatePurfenceConfig($input: UpdateOnePurfenceConfigInput!) {
     updateOnePurfenceConfig(input: $input) {
       id
       projectsRootPath
       proxyUrl
+      maxIssueConcurrency
       createdAt
       updatedAt
     }

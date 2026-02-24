@@ -15,6 +15,7 @@ export function PurfenceConfigPage() {
   const { config, loading, error, saving, saveConfig } = usePurfenceConfig()
   const [projectsRootPath, setProjectsRootPath] = useState('')
   const [proxyUrl, setProxyUrl] = useState('')
+  const [maxIssueConcurrency, setMaxIssueConcurrency] = useState<number>(2)
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
   const {
     status,
@@ -32,7 +33,8 @@ export function PurfenceConfigPage() {
   useEffect(() => {
     setProjectsRootPath(config?.projectsRootPath || '')
     setProxyUrl(config?.proxyUrl || '')
-  }, [config?.projectsRootPath, config?.proxyUrl])
+    setMaxIssueConcurrency(config?.maxIssueConcurrency ?? 2)
+  }, [config?.projectsRootPath, config?.proxyUrl, config?.maxIssueConcurrency])
 
   const handleSave = async () => {
     const normalizedProjectsRootPath = projectsRootPath.trim()
@@ -49,6 +51,7 @@ export function PurfenceConfigPage() {
       await saveConfig({
         projectsRootPath: normalizedProjectsRootPath,
         proxyUrl,
+        maxIssueConcurrency: Math.max(1, maxIssueConcurrency),
       })
       toast({
         title: '保存成功',
@@ -169,6 +172,34 @@ export function PurfenceConfigPage() {
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">留空表示不使用代理。</p>
+          </div>
+
+          <div className="mt-6 border-t pt-6">
+            <Label htmlFor="max-issue-concurrency">最大 Issue 并行数</Label>
+            <div className="mt-3 flex gap-3 items-center">
+              <Input
+                id="max-issue-concurrency"
+                type="number"
+                min={1}
+                max={10}
+                value={maxIssueConcurrency}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10)
+                  setMaxIssueConcurrency(isNaN(value) ? 1 : value)
+                }}
+                disabled={loading || saving}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSave}
+                disabled={loading || saving || !projectsRootPath.trim()}
+              >
+                {saving ? '保存中...' : '保存'}
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              同时处理的最大 Issue 数量，范围 1-10，默认 2。
+            </p>
           </div>
 
           <div className="mt-6 border-t pt-6">

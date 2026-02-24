@@ -25,4 +25,11 @@ export class PurfenceConfigService {
     const config = await this.getConfig();
     return config?.proxyUrl || undefined;
   }
+
+  async getMaxIssueConcurrency(): Promise<number> {
+    const config = await this.getConfig();
+    const concurrency = config?.maxIssueConcurrency ?? 2;
+    // 确保最小值为 1
+    return Math.max(1, concurrency);
+  }
 }
