@@ -30,5 +30,8 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.0",
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0"
   }
 }

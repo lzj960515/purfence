@@ -2,39 +2,26 @@ import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DiscoveryModule } from '@nestjs/core';
-import { Memory } from '@voltagent/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClaudeAgentSdkService } from './claude-agent-sdk.service';
 import { LlmService } from './llm.service';
 import { MessageService } from './message.service';
-import { MyAgentHooks } from './my-agent-hooks';
 import { MyAgentService } from './my-agent.service';
 import { ToolsService } from './tools.service';
-import { TypeOrmMemoryStorageAdapter } from './typeorm-memory-storage.adapter';
-
-async function createMemoryAdapter(config: ConfigService) {
-  return new TypeOrmMemoryStorageAdapter();
-}
+import { MemoryStorageService } from './memory-storage.service';
+import { AgentLifecycleService } from './agent-lifecycle.service';
 
 @Global()
 @Module({
-  imports: [DiscoveryModule, ConfigModule, HttpModule],
+  imports: [DiscoveryModule, ConfigModule, HttpModule, EventEmitterModule],
   providers: [
     MyAgentService,
     ToolsService,
-    MyAgentHooks,
     LlmService,
     MessageService,
     ClaudeAgentSdkService,
-    {
-      provide: Memory,
-      inject: [ConfigService],
-      useFactory: async (config) => {
-        return new Memory({
-          storage: await createMemoryAdapter(config),
-          generateTitle: true,
-        });
-      },
-    },
+    MemoryStorageService,
+    AgentLifecycleService,
   ],
   exports: [
     MyAgentService,
@@ -42,6 +29,8 @@ async function createMemoryAdapter(config: ConfigService) {
     MessageService,
     ToolsService,
     ClaudeAgentSdkService,
+    MemoryStorageService,
+    AgentLifecycleService,
   ],
 })
 export class MyAgentModule {}

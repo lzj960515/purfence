@@ -1,5 +1,5 @@
 import { BaseEntity, IDColumnOpts } from '@app/shared';
-import type { ToolExecuteOptions } from '@voltagent/core';
+import type { ToolExecuteOptions } from '@app/my-agent';
 import { Column, Entity, Index } from 'typeorm';
 import {
   AgentArtifactContent,

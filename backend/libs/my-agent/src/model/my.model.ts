@@ -1,8 +1,6 @@
-import { AgentOptions, BaseGenerationOptions, Tool } from '@voltagent/core';
 import {
   LanguageModelV3,
   LanguageModelV3Middleware,
-  LanguageModelV3Prompt,
 } from '@ai-sdk/provider';
 import { wrapLanguageModel } from 'ai';
 import { ModelOptions } from '../types';
@@ -10,6 +8,16 @@ import {
   formatAgentsList,
   loadPrimaryAgents,
 } from '../utils/agent-loader.util';
+
+// ============================================================================
+// 生成选项类型（替代 @voltagent/core 的 BaseGenerationOptions）
+// ============================================================================
+
+export type ProviderOptions = Record<string, any>;
+
+// ============================================================================
+// MyModel - 抽象基类，用于所有模型实现
+// ============================================================================
 
 export abstract class MyModel {
   constructor(protected readonly modelOptions: ModelOptions = {}) {}
@@ -25,15 +33,15 @@ export abstract class MyModel {
 
   abstract tokenLimit(): number;
 
-  abstract providerOptions(): BaseGenerationOptions['providerOptions'];
+  abstract providerOptions(): ProviderOptions;
 
   headers(): Record<string, string> {
     return {};
   }
 
   async countTokens(
-    prompt: LanguageModelV3Prompt,
-    tools: Tool[],
+    prompt: any,
+    tools: any[],
   ): Promise<number> {
     return Promise.resolve(-1);
   }

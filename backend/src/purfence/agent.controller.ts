@@ -7,8 +7,11 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { MyAgentService, MessageService } from '@app/my-agent';
-import { Memory } from '@voltagent/core';
+import {
+  MyAgentService,
+  MessageService,
+  MemoryStorageService,
+} from '@app/my-agent';
 import type { Response } from 'express';
 
 const USER_ID = 'purfence';
@@ -18,11 +21,8 @@ export class AgentController {
   constructor(
     private readonly myAgentService: MyAgentService,
     private readonly messageService: MessageService,
+    private readonly memoryStorage: MemoryStorageService,
   ) {}
-
-  private get memory(): Memory {
-    return (this.messageService as any).memory;
-  }
 
   @Get('tools')
   getTools() {
@@ -35,11 +35,9 @@ export class AgentController {
 
   @Get('conversations')
   async getConversations() {
-    const conversations = await this.memory.getConversationsByUserId(USER_ID, {
-      limit: 20,
-      orderBy: 'updated_at',
-      orderDirection: 'DESC',
-    });
+    const conversations = await this.memoryStorage.getConversationsByUserId(
+      USER_ID,
+    );
     return conversations;
   }
 
