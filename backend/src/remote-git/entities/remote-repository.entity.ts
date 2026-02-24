@@ -44,6 +44,6 @@ export class RemoteRepositoryConfig extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   errorMessage?: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastSyncedAt?: Date;
 }
