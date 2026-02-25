@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IssueQueue, IssueQueueStatus } from './issue-queue.entity';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class IssueQueueService {
   private readonly logger = new Logger(IssueQueueService.name);
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor() {}
 
   /**
    * 将 Issue 加入队列
@@ -51,30 +50,28 @@ export class IssueQueueService {
 
   /**
    * 从队列中取出一个待处理的 Issue
-   * 使用 SELECT FOR UPDATE (悲观锁) 确保并发安全
+   * 使用普通查询（SQLite 不支持悲观锁）
    */
   async dequeue(): Promise<IssueQueue | null> {
-    return this.dataSource.transaction(async (manager) => {
-      // 使用 query builder 获取行锁 (SELECT FOR UPDATE)
-      const pendingItem = await manager
-        .createQueryBuilder(IssueQueue, 'queue')
-        .setLock('pessimistic_write')
-        .where('queue.status = :status', { status: IssueQueueStatus.pending })
-        .orderBy('queue.priority', 'DESC')
-        .addOrderBy('queue.createdAt', 'ASC')
-        .getOne();
-
-      if (!pendingItem) {
-        return null;
-      }
-
-      // 更新状态为处理中
-      pendingItem.status = IssueQueueStatus.processing;
-      pendingItem.startedAt = new Date();
-      await manager.save(pendingItem);
-
-      return pendingItem;
+    // 使用普通的 TypeORM 查询，不使用锁
+    const pendingItem = await IssueQueue.findOne({
+      where: { status: IssueQueueStatus.pending },
+      order: {
+        priority: 'DESC',
+        createdAt: 'ASC',
+      },
     });
+
+    if (!pendingItem) {
+      return null;
+    }
+
+    // 更新状态为处理中
+    pendingItem.status = IssueQueueStatus.processing;
+    pendingItem.startedAt = new Date();
+    await pendingItem.save();
+
+    return pendingItem;
   }
 
   /**
