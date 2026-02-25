@@ -120,7 +120,10 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
    * 处理队列中的下一个 Issue
    */
   private async processNextIssue(): Promise<boolean> {
-    const queueItem = await this.issueQueueService.dequeue();
+    // 传入当前正在处理的 issue IDs，防止重复取出同一个 issue
+    const queueItem = await this.issueQueueService.dequeue(
+      Array.from(this.processingIssueIds)
+    );
 
     if (!queueItem) {
       this.logger.debug('ℹ️ No pending item to process');

@@ -51,11 +51,22 @@ export class IssueQueueService {
   /**
    * 从队列中取出一个待处理的 Issue
    * 使用普通查询（SQLite 不支持悲观锁）
+   * @param excludeIds 需要排除的 issue ID 列表（已在处理中的）
    */
-  async dequeue(): Promise<IssueQueue | null> {
+  async dequeue(excludeIds: string[] = []): Promise<IssueQueue | null> {
+    // 构建查询条件
+    const whereCondition: any = {
+      status: IssueQueueStatus.pending,
+    };
+
+    // 如果需要排除某些 ID，添加 NOT IN 条件
+    if (excludeIds.length > 0) {
+      whereCondition.id = { $nin: excludeIds };
+    }
+
     // 使用普通的 TypeORM 查询，不使用锁
     const pendingItem = await IssueQueue.findOne({
-      where: { status: IssueQueueStatus.pending },
+      where: whereCondition,
       order: {
         priority: 'DESC',
         createdAt: 'ASC',
