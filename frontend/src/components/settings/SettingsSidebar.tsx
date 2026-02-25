@@ -7,6 +7,7 @@ import {
   AlarmClock,
   AppWindow,
   Blocks,
+  ListOrdered,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,6 +26,7 @@ type SettingsTab =
   | 'scheduled-tasks'
   | 'app'
   | 'skills'
+  | 'queue'
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab
@@ -164,6 +166,13 @@ export function SettingsSidebar({ activeTab, onTabChange, onCollapseChange, coll
           label="Skills"
           active={activeTab === 'skills'}
           onClick={() => onTabChange('skills')}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<ListOrdered className="h-4 w-4" />}
+          label="队列管理"
+          active={activeTab === 'queue'}
+          onClick={() => onTabChange('queue')}
           collapsed={collapsed}
         />
       </nav>

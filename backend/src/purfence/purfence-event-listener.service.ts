@@ -12,7 +12,7 @@ import { IssueQueueService } from './issue-queue/issue-queue.service';
  * Event listener service for Purfence module.
  * Handles all events emitted by EntitySubscriber and services.
  *
- * Replaces the old BullMQ processor (PurfenceExecutionProcessor).
+ * Uses liteque-based IssueQueueService for issue processing.
  */
 @Injectable()
 export class PurfenceEventListenerService {
@@ -30,7 +30,7 @@ export class PurfenceEventListenerService {
    * Triggered by: PurfenceIssueSubscriber.afterInsert
    * Delay: 1000ms
    *
-   * 新流程：将 Issue 加入队列，由 IssueSchedulerService 调度执行
+   * 将 Issue 加入 liteque 队列，由 Runner 自动调度执行
    */
   @OnEvent('purfence.issue.created')
   async handleIssueCreated(payload: { issueId: string }) {
@@ -57,12 +57,14 @@ export class PurfenceEventListenerService {
         `Enqueueing issue ${issueId} for processing`,
       );
 
-      // 将 Issue 加入队列，等待调度器执行
+      // 将 Issue 加入队列，延迟 1 秒后由 Runner 调度执行
       await this.issueQueueService.enqueue(issueId, {
         projectId: issue.projectId,
         title: issue.title,
         description: issue.description,
         origin: issue.origin,
+      }, {
+        delayMs: 1000,  // 延迟 1 秒入队
       });
     } catch (error) {
       this.logger.error(
