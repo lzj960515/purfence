@@ -86,6 +86,34 @@ export class IssueQueueService {
   }
 
   /**
+   * 批量从队列中取出待处理的 Issue
+   * 一次性取出多个，减少数据库查询次数
+   * @param limit 取出的最大数量
+   */
+  async dequeueBatch(limit: number): Promise<IssueQueue[]> {
+    if (limit <= 0) return [];
+
+    const items = await IssueQueue.find({
+      where: { status: IssueQueueStatus.pending },
+      order: { priority: 'DESC', createdAt: 'ASC' },
+      take: limit,
+    });
+
+    if (items.length === 0) return [];
+
+    // 批量更新状态
+    const now = new Date();
+    for (const item of items) {
+      item.status = IssueQueueStatus.processing;
+      item.startedAt = now;
+    }
+    await IssueQueue.save(items);
+
+    this.logger.debug(`Dequeued ${items.length} issues in batch`);
+    return items;
+  }
+
+  /**
    * 标记 Issue 为处理中
    * 只允许从 pending 状态转换
    */

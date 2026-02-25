@@ -90,57 +90,41 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
     try {
       const maxConcurrency = await this.configService.getMaxIssueConcurrency();
       const processingCount = this.processingIssueIds.size;
-      this.logger.debug(`📊 Concurrency: ${processingCount}/${maxConcurrency}`);
+      const availableSlots = maxConcurrency - processingCount;
 
-      // 如果已达到最大并发数，跳过
-      if (processingCount >= maxConcurrency) {
-        this.logger.debug('🛑 Max concurrency reached, skip');
+      this.logger.debug(
+        `📊 Concurrency: ${processingCount}/${maxConcurrency}, available: ${availableSlots}`,
+      );
+
+      if (availableSlots <= 0) return;
+
+      // 一次性取出 availableSlots 个 issue
+      const queueItems = await this.issueQueueService.dequeueBatch(
+        availableSlots,
+      );
+
+      if (queueItems.length === 0) {
+        this.logger.debug('ℹ️ No pending items');
         return;
       }
 
-      // 计算可处理的槽位数
-      const availableSlots = maxConcurrency - processingCount;
+      this.logger.debug(`🚀 Starting ${queueItems.length} issues`);
 
-      // 并行处理多个槽位
-      const tasks: Promise<boolean>[] = [];
-      for (let i = 0; i < availableSlots; i++) {
-        tasks.push(this.processNextIssue());
+      // 逐个启动执行
+      for (const item of queueItems) {
+        this.processingIssueIds.add(item.issueId);
+        this.executeIssue(item).catch(error => {
+          this.logger.error(
+            `Unhandled error in executeIssue for ${item.issueId}: ${error instanceof Error ? error.message : String(error)}`,
+            error instanceof Error ? error.stack : undefined,
+          );
+        });
       }
-
-      const results = await Promise.all(tasks);
-      this.logger.debug(`🎯 Queue round done, results: ${JSON.stringify(results)}`);
     } catch (error) {
       this.logger.error(
         `❌ Error processing queue: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-  }
-
-  /**
-   * 处理队列中的下一个 Issue
-   */
-  private async processNextIssue(): Promise<boolean> {
-    // 传入当前正在处理的 issue IDs，防止重复取出同一个 issue
-    const queueItem = await this.issueQueueService.dequeue(
-      Array.from(this.processingIssueIds)
-    );
-
-    if (!queueItem) {
-      this.logger.debug('ℹ️ No pending item to process');
-      return false;
-    }
-
-    this.logger.debug(`🚀 Starting processing issueId=${queueItem.issueId}`);
-
-    // 开始异步处理，使用 .catch 确保错误被处理
-    this.executeIssue(queueItem).catch((error) => {
-      this.logger.error(
-        `Unhandled error in executeIssue for ${queueItem.issueId}: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
-      );
-    });
-
-    return true;
   }
 
   /**
