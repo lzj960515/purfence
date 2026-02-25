@@ -133,16 +133,6 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
   private async executeIssue(queueItem: IssueQueue): Promise<void> {
     const { issueId } = queueItem;
 
-    // 检查是否已经在处理中（防止重复）
-    if (this.processingIssueIds.has(issueId)) {
-      this.logger.warn(`Issue ${issueId} is already being processed`);
-      // 将队列项重新放回 pending 状态，让其他工作进程处理
-      await this.issueQueueService.markAsPending(issueId);
-      return;
-    }
-
-    this.processingIssueIds.add(issueId);
-
     try {
       this.logger.log(`Starting execution of issue ${issueId}`);
 
@@ -189,6 +179,7 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
         await this.issueQueueService.markAsFailed(issueId, errorMessage);
       }
     } finally {
+      // 从处理中集合移除
       this.processingIssueIds.delete(issueId);
     }
   }
