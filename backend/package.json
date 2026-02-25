@@ -69,7 +69,7 @@
     "@slack/bolt": "^4.6.0",
     "@slack/web-api": "^7.14.1",
     "@types/async-retry": "^1.4.9",
-    "@voltagent/core": "^2.6.0",
+    "@voltagent/core": "^2.6.1",
     "@voltagent/logger": "^2.0.2",
     "@voltagent/server-hono": "^2.0.7",
     "ai": "^6.0.68",
