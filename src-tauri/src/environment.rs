@@ -441,157 +441,153 @@ fn run_skills_find(query: &str) -> Result<Vec<DesktopSkillItem>, String> {
 }
 
 fn fixed_online_recommended_skills() -> Vec<DesktopSkillItem> {
+    // 官方 Anthropic 技能仓库: https://github.com/anthropics/skills
+    // 安装命令格式: npx skills add <owner/repo@skill> -g -y --agent claude-code
     vec![
+        // ===== 官方 Anthropic 技能 =====
         DesktopSkillItem {
             name: "algorithmic-art".to_string(),
             description: "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@algorithmic-art".to_string()),
         },
         DesktopSkillItem {
             name: "browser-use".to_string(),
             description: "Automates browser interactions for web testing, form filling, screenshots, and extraction".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("browser-use/browser-use@browser-use".to_string()),
         },
         DesktopSkillItem {
             name: "canvas-design".to_string(),
             description: "Create beautiful visual art in .png and .pdf documents using design philosophy".to_string(),
             source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "configuring-tauri-permissions".to_string(),
-            description: "Guides through configuring Tauri permissions and capability integration".to_string(),
-            source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@canvas-design".to_string()),
         },
         DesktopSkillItem {
             name: "doc-coauthoring".to_string(),
             description: "Structured workflow for co-authoring documentation and technical specs".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@doc-coauthoring".to_string()),
         },
         DesktopSkillItem {
             name: "docx".to_string(),
             description: "Professional .docx document creation, editing, tracked changes, and comments".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@docx".to_string()),
         },
         DesktopSkillItem {
             name: "find-skills".to_string(),
             description: "Discover and install agent skills for specific tasks".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("vercel-labs/skills@find-skills".to_string()),
         },
         DesktopSkillItem {
             name: "frontend-design".to_string(),
             description: "Create production-grade frontend interfaces with high design quality".to_string(),
             source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "integrating-tauri-js-frontends".to_string(),
-            description: "Configure JavaScript frontends for Tauri v2 desktop apps".to_string(),
-            source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@frontend-design".to_string()),
         },
         DesktopSkillItem {
             name: "mcp-builder".to_string(),
             description: "Guide for building MCP servers that integrate external services".to_string(),
             source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "nanobanana".to_string(),
-            description: "Generate and edit images using Google Gemini 3 Pro Image".to_string(),
-            source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@mcp-builder".to_string()),
         },
         DesktopSkillItem {
             name: "nestjs-best-practices".to_string(),
             description: "NestJS architecture and best practices for production apps".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@nestjs-best-practices".to_string()),
         },
         DesktopSkillItem {
             name: "pdf".to_string(),
             description: "Comprehensive PDF extraction, editing, merging, splitting, and form handling".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@pdf".to_string()),
+        },
+        DesktopSkillItem {
+            name: "playwright-cli".to_string(),
+            description: "Automates browser interactions for web testing, screenshots, and data extraction".to_string(),
+            source: "online".to_string(),
+            package: Some("microsoft/playwright-cli@playwright-cli".to_string()),
         },
         DesktopSkillItem {
             name: "pptx".to_string(),
             description: "Presentation creation, editing, layout, and speaker notes tooling".to_string(),
             source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "product-artifacts".to_string(),
-            description: "产品工件目录结构和 PRD/IA/验收标准模板".to_string(),
-            source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@pptx".to_string()),
         },
         DesktopSkillItem {
             name: "skill-creator".to_string(),
             description: "Guide for creating and improving reusable skills".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@skill-creator".to_string()),
         },
         DesktopSkillItem {
             name: "slack-gif-creator".to_string(),
             description: "Knowledge and utilities for creating Slack-friendly animated GIFs".to_string(),
             source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "tauri-common-issues".to_string(),
-            description: "Tauri v2 common issues and solutions".to_string(),
-            source: "online".to_string(),
-            package: None,
-        },
-        DesktopSkillItem {
-            name: "tauri-event-system".to_string(),
-            description: "Advanced Tauri event patterns for bidirectional communication".to_string(),
-            source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@slack-gif-creator".to_string()),
         },
         DesktopSkillItem {
             name: "tauri-v2".to_string(),
             description: "Tauri v2 cross-platform app development with Rust backend".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("nodnarbnitram/claude-code-extensions@tauri-v2".to_string()),
         },
         DesktopSkillItem {
             name: "theme-factory".to_string(),
             description: "Apply themed visual systems to docs, slides, reports, and HTML artifacts".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@theme-factory".to_string()),
         },
         DesktopSkillItem {
             name: "typeorm".to_string(),
             description: "Guidelines for developing with TypeORM".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("mindrally/skills@typeorm".to_string()),
         },
         DesktopSkillItem {
             name: "web-artifacts-builder".to_string(),
             description: "Build elaborate multi-component HTML artifacts with modern frontend tooling".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@web-artifacts-builder".to_string()),
         },
         DesktopSkillItem {
             name: "webapp-testing".to_string(),
             description: "Playwright-based toolkit for local web app interaction and testing".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@webapp-testing".to_string()),
         },
         DesktopSkillItem {
             name: "xlsx".to_string(),
             description: "Spreadsheet creation, editing, formulas, analysis, and visualization".to_string(),
             source: "online".to_string(),
-            package: None,
+            package: Some("anthropics/skills@xlsx".to_string()),
         },
+        // ===== Tauri 子技能 =====
+        DesktopSkillItem {
+            name: "integrating-tauri-js-frontends".to_string(),
+            description: "Configure JavaScript frontends for Tauri v2 desktop apps".to_string(),
+            source: "online".to_string(),
+            package: Some("dchuk/claude-code-tauri-skills@integrating-tauri-js-frontends".to_string()),
+        },
+        DesktopSkillItem {
+            name: "configuring-tauri-permissions".to_string(),
+            description: "Guides through configuring Tauri permissions and capability integration".to_string(),
+            source: "online".to_string(),
+            package: Some("dchuk/claude-code-tauri-skills@configuring-tauri-permissions".to_string()),
+        },
+        DesktopSkillItem {
+            name: "tauri-event-system".to_string(),
+            description: "Advanced Tauri event patterns for bidirectional communication".to_string(),
+            source: "online".to_string(),
+            package: Some("bobmatnyc/claude-mpm-skills@tauri-event-system".to_string()),
+        },
+        // 注意: 以下技能已移除，因为在线技能库中不存在或非官方:
+        // - product-artifacts: 在线不存在，应作为内置技能处理
+        // - tauri-common-issues: 在线不存在
+        // - nanobanana: 非官方，安装量低
     ]
 }
 
