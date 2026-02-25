@@ -4,7 +4,6 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { Interval } from '@nestjs/schedule';
 import { IssueQueueService } from './issue-queue.service';
 import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceConfigService } from '../purfence-config/purfence-config.service';
@@ -18,6 +17,7 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(IssueSchedulerService.name);
   private readonly processingIssueIds = new Set<string>();
   private isShuttingDown = false;
+  private schedulerInterval: NodeJS.Timeout | null = null;
 
   constructor(
     private readonly issueQueueService: IssueQueueService,
@@ -28,13 +28,32 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this.logger.log('IssueSchedulerService initialized');
+    this.logger.debug('Scheduler interval: 5000ms');
     // 启动时恢复处理中的任务（上次重启前未完成的）
     await this.recoverProcessingIssues();
+
+    // 使用 setInterval 替代 @Interval 装饰器
+    this.schedulerInterval = setInterval(() => {
+      this.processQueue().catch(err => {
+        this.logger.error('Failed to process queue: ' + err?.message);
+      });
+    }, 5000);
+
+    this.logger.log('✅ Scheduler interval started (5000ms)');
+    // 立即执行一次
+    await this.processQueue();
   }
 
   async onModuleDestroy() {
     this.logger.log('IssueSchedulerService shutting down...');
     this.isShuttingDown = true;
+
+    // 清理定时器
+    if (this.schedulerInterval) {
+      clearInterval(this.schedulerInterval);
+      this.schedulerInterval = null;
+      this.logger.debug('Scheduler interval cleared');
+    }
 
     // 等待正在处理的任务完成（最多等待 30 秒）
     const maxWaitTime = 30000;
@@ -60,18 +79,22 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
    * 定时检查并处理队列中的 Issue
    * 每 5 秒执行一次
    */
-  @Interval(5000)
   async processQueue() {
+    this.logger.debug('🔍 processQueue triggered');
+
     if (this.isShuttingDown) {
+      this.logger.debug('⏸️  Skipping: shutting down');
       return;
     }
 
     try {
       const maxConcurrency = await this.configService.getMaxIssueConcurrency();
       const processingCount = this.processingIssueIds.size;
+      this.logger.debug(`📊 Concurrency: ${processingCount}/${maxConcurrency}`);
 
       // 如果已达到最大并发数，跳过
       if (processingCount >= maxConcurrency) {
+        this.logger.debug('🛑 Max concurrency reached, skip');
         return;
       }
 
@@ -84,10 +107,11 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
         tasks.push(this.processNextIssue());
       }
 
-      await Promise.all(tasks);
+      const results = await Promise.all(tasks);
+      this.logger.debug(`🎯 Queue round done, results: ${JSON.stringify(results)}`);
     } catch (error) {
       this.logger.error(
-        `Error processing queue: ${error instanceof Error ? error.message : String(error)}`,
+        `❌ Error processing queue: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -99,8 +123,11 @@ export class IssueSchedulerService implements OnModuleInit, OnModuleDestroy {
     const queueItem = await this.issueQueueService.dequeue();
 
     if (!queueItem) {
+      this.logger.debug('ℹ️ No pending item to process');
       return false;
     }
+
+    this.logger.debug(`🚀 Starting processing issueId=${queueItem.issueId}`);
 
     // 开始异步处理，使用 .catch 确保错误被处理
     this.executeIssue(queueItem).catch((error) => {
