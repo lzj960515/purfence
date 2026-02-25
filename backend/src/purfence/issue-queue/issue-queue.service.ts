@@ -12,6 +12,7 @@ import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceConfigService } from '../purfence-config/purfence-config.service';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import * as fs from 'node:fs';
 import Database from 'better-sqlite3';
 
 /**
@@ -102,8 +103,32 @@ export class IssueQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly issueService: PurfenceIssueService,
     private readonly configService: PurfenceConfigService,
   ) {
-    // Store the SQLite database in the OS temp directory
-    this.dbPath = path.join(os.tmpdir(), 'purfence-issue-queue.db');
+    // Store the queue data in the main application database for persistence.
+    // Use the same database path resolution as TypeORM config for consistency:
+    // Priority: TYPEORM_DATABASE env var > fallback to ~/.purfence/database.sqlite
+    const typeormDatabase = process.env.TYPEORM_DATABASE;
+    if (typeormDatabase) {
+      // Use the same database file as TypeORM
+      this.dbPath = typeormDatabase;
+    } else {
+      // Fallback for non-Tauri environments (development, testing)
+      const appDataDir = path.join(os.homedir(), '.purfence');
+      this.dbPath = path.join(appDataDir, 'database.sqlite');
+    }
+
+    // Ensure the database directory exists
+    const dbDir = path.dirname(this.dbPath);
+    try {
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+        this.logger.log(`Created database directory: ${dbDir}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to create database directory ${dbDir}: ${errorMessage}`);
+      throw error;
+    }
+
     this.logger.log(`Queue database path: ${this.dbPath}`);
   }
 
