@@ -12,6 +12,7 @@ type SettingsTab =
   | 'scheduled-tasks'
   | 'app'
   | 'skills'
+  | 'queue'
 
 export function SettingsPage() {
   const navigate = useNavigate()

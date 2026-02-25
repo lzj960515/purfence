@@ -39,9 +39,8 @@ import { AgentArtifactUpdateInput } from './artifact/agent-artifact-update.input
 import { PurfenceScheduledTaskModule } from './scheduled-task/purfence-scheduled-task.module';
 import { PurfenceAgentService } from './agent.service';
 import { PurfenceAppConfigModule } from './app-config/purfence-app-config.module';
-import { IssueQueue } from './issue-queue/issue-queue.entity';
 import { IssueQueueService } from './issue-queue/issue-queue.service';
-import { IssueSchedulerService } from './issue-queue/issue-scheduler.service';
+import { IssueQueueController } from './issue-queue/issue-queue.controller';
 
 @Module({
   imports: [
@@ -50,7 +49,6 @@ import { IssueSchedulerService } from './issue-queue/issue-scheduler.service';
       PurfenceIssue,
       PurfenceExecution,
       AgentArtifact,
-      IssueQueue,
     ]),
     ToolsModule,
     ModelProviderConfigModule,
@@ -66,7 +64,6 @@ import { IssueSchedulerService } from './issue-queue/issue-scheduler.service';
           PurfenceIssue,
           PurfenceExecution,
           AgentArtifact,
-          IssueQueue,
         ]),
       ],
       resolvers: [
@@ -120,7 +117,7 @@ import { IssueSchedulerService } from './issue-queue/issue-scheduler.service';
       ],
     }),
   ],
-  controllers: [AgentController],
+  controllers: [AgentController, IssueQueueController],
   providers: [
     AgentGateway,
     PurfenceExecutionService,
@@ -134,14 +131,12 @@ import { IssueSchedulerService } from './issue-queue/issue-scheduler.service';
     ProviderModelService,
     PurfenceAgentService,
     IssueQueueService,
-    IssueSchedulerService,
   ],
   exports: [
     PurfenceIssueService,
     PurfenceExecutionService,
     PurfenceProjectService,
     IssueQueueService,
-    IssueSchedulerService,
   ],
 })
 export class PurfenceModule {}

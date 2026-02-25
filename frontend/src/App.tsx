@@ -14,6 +14,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ScheduledTaskSettingsPage } from '@/pages/ScheduledTaskSettingsPage'
 import { AppConfigPage } from '@/pages/AppConfigPage'
 import { SkillsSettingsPage } from '@/pages/SkillsSettingsPage'
+import { QueueManagementPage } from '@/pages/QueueManagementPage'
 import { ErrorBoundary } from '@/components/error'
 
 function RootRedirect() {
@@ -45,6 +46,7 @@ function App() {
               <Route path="scheduled-tasks" element={<ScheduledTaskSettingsPage />} />
               <Route path="app" element={<AppConfigPage />} />
               <Route path="skills" element={<SkillsSettingsPage />} />
+              <Route path="queue" element={<QueueManagementPage />} />
             </Route>
           </Route>
         </Routes>
