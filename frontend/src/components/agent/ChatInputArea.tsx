@@ -10,7 +10,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Paperclip, ArrowUp, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { AgentType, AgentOption } from '@/lib/socket-agent'
+import type { AgentType } from '@/lib/socket-agent'
 import { AGENT_OPTIONS } from '@/lib/socket-agent'
 
 interface ProviderOption {

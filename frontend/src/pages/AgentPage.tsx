@@ -6,7 +6,6 @@ import { useSocketAgent } from '@/hooks/useSocketAgent';
 import { useProviderConfigs } from '@/hooks/useProviderConfigs';
 import { fetchConversationMessages } from '@/api/agent.api';
 import type { ChatMessage, AgentType } from '@/lib/socket-agent';
-import { AGENT_OPTIONS as agentOptions } from '@/lib/socket-agent';
 
 export function AgentPage() {
   const [searchParams, setSearchParams] = useSearchParams();
