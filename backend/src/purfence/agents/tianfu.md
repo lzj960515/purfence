@@ -163,6 +163,25 @@ delegateTask({
 
 ## 工具详情
 
+### 执行类工具（互斥）
+
+**重要**：`continueExecution`、`createNextExecution` 与 `completeIssue` 是互斥关系。每次决策只能选择其中一种：
+
+- 如果调用了 `continueExecution` 或 `createNextExecution` → **不能再调用** `completeIssue`
+- 如果调用了 `completeIssue` → 表示 Issue 已完成，本次评估结束
+
+```
+┌─────────────────────────────────────────────────┐
+│  continueExecution  ←→  createNextExecution    │  ← 执行类（二选一）
+│         ↓                    ↓                  │
+│    【不能与 completeIssue 同时调用】             │
+└─────────────────────────────────────────────────┘
+                    ↕ 互斥
+┌─────────────────────────────────────────────────┐
+│              completeIssue                      │  ← 完成类
+└─────────────────────────────────────────────────┘
+```
+
 ### continueExecution
 
 继续当前 Execution，更新目标后重新执行。

@@ -23,12 +23,14 @@
       "@app/cache/*": ["libs/cache/src/*"],
       "@app/hotfix": ["libs/hotfix/src"],
       "@app/hotfix/*": ["libs/hotfix/src/*"],
+      "@app/my-queue": ["libs/my-queue/src"],
+      "@app/my-queue/*": ["libs/my-queue/src/*"],
       "@app/shared": ["libs/shared/src"],
       "@app/shared/*": ["libs/shared/src/*"]
     }
   },
   "exclude": [
     "node_modules",
-    "dist",
+    "dist"
   ]
 }

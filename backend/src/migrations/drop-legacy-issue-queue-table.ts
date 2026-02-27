@@ -4,8 +4,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Migration: Drop legacy tbl_issue_queue table
  *
  * Background:
- * - The queue system has been migrated from TypeORM to liteque
- * - liteque uses the 'tasks' table for job management
+ * - The queue system has been migrated from legacy TypeORM table jobs
+ * - Job management now uses the unified queue job table
  * - The old tbl_issue_queue table is no longer used by any code
  * - This migration removes the deprecated table to keep the database clean
  *
@@ -17,7 +17,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *
  * Decision: Direct deletion without data migration
  * Rationale:
- *   1. Code has fully migrated to liteque's tasks table
+ *   1. Code has fully migrated away from `tbl_issue_queue`
  *   2. Only 2 pending records with low value
  *   3. 7 failed records have no migration value
  *   4. No TypeORM entity exists for this table

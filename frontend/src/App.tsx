@@ -47,6 +47,7 @@ function App() {
               <Route path="app" element={<AppConfigPage />} />
               <Route path="skills" element={<SkillsSettingsPage />} />
               <Route path="queue" element={<QueueManagementPage />} />
+              <Route path="queue/:queueId" element={<QueueManagementPage />} />
             </Route>
           </Route>
         </Routes>

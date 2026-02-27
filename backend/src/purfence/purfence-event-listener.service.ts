@@ -1,19 +1,14 @@
+import { MyQueueService } from '@app/my-queue';
 import { Log } from '@nest-mods/log';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PurfenceExecutionService } from './purfence-execution.service';
 import { PurfenceProjectService } from './purfence-project.service';
 import { PurfenceIssueService } from './purfence-issue.service';
-import { PurfenceIssue } from './purfence-issue.entity';
+import { PurfenceExecution } from './purfence-execution.entity';
 import { IssueOrigin, PurfenceStatus } from './purfence-status.enum';
-import { IssueQueueService } from './issue-queue/issue-queue.service';
+import { PurfenceIssue } from './purfence-issue.entity';
 
-/**
- * Event listener service for Purfence module.
- * Handles all events emitted by EntitySubscriber and services.
- *
- * Uses liteque-based IssueQueueService for issue processing.
- */
 @Injectable()
 export class PurfenceEventListenerService {
   @Log() logger: Logger;
@@ -22,16 +17,9 @@ export class PurfenceEventListenerService {
     private readonly executionService: PurfenceExecutionService,
     private readonly projectService: PurfenceProjectService,
     private readonly issueService: PurfenceIssueService,
-    private readonly issueQueueService: IssueQueueService,
+    private readonly myQueueService: MyQueueService,
   ) {}
 
-  /**
-   * Handle purfence.issue.created event
-   * Triggered by: PurfenceIssueSubscriber.afterInsert
-   * Delay: 1000ms
-   *
-   * 将 Issue 加入 liteque 队列，由 Runner 自动调度执行
-   */
   @OnEvent('purfence.issue.created')
   async handleIssueCreated(payload: { issueId: string }) {
     try {
@@ -47,25 +35,13 @@ export class PurfenceEventListenerService {
           issue.status = PurfenceStatus.needs_user;
           await issue.save();
         }
-        this.logger.log(
-          `Skipping queue for AI-originated issue: ${issueId}`,
-        );
+        this.logger.log(`Skipping queue for AI-originated issue: ${issueId}`);
         return;
       }
 
-      this.logger.log(
-        `Enqueueing issue ${issueId} for processing`,
-      );
+      this.logger.log(`Enqueueing issue ${issueId} for processing`);
 
-      // 将 Issue 加入队列，延迟 1 秒后由 Runner 调度执行
-      await this.issueQueueService.enqueue(issueId, {
-        projectId: issue.projectId,
-        title: issue.title,
-        description: issue.description,
-        origin: issue.origin,
-      }, {
-        delayMs: 1000,  // 延迟 1 秒入队
-      });
+      await this.issueService.startIssue(issueId);
     } catch (error) {
       this.logger.error(
         `Failed to handle purfence.issue.created for issue ${payload.issueId}: ${error.message}`,
@@ -127,13 +103,98 @@ export class PurfenceEventListenerService {
         `Handling purfence.execution.execute for execution: ${executionId}`,
       );
 
-      return this.executionService.execute(executionId);
+      return await this.executionService.execute(executionId);
     } catch (error) {
+      await this.nackByExecutionId(payload.executionId, error);
+      await PurfenceExecution.update(payload.executionId, {
+        status: PurfenceStatus.failed,
+        error: error instanceof Error ? error.message : String(error),
+      });
       this.logger.error(
         `Failed to handle purfence.execution.execute for execution ${payload.executionId}: ${error.message}`,
         error.stack,
       );
     }
+  }
+
+  @OnEvent('execution-queue')
+  async handleExecutionQueueDispatch(queueJobId: string, payload: unknown) {
+    const executionId = this.resolveExecutionId(payload);
+    if (!executionId) {
+      await this.myQueueService.nack({
+        jobId: queueJobId,
+        reason: 'execution-queue payload is missing executionId',
+      });
+      return;
+    }
+
+    try {
+      const execution = await PurfenceExecution.findOne({
+        where: { id: executionId },
+      });
+      if (!execution) {
+        await this.myQueueService.nack({
+          jobId: queueJobId,
+          reason: `execution not found: ${executionId}`,
+        });
+        return;
+      }
+
+      if (!execution.queueJobId || execution.queueJobId !== queueJobId) {
+        execution.queueJobId = queueJobId;
+        await execution.save();
+      }
+
+      await this.executionService.execute(executionId);
+    } catch (error) {
+      await this.myQueueService.nack({
+        jobId: queueJobId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      await PurfenceExecution.update(executionId, {
+        status: PurfenceStatus.failed,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      this.logger.error(
+        `Failed to execute queue job ${queueJobId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
+
+  @OnEvent('purfence.agent.on-end.success')
+  async handleAgentOnEndSuccess(payload: {
+    conversationId: string;
+    context: Record<string, unknown>;
+  }) {
+    const eventName = this.contextString(payload.context, 'event');
+    if (eventName !== 'purfence.evaluation.stream-ended') {
+      return;
+    }
+
+    const queueJobId = await this.resolveQueueJobId(payload);
+    if (!queueJobId) {
+      return;
+    }
+
+    await this.myQueueService.ack(queueJobId);
+  }
+
+  @OnEvent('purfence.agent.on-end.failure')
+  async handleAgentOnEndFailure(payload: {
+    conversationId: string;
+    context: Record<string, unknown>;
+    error?: unknown;
+  }) {
+    const queueJobId = await this.resolveQueueJobId(payload);
+    if (!queueJobId) {
+      return;
+    }
+
+    await this.myQueueService.nack({
+      jobId: queueJobId,
+      reason: this.failureReason(payload.error),
+    });
   }
 
   /**
@@ -150,12 +211,81 @@ export class PurfenceEventListenerService {
         `Handling purfence.execution.evaluate for execution: ${executionId}`,
       );
 
-      return this.executionService.evaluateAndScheduleNextStep(executionId);
+      return await this.executionService.evaluateAndScheduleNextStep(
+        executionId,
+      );
     } catch (error) {
+      await this.nackByExecutionId(payload.executionId, error);
       this.logger.error(
         `Failed to handle purfence.execution.evaluate for execution ${payload.executionId}: ${error.message}`,
         error.stack,
       );
     }
+  }
+
+  private resolveExecutionId(payload: unknown): string | undefined {
+    if (!payload || typeof payload !== 'object') {
+      return undefined;
+    }
+    const executionId = (payload as { executionId?: unknown }).executionId;
+    return typeof executionId === 'string' && executionId.trim()
+      ? executionId
+      : undefined;
+  }
+
+  private async resolveQueueJobId(payload: {
+    conversationId: string;
+    context: Record<string, unknown>;
+  }): Promise<string | undefined> {
+    const executionId =
+      this.contextString(payload.context, 'executionId') ??
+      payload.conversationId;
+    if (!executionId) {
+      return undefined;
+    }
+
+    const execution = await PurfenceExecution.findOne({
+      where: { id: executionId },
+    });
+    if (execution?.status !== PurfenceStatus.done) {
+      return undefined;
+    }
+    return execution?.queueJobId?.trim() || undefined;
+  }
+
+  private async nackByExecutionId(
+    executionId: string,
+    error: unknown,
+  ): Promise<void> {
+    const execution = await PurfenceExecution.findOne({
+      where: { id: executionId },
+    });
+    const queueJobId = execution?.queueJobId?.trim();
+    if (!queueJobId) {
+      return;
+    }
+
+    await this.myQueueService.nack({
+      jobId: queueJobId,
+      reason: this.failureReason(error),
+    });
+  }
+
+  private contextString(
+    context: Record<string, unknown>,
+    key: string,
+  ): string | undefined {
+    const value = context[key];
+    return typeof value === 'string' && value.trim() ? value : undefined;
+  }
+
+  private failureReason(error: unknown): string {
+    if (error instanceof Error && error.message.trim()) {
+      return error.message;
+    }
+    if (typeof error === 'string' && error.trim()) {
+      return error;
+    }
+    return 'agent onEnd failed';
   }
 }

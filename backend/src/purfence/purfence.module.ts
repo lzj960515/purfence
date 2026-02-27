@@ -39,8 +39,13 @@ import { AgentArtifactUpdateInput } from './artifact/agent-artifact-update.input
 import { PurfenceScheduledTaskModule } from './scheduled-task/purfence-scheduled-task.module';
 import { PurfenceAgentService } from './agent.service';
 import { PurfenceAppConfigModule } from './app-config/purfence-app-config.module';
-import { IssueQueueService } from './issue-queue/issue-queue.service';
-import { IssueQueueController } from './issue-queue/issue-queue.controller';
+import { MyQueue, MyQueueJob, MyQueueModule } from '@app/my-queue';
+import { MyQueueDto } from './my-queue/my-queue.dto';
+import { MyQueueCreateInput } from './my-queue/my-queue-create.input';
+import { MyQueueUpdateInput } from './my-queue/my-queue-update.input';
+import { MyQueueJobDto } from './my-queue/my-queue-job.dto';
+import { MyQueueJobCreateInput } from './my-queue/my-queue-job-create.input';
+import { MyQueueJobUpdateInput } from './my-queue/my-queue-job-update.input';
 
 @Module({
   imports: [
@@ -49,6 +54,8 @@ import { IssueQueueController } from './issue-queue/issue-queue.controller';
       PurfenceIssue,
       PurfenceExecution,
       AgentArtifact,
+      MyQueue,
+      MyQueueJob,
     ]),
     ToolsModule,
     ModelProviderConfigModule,
@@ -56,6 +63,7 @@ import { IssueQueueController } from './issue-queue/issue-queue.controller';
     ClaudeCodeConfigModule,
     PurfenceScheduledTaskModule,
     PurfenceAppConfigModule,
+    MyQueueModule,
     OAuthModule,
     NestjsQueryGraphQLModule.forFeature({
       imports: [
@@ -64,6 +72,8 @@ import { IssueQueueController } from './issue-queue/issue-queue.controller';
           PurfenceIssue,
           PurfenceExecution,
           AgentArtifact,
+          MyQueue,
+          MyQueueJob,
         ]),
       ],
       resolvers: [
@@ -114,10 +124,34 @@ import { IssueQueueController } from './issue-queue/issue-queue.controller';
           enableTotalCount: true,
           pagingStrategy: PagingStrategies.OFFSET,
         },
+        {
+          EntityClass: MyQueue,
+          DTOClass: MyQueueDto,
+          CreateDTOClass: MyQueueCreateInput,
+          UpdateDTOClass: MyQueueUpdateInput,
+          read: {},
+          create: { many: { disabled: true } },
+          update: { many: { disabled: true } },
+          delete: { many: { disabled: true } },
+          enableTotalCount: true,
+          pagingStrategy: PagingStrategies.OFFSET,
+        },
+        {
+          EntityClass: MyQueueJob,
+          DTOClass: MyQueueJobDto,
+          CreateDTOClass: MyQueueJobCreateInput,
+          UpdateDTOClass: MyQueueJobUpdateInput,
+          read: {},
+          create: { many: { disabled: true } },
+          update: { many: { disabled: true } },
+          delete: { many: { disabled: true } },
+          enableTotalCount: true,
+          pagingStrategy: PagingStrategies.OFFSET,
+        },
       ],
     }),
   ],
-  controllers: [AgentController, IssueQueueController],
+  controllers: [AgentController],
   providers: [
     AgentGateway,
     PurfenceExecutionService,
@@ -130,13 +164,11 @@ import { IssueQueueController } from './issue-queue/issue-queue.controller';
     PurfenceExecutionSubscriber,
     ProviderModelService,
     PurfenceAgentService,
-    IssueQueueService,
   ],
   exports: [
     PurfenceIssueService,
     PurfenceExecutionService,
     PurfenceProjectService,
-    IssueQueueService,
   ],
 })
 export class PurfenceModule {}

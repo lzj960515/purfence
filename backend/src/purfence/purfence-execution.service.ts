@@ -28,7 +28,7 @@ export class PurfenceExecutionService {
       projectId: issue.projectId,
       issueId: issue.id,
       goal,
-      status: PurfenceStatus.running,
+      status: PurfenceStatus.open,
     });
     await execution.save();
 
@@ -55,7 +55,6 @@ export class PurfenceExecutionService {
     execution.status = PurfenceStatus.running;
     await execution.save();
 
-    // 触发重新执行
     CommonService.emit('purfence.execution.execute', {
       executionId: execution.id,
     });
@@ -140,12 +139,12 @@ ${goalLine}
   /**
    * 评估 Execution 完成后的下一步行动
    *
-     * 使用天府（tianfu）Agent + 工具模式，让 AI 自主决策：
-    * - continueExecution: 继续当前执行（更新目标后重新执行）
-    * - createNextExecution: 创建下一执行（新阶段）
-    * - completeIssue: 完成 Issue（含合并分支）
-    * - createNextIssue: 创建后续 Issue
-    */
+   * 使用天府（tianfu）Agent + 工具模式，让 AI 自主决策：
+   * - continueExecution: 继续当前执行（更新目标后重新执行）
+   * - createNextExecution: 创建下一执行（新阶段）
+   * - completeIssue: 完成 Issue（含合并分支）
+   * - createNextIssue: 创建后续 Issue
+   */
   async evaluateAndScheduleNextStep(executionId: string) {
     const execution = await PurfenceExecution.findOneOrFail({
       where: { id: executionId },
@@ -219,12 +218,7 @@ ${execution.goal ? `刚才执行的目标是：${execution.goal}` : '刚才执�
       return [];
     }
 
-    const newRoot = path.join(
-      issue.workdir,
-      '.purfence',
-      issueId,
-      'artifacts',
-    );
+    const newRoot = path.join(issue.workdir, '.purfence', issueId, 'artifacts');
     if (!(await pathExists(newRoot))) {
       return [];
     }
@@ -286,7 +280,6 @@ ${execution.goal ? `刚才执行的目标是：${execution.goal}` : '刚才执�
    - 如果原文是英文，用中文改写
 
 2. 收到名称和描述后，直接使用 updateProject 更新项目信息`;
-
 
     const conversationId = crypto.randomUUID();
 

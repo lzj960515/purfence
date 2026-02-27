@@ -9,7 +9,6 @@ type PurfenceConfig = {
   id: string
   projectsRootPath?: string | null
   proxyUrl?: string | null
-  maxIssueConcurrency?: number | null
   createdAt: string
   updatedAt: string
 }
@@ -31,11 +30,9 @@ export function usePurfenceConfig() {
   const saveConfig = async (input: {
     projectsRootPath: string
     proxyUrl: string
-    maxIssueConcurrency: number
   }) => {
     const normalizedProjectsRootPath = input.projectsRootPath.trim()
     const normalizedProxyUrl = input.proxyUrl.trim()
-    const maxIssueConcurrency = Math.max(1, input.maxIssueConcurrency)
 
     if (config) {
       await updateMutation({
@@ -45,7 +42,6 @@ export function usePurfenceConfig() {
             update: {
               projectsRootPath: normalizedProjectsRootPath,
               proxyUrl: normalizedProxyUrl || null,
-              maxIssueConcurrency,
             },
           },
         },
@@ -57,7 +53,6 @@ export function usePurfenceConfig() {
             purfenceConfig: {
               projectsRootPath: normalizedProjectsRootPath,
               proxyUrl: normalizedProxyUrl || null,
-              maxIssueConcurrency,
             },
           },
         },

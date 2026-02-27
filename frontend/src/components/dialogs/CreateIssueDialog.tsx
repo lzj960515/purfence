@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,19 +6,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 interface CreateIssueDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreate: (title: string, slug: string, description: string) => void
-  loading?: boolean
-  projectName?: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreate: (title: string, slug: string, description: string) => void;
+  loading?: boolean;
+  projectName?: string;
 }
 
 export function CreateIssueDialog({
@@ -28,45 +28,48 @@ export function CreateIssueDialog({
   loading = false,
   projectName,
 }: CreateIssueDialogProps) {
-  const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [description, setDescription] = useState('')
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [description, setDescription] = useState("");
 
-  const canCreate = title.trim().length > 0 && slug.trim().length > 0 && description.trim().length > 0
+  const canCreate =
+    title.trim().length > 0 &&
+    slug.trim().length > 0 &&
+    description.trim().length > 0;
 
   // 从标题自动生成 slug
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 48)
-  }
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 48);
+  };
 
   const handleTitleChange = (value: string) => {
-    setTitle(value)
+    setTitle(value);
     // 如果 slug 还没填，自动填充
     if (!slug) {
-      setSlug(generateSlug(value))
+      setSlug(generateSlug(value));
     }
-  }
+  };
 
   const handleCreate = () => {
-    if (!canCreate) return
-    onCreate(title.trim(), slug.trim(), description.trim())
-    setTitle('')
-    setSlug('')
-    setDescription('')
-  }
+    if (!canCreate) return;
+    onCreate(title.trim(), slug.trim(), description.trim());
+    setTitle("");
+    setSlug("");
+    setDescription("");
+  };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && !loading) {
-      setTitle('')
-      setSlug('')
-      setDescription('')
+      setTitle("");
+      setSlug("");
+      setDescription("");
     }
-    onOpenChange(newOpen)
-  }
+    onOpenChange(newOpen);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -131,10 +134,10 @@ export function CreateIssueDialog({
             取消
           </Button>
           <Button disabled={!canCreate || loading} onClick={handleCreate}>
-            {loading ? '创建中…' : '创建并执行 MVP-1'}
+            {loading ? "创建中…" : "创建并执行"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

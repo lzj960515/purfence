@@ -72,3 +72,5 @@ experiments/**/*.js.map
 /.claude
 /.project-purfence
 /docs*.dmg
+
+.sisyphus

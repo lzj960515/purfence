@@ -51,6 +51,19 @@ interface UseUpdateReturn {
 
 const CHECK_INTERVAL = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
 
+function isTauriRuntime(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const tauriWindow = window as Window & {
+    __TAURI__?: unknown
+    __TAURI_INTERNALS__?: unknown
+  }
+
+  return Boolean(tauriWindow.__TAURI__ || tauriWindow.__TAURI_INTERNALS__)
+}
+
 export function useUpdate(): UseUpdateReturn {
   const [status, setStatus] = useState<UpdateStatus>('idle')
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
@@ -62,9 +75,15 @@ export function useUpdate(): UseUpdateReturn {
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const tauriAvailableRef = useRef<boolean>(isTauriRuntime())
 
   // Get current version on mount
   useEffect(() => {
+    if (!tauriAvailableRef.current) {
+      setCurrentVersion('')
+      return
+    }
+
     invoke<string>('get_current_version')
       .then((version) => {
         console.log('[useUpdate] Current version:', version)
@@ -75,6 +94,10 @@ export function useUpdate(): UseUpdateReturn {
 
   // Set up periodic check
   useEffect(() => {
+    if (!tauriAvailableRef.current) {
+      return
+    }
+
     // Check on mount (with a small delay to let app initialize)
     const initialCheckTimeout = setTimeout(() => {
       checkForUpdates()
@@ -97,6 +120,12 @@ export function useUpdate(): UseUpdateReturn {
   }, [])
 
   const checkForUpdates = useCallback(async (): Promise<boolean> => {
+    if (!tauriAvailableRef.current) {
+      setStatus('idle')
+      setError(null)
+      return false
+    }
+
     if (status === 'checking' || status === 'downloading') {
       return false
     }
@@ -152,6 +181,10 @@ export function useUpdate(): UseUpdateReturn {
   }, [status])
 
   const startDownload = useCallback(async () => {
+    if (!tauriAvailableRef.current) {
+      return
+    }
+
     if (!updateManifest) {
       console.error('[useUpdate] No update manifest available')
       setError('没有可用的更新')
@@ -220,6 +253,10 @@ export function useUpdate(): UseUpdateReturn {
   }, [])
 
   const installAndRestart = useCallback(async () => {
+    if (!tauriAvailableRef.current) {
+      return
+    }
+
     try {
       console.log('[useUpdate] Restarting app to install update...')
       await relaunch()

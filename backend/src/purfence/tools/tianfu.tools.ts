@@ -84,12 +84,6 @@ export class TianfuTools {
   async completeIssue(_: unknown, options: ToolExecuteOptions) {
     const issueId = options.context.get('issueId') as string;
     const executionId = options.context.get('executionId') as string;
-    const slackAppConfigId = options.context.get('slackAppConfigId') as
-      | string
-      | undefined;
-    const slackChannelId = options.context.get('slackChannelId') as
-      | string
-      | undefined;
 
     if (!issueId) throw new Error('issueId is required in context');
 

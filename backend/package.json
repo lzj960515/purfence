@@ -92,7 +92,6 @@
     "graphql-scalars": "^1.24.2",
     "gray-matter": "^4.0.3",
     "hpagent": "^1.2.0",
-    "liteque": "^0.8.0",
     "lodash": "^4.17.21",
     "markitdown-ts": "^0.0.8",
     "mime-types": "^3.0.1",
@@ -184,6 +183,7 @@
       "^@src(|/.*)$": "<rootDir>/src/$1",
       "^@app/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
       "^@app/hotfix(|/.*)$": "<rootDir>/libs/hotfix/src/$1",
+      "^@app/my-queue(|/.*)$": "<rootDir>/libs/my-queue/src/$1",
       "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1",
       "^@app/my-agent(|/.*)$": "<rootDir>/libs/my-agent/src/$1"
     },
