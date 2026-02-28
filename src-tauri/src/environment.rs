@@ -37,7 +37,7 @@ pub struct DesktopSkillItem {
     name: String,
     description: String,
     source: String,
-    package: Option<String>,
+    command: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -311,7 +311,7 @@ fn parse_skill_metadata(skill_dir: &Path) -> DesktopSkillItem {
         name,
         description,
         source: "installed".to_string(),
-        package: None,
+        command: None,
     }
 }
 
@@ -414,11 +414,18 @@ fn parse_remote_skill_refs(stdout: &str) -> Vec<DesktopSkillItem> {
             continue;
         }
 
+        // 生成完整安装命令
+        let command = format!(
+            "npx skills add https://github.com/{} --skill {} -g -y --agent claude-code",
+            package.split('@').next().unwrap_or(package),
+            skill_name
+        );
+
         result.push(DesktopSkillItem {
             name: skill_name,
             description: package.to_string(),
             source: "online".to_string(),
-            package: Some(package.to_string()),
+            command: Some(command),
         });
     }
 
@@ -442,148 +449,124 @@ fn run_skills_find(query: &str) -> Result<Vec<DesktopSkillItem>, String> {
 
 fn fixed_online_recommended_skills() -> Vec<DesktopSkillItem> {
     // 官方 Anthropic 技能仓库: https://github.com/anthropics/skills
-    // 安装命令格式: npx skills add <owner/repo@skill> -g -y --agent claude-code
+    // 安装命令格式: npx skills add https://github.com/<owner/repo> --skill <skill-name> -g -y --agent claude-code
     vec![
         // ===== 官方 Anthropic 技能 =====
         DesktopSkillItem {
             name: "algorithmic-art".to_string(),
             description: "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@algorithmic-art".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill algorithmic-art -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "browser-use".to_string(),
             description: "Automates browser interactions for web testing, form filling, screenshots, and extraction".to_string(),
             source: "online".to_string(),
-            package: Some("browser-use/browser-use@browser-use".to_string()),
+            command: Some("npx skills add https://github.com/browser-use/browser-use --skill browser-use -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "canvas-design".to_string(),
             description: "Create beautiful visual art in .png and .pdf documents using design philosophy".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@canvas-design".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill canvas-design -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "doc-coauthoring".to_string(),
             description: "Structured workflow for co-authoring documentation and technical specs".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@doc-coauthoring".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill doc-coauthoring -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "docx".to_string(),
             description: "Professional .docx document creation, editing, tracked changes, and comments".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@docx".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill docx -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "find-skills".to_string(),
             description: "Discover and install agent skills for specific tasks".to_string(),
             source: "online".to_string(),
-            package: Some("vercel-labs/skills@find-skills".to_string()),
+            command: Some("npx skills add https://github.com/vercel-labs/skills --skill find-skills -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "frontend-design".to_string(),
             description: "Create production-grade frontend interfaces with high design quality".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@frontend-design".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill frontend-design -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "mcp-builder".to_string(),
             description: "Guide for building MCP servers that integrate external services".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@mcp-builder".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill mcp-builder -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "nestjs-best-practices".to_string(),
             description: "NestJS architecture and best practices for production apps".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@nestjs-best-practices".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill nestjs-best-practices -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "pdf".to_string(),
             description: "Comprehensive PDF extraction, editing, merging, splitting, and form handling".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@pdf".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill pdf -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "playwright-cli".to_string(),
             description: "Automates browser interactions for web testing, screenshots, and data extraction".to_string(),
             source: "online".to_string(),
-            package: Some("microsoft/playwright-cli@playwright-cli".to_string()),
+            command: Some("npx skills add https://github.com/microsoft/playwright-cli --skill playwright-cli -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "pptx".to_string(),
             description: "Presentation creation, editing, layout, and speaker notes tooling".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@pptx".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill pptx -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "skill-creator".to_string(),
             description: "Guide for creating and improving reusable skills".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@skill-creator".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "slack-gif-creator".to_string(),
             description: "Knowledge and utilities for creating Slack-friendly animated GIFs".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@slack-gif-creator".to_string()),
-        },
-        DesktopSkillItem {
-            name: "tauri-v2".to_string(),
-            description: "Tauri v2 cross-platform app development with Rust backend".to_string(),
-            source: "online".to_string(),
-            package: Some("nodnarbnitram/claude-code-extensions@tauri-v2".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill slack-gif-creator -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "theme-factory".to_string(),
             description: "Apply themed visual systems to docs, slides, reports, and HTML artifacts".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@theme-factory".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill theme-factory -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "typeorm".to_string(),
             description: "Guidelines for developing with TypeORM".to_string(),
             source: "online".to_string(),
-            package: Some("mindrally/skills@typeorm".to_string()),
+            command: Some("npx skills add https://github.com/mindrally/skills --skill typeorm -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "web-artifacts-builder".to_string(),
             description: "Build elaborate multi-component HTML artifacts with modern frontend tooling".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@web-artifacts-builder".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill web-artifacts-builder -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "webapp-testing".to_string(),
             description: "Playwright-based toolkit for local web app interaction and testing".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@webapp-testing".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill webapp-testing -g -y --agent claude-code".to_string()),
         },
         DesktopSkillItem {
             name: "xlsx".to_string(),
             description: "Spreadsheet creation, editing, formulas, analysis, and visualization".to_string(),
             source: "online".to_string(),
-            package: Some("anthropics/skills@xlsx".to_string()),
+            command: Some("npx skills add https://github.com/anthropics/skills --skill xlsx -g -y --agent claude-code".to_string()),
         },
-        // ===== Tauri 子技能 =====
-        DesktopSkillItem {
-            name: "integrating-tauri-js-frontends".to_string(),
-            description: "Configure JavaScript frontends for Tauri v2 desktop apps".to_string(),
-            source: "online".to_string(),
-            package: Some("dchuk/claude-code-tauri-skills@integrating-tauri-js-frontends".to_string()),
-        },
-        DesktopSkillItem {
-            name: "configuring-tauri-permissions".to_string(),
-            description: "Guides through configuring Tauri permissions and capability integration".to_string(),
-            source: "online".to_string(),
-            package: Some("dchuk/claude-code-tauri-skills@configuring-tauri-permissions".to_string()),
-        },
-        DesktopSkillItem {
-            name: "tauri-event-system".to_string(),
-            description: "Advanced Tauri event patterns for bidirectional communication".to_string(),
-            source: "online".to_string(),
-            package: Some("bobmatnyc/claude-mpm-skills@tauri-event-system".to_string()),
-        },
+        // 注意: tauri 相关技能已移除
         // 注意: 以下技能已移除，因为在线技能库中不存在或非官方:
         // - product-artifacts: 在线不存在，应作为内置技能处理
         // - tauri-common-issues: 在线不存在
@@ -591,7 +574,7 @@ fn fixed_online_recommended_skills() -> Vec<DesktopSkillItem> {
     ]
 }
 
-fn resolve_online_package_for_skill(skill_name: &str) -> Result<String, String> {
+fn resolve_online_command_for_skill(skill_name: &str) -> Result<String, String> {
     let mut candidates = run_skills_find(skill_name)?;
     if candidates.is_empty() {
         return Err(format!("未找到可安装的在线 skill: {}", skill_name));
@@ -600,14 +583,14 @@ fn resolve_online_package_for_skill(skill_name: &str) -> Result<String, String> 
     if let Some(exact) = candidates
         .iter()
         .find(|item| item.name.eq_ignore_ascii_case(skill_name))
-        .and_then(|item| item.package.clone())
+        .and_then(|item| item.command.clone())
     {
         return Ok(exact);
     }
 
     candidates
         .remove(0)
-        .package
+        .command
         .ok_or_else(|| format!("未找到可安装的在线 skill: {}", skill_name))
 }
 
@@ -1247,7 +1230,7 @@ pub async fn desktop_skills_catalog(
 
             let mut item = parse_skill_metadata(&dir);
             item.source = "builtin".to_string();
-            item.package = None;
+            item.command = None;
             recommended.push(item);
         }
     }
@@ -1278,7 +1261,7 @@ pub async fn install_desktop_skill(
     app: AppHandle,
     name: String,
     source: String,
-    package: Option<String>,
+    command: Option<String>,
 ) -> Result<EnvironmentActionResult, String> {
     let target_root = claude_skills_dir()?;
     fs::create_dir_all(&target_root).map_err(|e| e.to_string())?;
@@ -1305,20 +1288,24 @@ pub async fn install_desktop_skill(
     }
 
     if source == "online" {
-        let pkg = match package {
+        // 获取完整的安装命令
+        let install_command = match command {
             Some(value) if !value.trim().is_empty() => value,
-            _ => resolve_online_package_for_skill(&name)?,
+            _ => resolve_online_command_for_skill(&name)?,
         };
-        let output = Command::new("npx")
-            .args([
-                "skills",
-                "add",
-                &pkg,
-                "-g",
-                "-y",
-                "--agent",
-                "claude-code",
-            ])
+
+        // 解析命令以执行
+        // 命令格式: npx skills add https://github.com/... --skill <name> -g -y --agent claude-code
+        let parts: Vec<&str> = install_command.split_whitespace().collect();
+        if parts.is_empty() {
+            return Err("无效的安装命令".to_string());
+        }
+
+        let program = parts[0];
+        let args: Vec<&str> = parts[1..].to_vec();
+
+        let output = Command::new(program)
+            .args(&args)
             .output()
             .map_err(|e| e.to_string())?;
 

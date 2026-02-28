@@ -95,7 +95,7 @@ export function SkillsSettingsPage() {
       const result = await installDesktopSkill({
         name: item.name,
         source: item.source === 'online' ? 'online' : 'builtin',
-        package: item.package,
+        command: item.command,
       })
 
       toast({
