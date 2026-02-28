@@ -4,7 +4,7 @@ export interface DesktopSkillItem {
   name: string
   description: string
   source: 'installed' | 'builtin' | 'online'
-  package?: string
+  command?: string
 }
 
 export interface DesktopSkillsCatalog {
@@ -42,7 +42,7 @@ export async function getDesktopSkillsCatalog(): Promise<DesktopSkillsCatalog> {
 export async function installDesktopSkill(input: {
   name: string
   source: 'builtin' | 'online'
-  package?: string
+  command?: string
 }): Promise<DesktopSkillInstallResult> {
   if (!isTauri()) {
     return {
@@ -58,7 +58,7 @@ export async function installDesktopSkill(input: {
   }>('install_desktop_skill', {
     name: input.name,
     source: input.source,
-    package: input.package || null,
+    command: input.command || null,
   })
 
   return {
