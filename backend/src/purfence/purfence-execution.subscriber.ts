@@ -1,12 +1,12 @@
 import { Log } from '@nest-mods/log';
 import { Logger } from '@nestjs/common';
+import { MyQueueService } from '@app/my-queue';
 import {
   DataSource,
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
 } from 'typeorm';
-import { CommonService } from '../common/common.service';
 import { PurfenceExecution } from './purfence-execution.entity';
 
 @EventSubscriber()
@@ -15,7 +15,10 @@ export class PurfenceExecutionSubscriber
 {
   @Log() logger: Logger;
 
-  constructor(ds: DataSource) {
+  constructor(
+    ds: DataSource,
+    private readonly myQueueService: MyQueueService,
+  ) {
     ds.subscribers.push(this);
   }
 
@@ -25,13 +28,11 @@ export class PurfenceExecutionSubscriber
 
   async afterInsert(event: InsertEvent<PurfenceExecution>) {
     const executionId = event.entity.id;
-    this.logger.log(
-      `Execution created: ${executionId}, emitting purfence.execution.execute`,
+    this.logger.log(`Execution created: ${executionId}, enqueueing execution-queue`);
+    await this.myQueueService.addJob(
+      'execution-queue',
+      { executionId },
+      { delayMs: 500 },
     );
-
-    // Add 500ms delay using setTimeout to mimic BullMQ behavior
-    setTimeout(() => {
-      CommonService.emit('purfence.execution.execute', { executionId });
-    }, 500);
   }
 }

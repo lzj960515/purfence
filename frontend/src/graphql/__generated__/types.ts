@@ -242,6 +242,16 @@ export type CreateOneModelProviderConfigDtoInput = {
   modelProviderConfigDto: ModelProviderConfigCreateInput;
 };
 
+export type CreateOneMyQueueInput = {
+  /** The record to create */
+  myQueue: MyQueueCreateInput;
+};
+
+export type CreateOneMyQueueJobInput = {
+  /** The record to create */
+  myQueueJob: MyQueueJobCreateInput;
+};
+
 export type CreateOnePurfenceAppConfigInput = {
   /** The record to create */
   purfenceAppConfig: PurfenceAppConfigCreateInput;
@@ -304,6 +314,16 @@ export type DeleteOneClaudeCodeConfigInput = {
 };
 
 export type DeleteOneModelProviderConfigDtoInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneMyQueueInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneMyQueueJobInput = {
   /** The id of the record to delete. */
   id: Scalars['ID']['input'];
 };
@@ -373,6 +393,26 @@ export type IdFilterComparison = {
 export type ImportRemoteIssueInput = {
   projectId: Scalars['String']['input'];
   remoteIssueId: Scalars['String']['input'];
+};
+
+export type IntFieldComparison = {
+  between: InputMaybe<IntFieldComparisonBetween>;
+  eq: InputMaybe<Scalars['Int']['input']>;
+  gt: InputMaybe<Scalars['Int']['input']>;
+  gte: InputMaybe<Scalars['Int']['input']>;
+  in: InputMaybe<Array<Scalars['Int']['input']>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  lt: InputMaybe<Scalars['Int']['input']>;
+  lte: InputMaybe<Scalars['Int']['input']>;
+  neq: InputMaybe<Scalars['Int']['input']>;
+  notBetween: InputMaybe<IntFieldComparisonBetween>;
+  notIn: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+export type IntFieldComparisonBetween = {
+  lower: Scalars['Int']['input'];
+  upper: Scalars['Int']['input'];
 };
 
 export type IssueOrigin =
@@ -479,6 +519,8 @@ export type Mutation = {
   createManyPurfenceIssues: Array<PurfenceIssue>;
   createOneClaudeCodeConfig: ClaudeCodeConfig;
   createOneModelProviderConfigDto: ModelProviderConfigDto;
+  createOneMyQueue: MyQueue;
+  createOneMyQueueJob: MyQueueJob;
   createOnePurfenceAppConfig: PurfenceAppConfig;
   createOnePurfenceConfig: PurfenceConfig;
   createOnePurfenceIssue: PurfenceIssue;
@@ -488,6 +530,8 @@ export type Mutation = {
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneClaudeCodeConfig: ClaudeCodeConfigDeleteResponse;
   deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
+  deleteOneMyQueue: MyQueueDeleteResponse;
+  deleteOneMyQueueJob: MyQueueJobDeleteResponse;
   deleteOnePurfenceAppConfig: PurfenceAppConfigDeleteResponse;
   deleteOnePurfenceConfig: PurfenceConfigDeleteResponse;
   deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
@@ -513,6 +557,8 @@ export type Mutation = {
   updateOneAgentArtifact: AgentArtifact;
   updateOneClaudeCodeConfig: ClaudeCodeConfig;
   updateOneModelProviderConfigDto: ModelProviderConfigDto;
+  updateOneMyQueue: MyQueue;
+  updateOneMyQueueJob: MyQueueJob;
   updateOnePurfenceAppConfig: PurfenceAppConfig;
   updateOnePurfenceConfig: PurfenceConfig;
   updateOnePurfenceExecution: PurfenceExecution;
@@ -551,6 +597,16 @@ export type MutationCreateOneClaudeCodeConfigArgs = {
 
 export type MutationCreateOneModelProviderConfigDtoArgs = {
   input: CreateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationCreateOneMyQueueArgs = {
+  input: CreateOneMyQueueInput;
+};
+
+
+export type MutationCreateOneMyQueueJobArgs = {
+  input: CreateOneMyQueueJobInput;
 };
 
 
@@ -596,6 +652,16 @@ export type MutationDeleteOneClaudeCodeConfigArgs = {
 
 export type MutationDeleteOneModelProviderConfigDtoArgs = {
   input: DeleteOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationDeleteOneMyQueueArgs = {
+  input: DeleteOneMyQueueInput;
+};
+
+
+export type MutationDeleteOneMyQueueJobArgs = {
+  input: DeleteOneMyQueueJobInput;
 };
 
 
@@ -727,6 +793,16 @@ export type MutationUpdateOneModelProviderConfigDtoArgs = {
 };
 
 
+export type MutationUpdateOneMyQueueArgs = {
+  input: UpdateOneMyQueueInput;
+};
+
+
+export type MutationUpdateOneMyQueueJobArgs = {
+  input: UpdateOneMyQueueJobInput;
+};
+
+
 export type MutationUpdateOnePurfenceAppConfigArgs = {
   input: UpdateOnePurfenceAppConfigInput;
 };
@@ -767,6 +843,191 @@ export type MutationUpdateRemoteRepositoryArgs = {
 export type MutationUpdateWorkflowConfigArgs = {
   input: UpdateWorkflowConfigInput;
   projectId: Scalars['String']['input'];
+};
+
+export type MyQueue = {
+  __typename?: 'MyQueue';
+  attempts: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  isPaused: Scalars['Boolean']['output'];
+  maxConcurrency: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type MyQueueConnection = {
+  __typename?: 'MyQueueConnection';
+  /** Array of nodes. */
+  nodes: Array<MyQueue>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type MyQueueCreateInput = {
+  attempts: Scalars['Int']['input'];
+  isPaused: Scalars['Boolean']['input'];
+  maxConcurrency: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+};
+
+export type MyQueueDeleteResponse = {
+  __typename?: 'MyQueueDeleteResponse';
+  attempts: Maybe<Scalars['Int']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  /** ID */
+  id: Maybe<Scalars['ID']['output']>;
+  isPaused: Maybe<Scalars['Boolean']['output']>;
+  maxConcurrency: Maybe<Scalars['Int']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type MyQueueFilter = {
+  and: InputMaybe<Array<MyQueueFilter>>;
+  attempts: InputMaybe<IntFieldComparison>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  isPaused: InputMaybe<BooleanFieldComparison>;
+  maxConcurrency: InputMaybe<IntFieldComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<MyQueueFilter>>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type MyQueueJob = {
+  __typename?: 'MyQueueJob';
+  attempts: Scalars['Int']['output'];
+  availableAt: Scalars['DateTime']['output'];
+  completedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  data: Scalars['JSON']['output'];
+  errorMessage: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  queueId: Scalars['String']['output'];
+  queueName: Scalars['String']['output'];
+  runCount: Scalars['Int']['output'];
+  runningAt: Maybe<Scalars['DateTime']['output']>;
+  status: MyQueueJobStatus;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type MyQueueJobConnection = {
+  __typename?: 'MyQueueJobConnection';
+  /** Array of nodes. */
+  nodes: Array<MyQueueJob>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type MyQueueJobCreateInput = {
+  attempts: Scalars['Int']['input'];
+  availableAt: Scalars['DateTime']['input'];
+  data: Scalars['JSON']['input'];
+  queueId: Scalars['String']['input'];
+  queueName: Scalars['String']['input'];
+};
+
+export type MyQueueJobDeleteResponse = {
+  __typename?: 'MyQueueJobDeleteResponse';
+  attempts: Maybe<Scalars['Int']['output']>;
+  availableAt: Maybe<Scalars['DateTime']['output']>;
+  completedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  data: Maybe<Scalars['JSON']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Maybe<Scalars['ID']['output']>;
+  queueId: Maybe<Scalars['String']['output']>;
+  queueName: Maybe<Scalars['String']['output']>;
+  runCount: Maybe<Scalars['Int']['output']>;
+  runningAt: Maybe<Scalars['DateTime']['output']>;
+  status: Maybe<MyQueueJobStatus>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type MyQueueJobFilter = {
+  and: InputMaybe<Array<MyQueueJobFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  or: InputMaybe<Array<MyQueueJobFilter>>;
+  queueId: InputMaybe<StringFieldComparison>;
+  queueName: InputMaybe<StringFieldComparison>;
+  status: InputMaybe<MyQueueJobStatusFilterComparison>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type MyQueueJobSort = {
+  direction: SortDirection;
+  field: MyQueueJobSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type MyQueueJobSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'queueId'
+  | 'queueName'
+  | 'status'
+  | 'updatedAt';
+
+export type MyQueueJobStatus =
+  | 'failed'
+  | 'pending'
+  | 'running'
+  | 'succeeded';
+
+export type MyQueueJobStatusFilterComparison = {
+  eq: InputMaybe<MyQueueJobStatus>;
+  gt: InputMaybe<MyQueueJobStatus>;
+  gte: InputMaybe<MyQueueJobStatus>;
+  iLike: InputMaybe<MyQueueJobStatus>;
+  in: InputMaybe<Array<MyQueueJobStatus>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  like: InputMaybe<MyQueueJobStatus>;
+  lt: InputMaybe<MyQueueJobStatus>;
+  lte: InputMaybe<MyQueueJobStatus>;
+  neq: InputMaybe<MyQueueJobStatus>;
+  notILike: InputMaybe<MyQueueJobStatus>;
+  notIn: InputMaybe<Array<MyQueueJobStatus>>;
+  notLike: InputMaybe<MyQueueJobStatus>;
+};
+
+export type MyQueueJobUpdateInput = {
+  attempts: InputMaybe<Scalars['Int']['input']>;
+  availableAt: InputMaybe<Scalars['DateTime']['input']>;
+  data: InputMaybe<Scalars['JSON']['input']>;
+  queueId: InputMaybe<Scalars['String']['input']>;
+  queueName: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MyQueueSort = {
+  direction: SortDirection;
+  field: MyQueueSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type MyQueueSortFields =
+  | 'attempts'
+  | 'createdAt'
+  | 'id'
+  | 'isPaused'
+  | 'maxConcurrency'
+  | 'name'
+  | 'updatedAt';
+
+export type MyQueueUpdateInput = {
+  attempts: InputMaybe<Scalars['Int']['input']>;
+  isPaused: InputMaybe<Scalars['Boolean']['input']>;
+  maxConcurrency: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OAuthAuthorization = {
@@ -1397,6 +1658,10 @@ export type Query = {
   importedRemoteIssues: Array<PurfenceIssue>;
   modelProviderConfigDto: ModelProviderConfigDto;
   modelProviderConfigDtos: ModelProviderConfigDtoConnection;
+  myQueue: MyQueue;
+  myQueueJob: MyQueueJob;
+  myQueueJobs: MyQueueJobConnection;
+  myQueues: MyQueueConnection;
   purfenceAppConfig: PurfenceAppConfig;
   purfenceAppConfigs: PurfenceAppConfigConnection;
   purfenceConfig: PurfenceConfig;
@@ -1466,6 +1731,30 @@ export type QueryModelProviderConfigDtosArgs = {
   filter?: ModelProviderConfigDtoFilter;
   paging?: OffsetPaging;
   sorting?: Array<ModelProviderConfigDtoSort>;
+};
+
+
+export type QueryMyQueueArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMyQueueJobArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMyQueueJobsArgs = {
+  filter?: MyQueueJobFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<MyQueueJobSort>;
+};
+
+
+export type QueryMyQueuesArgs = {
+  filter?: MyQueueFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<MyQueueSort>;
 };
 
 
@@ -1711,6 +2000,20 @@ export type UpdateOneModelProviderConfigDtoInput = {
   id: Scalars['ID']['input'];
   /** The update to apply. */
   update: ModelProviderConfigUpdateInput;
+};
+
+export type UpdateOneMyQueueInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: MyQueueUpdateInput;
+};
+
+export type UpdateOneMyQueueJobInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: MyQueueJobUpdateInput;
 };
 
 export type UpdateOnePurfenceAppConfigInput = {
@@ -2009,6 +2312,52 @@ export type StartIssueMutationVariables = Exact<{
 
 
 export type StartIssueMutation = { __typename?: 'Mutation', startIssue: string };
+
+export type MyQueuesQueryVariables = Exact<{
+  paging: OffsetPaging;
+  filter: MyQueueFilter;
+  sorting: Array<MyQueueSort> | MyQueueSort;
+}>;
+
+
+export type MyQueuesQuery = { __typename?: 'Query', myQueues: { __typename?: 'MyQueueConnection', totalCount: number, nodes: Array<{ __typename?: 'MyQueue', id: string, name: string, maxConcurrency: number, attempts: number, isPaused: boolean }> } };
+
+export type MyQueueJobsQueryVariables = Exact<{
+  paging: OffsetPaging;
+  filter: MyQueueJobFilter;
+  sorting: Array<MyQueueJobSort> | MyQueueJobSort;
+}>;
+
+
+export type MyQueueJobsQuery = { __typename?: 'Query', myQueueJobs: { __typename?: 'MyQueueJobConnection', totalCount: number, nodes: Array<{ __typename?: 'MyQueueJob', id: string, queueId: string, queueName: string, data: any, status: MyQueueJobStatus, availableAt: any, attempts: number, runCount: number, errorMessage: string | null, createdAt: any, updatedAt: any, runningAt: any | null, completedAt: any | null }> } };
+
+export type MyQueueStatsQueryVariables = Exact<{
+  queueId: Scalars['String']['input'];
+}>;
+
+
+export type MyQueueStatsQuery = { __typename?: 'Query', total: { __typename?: 'MyQueueJobConnection', totalCount: number }, pending: { __typename?: 'MyQueueJobConnection', totalCount: number }, running: { __typename?: 'MyQueueJobConnection', totalCount: number }, succeeded: { __typename?: 'MyQueueJobConnection', totalCount: number }, failed: { __typename?: 'MyQueueJobConnection', totalCount: number } };
+
+export type UpdateMyQueueMutationVariables = Exact<{
+  input: UpdateOneMyQueueInput;
+}>;
+
+
+export type UpdateMyQueueMutation = { __typename?: 'Mutation', updateOneMyQueue: { __typename?: 'MyQueue', id: string, name: string, maxConcurrency: number, attempts: number, isPaused: boolean } };
+
+export type CreateMyQueueJobMutationVariables = Exact<{
+  input: CreateOneMyQueueJobInput;
+}>;
+
+
+export type CreateMyQueueJobMutation = { __typename?: 'Mutation', createOneMyQueueJob: { __typename?: 'MyQueueJob', id: string, queueId: string, queueName: string, status: MyQueueJobStatus, availableAt: any, attempts: number, runCount: number, errorMessage: string | null, createdAt: any } };
+
+export type DeleteMyQueueJobMutationVariables = Exact<{
+  input: DeleteOneMyQueueJobInput;
+}>;
+
+
+export type DeleteMyQueueJobMutation = { __typename?: 'Mutation', deleteOneMyQueueJob: { __typename?: 'MyQueueJobDeleteResponse', id: string | null } };
 
 export type PurfenceScheduledTasksQueryVariables = Exact<{
   paging: InputMaybe<OffsetPaging>;

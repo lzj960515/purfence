@@ -2,7 +2,6 @@ import { Log } from '@nest-mods/log';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AgentHooks,
-  Agent,
   createHooks,
   OnEndHookArgs,
   OperationContext,
@@ -32,8 +31,7 @@ export class MyAgentHooks {
           return;
         }
 
-        if (error) return;
-        if (context.context.get('provider') === ProviderType.CODEX) {
+        if (!error && context.context.get('provider') === ProviderType.CODEX) {
           const title = this.messageService.extractRawText(
             context.input as UIMessage[],
           );
@@ -48,26 +46,37 @@ export class MyAgentHooks {
         const provider = this.llmService.getProviderByModel(model);
         await this.updateSessionUsage({ output, context, provider });
 
-        await this.handleEvent({ agent, context });
+        await this.handleEvent({ context, error });
       },
     });
   }
 
   private async handleEvent({
-    agent,
     context,
+    error,
   }: {
-    agent: Agent;
     context: OperationContext;
+    error?: unknown;
   }) {
     const event = context.context.get('event') as string;
-    if (!event) return;
-
     const contextPayload = Object.fromEntries(context.context.entries());
-    CommonService.emit(event, {
-      ...contextPayload,
-      conversationId: context.conversationId,
-    });
+
+    if (event) {
+      CommonService.emit(event, {
+        ...contextPayload,
+        conversationId: context.conversationId,
+      });
+    }
+
+    CommonService.emit(
+      error ? 'purfence.agent.on-end.failure' : 'purfence.agent.on-end.success',
+      {
+        context: contextPayload,
+        error,
+        event,
+        conversationId: context.conversationId,
+      },
+    );
   }
 
   private async updateSessionUsage({

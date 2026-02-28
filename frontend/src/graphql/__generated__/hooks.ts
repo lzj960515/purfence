@@ -246,6 +246,16 @@ export type CreateOneModelProviderConfigDtoInput = {
   modelProviderConfigDto: ModelProviderConfigCreateInput;
 };
 
+export type CreateOneMyQueueInput = {
+  /** The record to create */
+  myQueue: MyQueueCreateInput;
+};
+
+export type CreateOneMyQueueJobInput = {
+  /** The record to create */
+  myQueueJob: MyQueueJobCreateInput;
+};
+
 export type CreateOnePurfenceAppConfigInput = {
   /** The record to create */
   purfenceAppConfig: PurfenceAppConfigCreateInput;
@@ -308,6 +318,16 @@ export type DeleteOneClaudeCodeConfigInput = {
 };
 
 export type DeleteOneModelProviderConfigDtoInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneMyQueueInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneMyQueueJobInput = {
   /** The id of the record to delete. */
   id: Scalars['ID']['input'];
 };
@@ -377,6 +397,26 @@ export type IdFilterComparison = {
 export type ImportRemoteIssueInput = {
   projectId: Scalars['String']['input'];
   remoteIssueId: Scalars['String']['input'];
+};
+
+export type IntFieldComparison = {
+  between?: InputMaybe<IntFieldComparisonBetween>;
+  eq?: InputMaybe<Scalars['Int']['input']>;
+  gt?: InputMaybe<Scalars['Int']['input']>;
+  gte?: InputMaybe<Scalars['Int']['input']>;
+  in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  lt?: InputMaybe<Scalars['Int']['input']>;
+  lte?: InputMaybe<Scalars['Int']['input']>;
+  neq?: InputMaybe<Scalars['Int']['input']>;
+  notBetween?: InputMaybe<IntFieldComparisonBetween>;
+  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+export type IntFieldComparisonBetween = {
+  lower: Scalars['Int']['input'];
+  upper: Scalars['Int']['input'];
 };
 
 export type IssueOrigin =
@@ -483,6 +523,8 @@ export type Mutation = {
   createManyPurfenceIssues: Array<PurfenceIssue>;
   createOneClaudeCodeConfig: ClaudeCodeConfig;
   createOneModelProviderConfigDto: ModelProviderConfigDto;
+  createOneMyQueue: MyQueue;
+  createOneMyQueueJob: MyQueueJob;
   createOnePurfenceAppConfig: PurfenceAppConfig;
   createOnePurfenceConfig: PurfenceConfig;
   createOnePurfenceIssue: PurfenceIssue;
@@ -492,6 +534,8 @@ export type Mutation = {
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneClaudeCodeConfig: ClaudeCodeConfigDeleteResponse;
   deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
+  deleteOneMyQueue: MyQueueDeleteResponse;
+  deleteOneMyQueueJob: MyQueueJobDeleteResponse;
   deleteOnePurfenceAppConfig: PurfenceAppConfigDeleteResponse;
   deleteOnePurfenceConfig: PurfenceConfigDeleteResponse;
   deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
@@ -517,6 +561,8 @@ export type Mutation = {
   updateOneAgentArtifact: AgentArtifact;
   updateOneClaudeCodeConfig: ClaudeCodeConfig;
   updateOneModelProviderConfigDto: ModelProviderConfigDto;
+  updateOneMyQueue: MyQueue;
+  updateOneMyQueueJob: MyQueueJob;
   updateOnePurfenceAppConfig: PurfenceAppConfig;
   updateOnePurfenceConfig: PurfenceConfig;
   updateOnePurfenceExecution: PurfenceExecution;
@@ -555,6 +601,16 @@ export type MutationCreateOneClaudeCodeConfigArgs = {
 
 export type MutationCreateOneModelProviderConfigDtoArgs = {
   input: CreateOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationCreateOneMyQueueArgs = {
+  input: CreateOneMyQueueInput;
+};
+
+
+export type MutationCreateOneMyQueueJobArgs = {
+  input: CreateOneMyQueueJobInput;
 };
 
 
@@ -600,6 +656,16 @@ export type MutationDeleteOneClaudeCodeConfigArgs = {
 
 export type MutationDeleteOneModelProviderConfigDtoArgs = {
   input: DeleteOneModelProviderConfigDtoInput;
+};
+
+
+export type MutationDeleteOneMyQueueArgs = {
+  input: DeleteOneMyQueueInput;
+};
+
+
+export type MutationDeleteOneMyQueueJobArgs = {
+  input: DeleteOneMyQueueJobInput;
 };
 
 
@@ -731,6 +797,16 @@ export type MutationUpdateOneModelProviderConfigDtoArgs = {
 };
 
 
+export type MutationUpdateOneMyQueueArgs = {
+  input: UpdateOneMyQueueInput;
+};
+
+
+export type MutationUpdateOneMyQueueJobArgs = {
+  input: UpdateOneMyQueueJobInput;
+};
+
+
 export type MutationUpdateOnePurfenceAppConfigArgs = {
   input: UpdateOnePurfenceAppConfigInput;
 };
@@ -771,6 +847,191 @@ export type MutationUpdateRemoteRepositoryArgs = {
 export type MutationUpdateWorkflowConfigArgs = {
   input: UpdateWorkflowConfigInput;
   projectId: Scalars['String']['input'];
+};
+
+export type MyQueue = {
+  __typename?: 'MyQueue';
+  attempts: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  isPaused: Scalars['Boolean']['output'];
+  maxConcurrency: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type MyQueueConnection = {
+  __typename?: 'MyQueueConnection';
+  /** Array of nodes. */
+  nodes: Array<MyQueue>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type MyQueueCreateInput = {
+  attempts?: Scalars['Int']['input'];
+  isPaused?: Scalars['Boolean']['input'];
+  maxConcurrency?: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+};
+
+export type MyQueueDeleteResponse = {
+  __typename?: 'MyQueueDeleteResponse';
+  attempts?: Maybe<Scalars['Int']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  isPaused?: Maybe<Scalars['Boolean']['output']>;
+  maxConcurrency?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type MyQueueFilter = {
+  and?: InputMaybe<Array<MyQueueFilter>>;
+  attempts?: InputMaybe<IntFieldComparison>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  isPaused?: InputMaybe<BooleanFieldComparison>;
+  maxConcurrency?: InputMaybe<IntFieldComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<MyQueueFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type MyQueueJob = {
+  __typename?: 'MyQueueJob';
+  attempts: Scalars['Int']['output'];
+  availableAt: Scalars['DateTime']['output'];
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  data: Scalars['JSON']['output'];
+  errorMessage?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  queueId: Scalars['String']['output'];
+  queueName: Scalars['String']['output'];
+  runCount: Scalars['Int']['output'];
+  runningAt?: Maybe<Scalars['DateTime']['output']>;
+  status: MyQueueJobStatus;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type MyQueueJobConnection = {
+  __typename?: 'MyQueueJobConnection';
+  /** Array of nodes. */
+  nodes: Array<MyQueueJob>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type MyQueueJobCreateInput = {
+  attempts?: Scalars['Int']['input'];
+  availableAt: Scalars['DateTime']['input'];
+  data: Scalars['JSON']['input'];
+  queueId: Scalars['String']['input'];
+  queueName: Scalars['String']['input'];
+};
+
+export type MyQueueJobDeleteResponse = {
+  __typename?: 'MyQueueJobDeleteResponse';
+  attempts?: Maybe<Scalars['Int']['output']>;
+  availableAt?: Maybe<Scalars['DateTime']['output']>;
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  data?: Maybe<Scalars['JSON']['output']>;
+  errorMessage?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  queueId?: Maybe<Scalars['String']['output']>;
+  queueName?: Maybe<Scalars['String']['output']>;
+  runCount?: Maybe<Scalars['Int']['output']>;
+  runningAt?: Maybe<Scalars['DateTime']['output']>;
+  status?: Maybe<MyQueueJobStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type MyQueueJobFilter = {
+  and?: InputMaybe<Array<MyQueueJobFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  or?: InputMaybe<Array<MyQueueJobFilter>>;
+  queueId?: InputMaybe<StringFieldComparison>;
+  queueName?: InputMaybe<StringFieldComparison>;
+  status?: InputMaybe<MyQueueJobStatusFilterComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type MyQueueJobSort = {
+  direction: SortDirection;
+  field: MyQueueJobSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type MyQueueJobSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'queueId'
+  | 'queueName'
+  | 'status'
+  | 'updatedAt';
+
+export type MyQueueJobStatus =
+  | 'failed'
+  | 'pending'
+  | 'running'
+  | 'succeeded';
+
+export type MyQueueJobStatusFilterComparison = {
+  eq?: InputMaybe<MyQueueJobStatus>;
+  gt?: InputMaybe<MyQueueJobStatus>;
+  gte?: InputMaybe<MyQueueJobStatus>;
+  iLike?: InputMaybe<MyQueueJobStatus>;
+  in?: InputMaybe<Array<MyQueueJobStatus>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<MyQueueJobStatus>;
+  lt?: InputMaybe<MyQueueJobStatus>;
+  lte?: InputMaybe<MyQueueJobStatus>;
+  neq?: InputMaybe<MyQueueJobStatus>;
+  notILike?: InputMaybe<MyQueueJobStatus>;
+  notIn?: InputMaybe<Array<MyQueueJobStatus>>;
+  notLike?: InputMaybe<MyQueueJobStatus>;
+};
+
+export type MyQueueJobUpdateInput = {
+  attempts?: InputMaybe<Scalars['Int']['input']>;
+  availableAt?: InputMaybe<Scalars['DateTime']['input']>;
+  data?: InputMaybe<Scalars['JSON']['input']>;
+  queueId?: InputMaybe<Scalars['String']['input']>;
+  queueName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MyQueueSort = {
+  direction: SortDirection;
+  field: MyQueueSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type MyQueueSortFields =
+  | 'attempts'
+  | 'createdAt'
+  | 'id'
+  | 'isPaused'
+  | 'maxConcurrency'
+  | 'name'
+  | 'updatedAt';
+
+export type MyQueueUpdateInput = {
+  attempts?: InputMaybe<Scalars['Int']['input']>;
+  isPaused?: InputMaybe<Scalars['Boolean']['input']>;
+  maxConcurrency?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OAuthAuthorization = {
@@ -1401,6 +1662,10 @@ export type Query = {
   importedRemoteIssues: Array<PurfenceIssue>;
   modelProviderConfigDto: ModelProviderConfigDto;
   modelProviderConfigDtos: ModelProviderConfigDtoConnection;
+  myQueue: MyQueue;
+  myQueueJob: MyQueueJob;
+  myQueueJobs: MyQueueJobConnection;
+  myQueues: MyQueueConnection;
   purfenceAppConfig: PurfenceAppConfig;
   purfenceAppConfigs: PurfenceAppConfigConnection;
   purfenceConfig: PurfenceConfig;
@@ -1470,6 +1735,30 @@ export type QueryModelProviderConfigDtosArgs = {
   filter?: ModelProviderConfigDtoFilter;
   paging?: OffsetPaging;
   sorting?: Array<ModelProviderConfigDtoSort>;
+};
+
+
+export type QueryMyQueueArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMyQueueJobArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMyQueueJobsArgs = {
+  filter?: MyQueueJobFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<MyQueueJobSort>;
+};
+
+
+export type QueryMyQueuesArgs = {
+  filter?: MyQueueFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<MyQueueSort>;
 };
 
 
@@ -1715,6 +2004,20 @@ export type UpdateOneModelProviderConfigDtoInput = {
   id: Scalars['ID']['input'];
   /** The update to apply. */
   update: ModelProviderConfigUpdateInput;
+};
+
+export type UpdateOneMyQueueInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: MyQueueUpdateInput;
+};
+
+export type UpdateOneMyQueueJobInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: MyQueueJobUpdateInput;
 };
 
 export type UpdateOnePurfenceAppConfigInput = {
@@ -2013,6 +2316,52 @@ export type StartIssueMutationVariables = Exact<{
 
 
 export type StartIssueMutation = { __typename?: 'Mutation', startIssue: string };
+
+export type MyQueuesQueryVariables = Exact<{
+  paging: OffsetPaging;
+  filter: MyQueueFilter;
+  sorting: Array<MyQueueSort> | MyQueueSort;
+}>;
+
+
+export type MyQueuesQuery = { __typename?: 'Query', myQueues: { __typename?: 'MyQueueConnection', totalCount: number, nodes: Array<{ __typename?: 'MyQueue', id: string, name: string, maxConcurrency: number, attempts: number, isPaused: boolean }> } };
+
+export type MyQueueJobsQueryVariables = Exact<{
+  paging: OffsetPaging;
+  filter: MyQueueJobFilter;
+  sorting: Array<MyQueueJobSort> | MyQueueJobSort;
+}>;
+
+
+export type MyQueueJobsQuery = { __typename?: 'Query', myQueueJobs: { __typename?: 'MyQueueJobConnection', totalCount: number, nodes: Array<{ __typename?: 'MyQueueJob', id: string, queueId: string, queueName: string, data: any, status: MyQueueJobStatus, availableAt: any, attempts: number, runCount: number, errorMessage?: string | null, createdAt: any, updatedAt: any, runningAt?: any | null, completedAt?: any | null }> } };
+
+export type MyQueueStatsQueryVariables = Exact<{
+  queueId: Scalars['String']['input'];
+}>;
+
+
+export type MyQueueStatsQuery = { __typename?: 'Query', total: { __typename?: 'MyQueueJobConnection', totalCount: number }, pending: { __typename?: 'MyQueueJobConnection', totalCount: number }, running: { __typename?: 'MyQueueJobConnection', totalCount: number }, succeeded: { __typename?: 'MyQueueJobConnection', totalCount: number }, failed: { __typename?: 'MyQueueJobConnection', totalCount: number } };
+
+export type UpdateMyQueueMutationVariables = Exact<{
+  input: UpdateOneMyQueueInput;
+}>;
+
+
+export type UpdateMyQueueMutation = { __typename?: 'Mutation', updateOneMyQueue: { __typename?: 'MyQueue', id: string, name: string, maxConcurrency: number, attempts: number, isPaused: boolean } };
+
+export type CreateMyQueueJobMutationVariables = Exact<{
+  input: CreateOneMyQueueJobInput;
+}>;
+
+
+export type CreateMyQueueJobMutation = { __typename?: 'Mutation', createOneMyQueueJob: { __typename?: 'MyQueueJob', id: string, queueId: string, queueName: string, status: MyQueueJobStatus, availableAt: any, attempts: number, runCount: number, errorMessage?: string | null, createdAt: any } };
+
+export type DeleteMyQueueJobMutationVariables = Exact<{
+  input: DeleteOneMyQueueJobInput;
+}>;
+
+
+export type DeleteMyQueueJobMutation = { __typename?: 'Mutation', deleteOneMyQueueJob: { __typename?: 'MyQueueJobDeleteResponse', id?: string | null } };
 
 export type PurfenceScheduledTasksQueryVariables = Exact<{
   paging?: InputMaybe<OffsetPaging>;
@@ -3347,6 +3696,304 @@ export function useStartIssueMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type StartIssueMutationHookResult = ReturnType<typeof useStartIssueMutation>;
 export type StartIssueMutationResult = Apollo.MutationResult<StartIssueMutation>;
 export type StartIssueMutationOptions = Apollo.BaseMutationOptions<StartIssueMutation, StartIssueMutationVariables>;
+export const MyQueuesDocument = gql`
+    query MyQueues($paging: OffsetPaging!, $filter: MyQueueFilter!, $sorting: [MyQueueSort!]!) {
+  myQueues(paging: $paging, filter: $filter, sorting: $sorting) {
+    nodes {
+      id
+      name
+      maxConcurrency
+      attempts
+      isPaused
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useMyQueuesQuery__
+ *
+ * To run a query within a React component, call `useMyQueuesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQueuesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQueuesQuery({
+ *   variables: {
+ *      paging: // value for 'paging'
+ *      filter: // value for 'filter'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function useMyQueuesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<MyQueuesQuery, MyQueuesQueryVariables> & ({ variables: MyQueuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MyQueuesQuery, MyQueuesQueryVariables>(MyQueuesDocument, options);
+      }
+export function useMyQueuesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyQueuesQuery, MyQueuesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MyQueuesQuery, MyQueuesQueryVariables>(MyQueuesDocument, options);
+        }
+// @ts-ignore
+export function useMyQueuesSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<MyQueuesQuery, MyQueuesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueuesQuery, MyQueuesQueryVariables>;
+export function useMyQueuesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueuesQuery, MyQueuesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueuesQuery | undefined, MyQueuesQueryVariables>;
+export function useMyQueuesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueuesQuery, MyQueuesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<MyQueuesQuery, MyQueuesQueryVariables>(MyQueuesDocument, options);
+        }
+export type MyQueuesQueryHookResult = ReturnType<typeof useMyQueuesQuery>;
+export type MyQueuesLazyQueryHookResult = ReturnType<typeof useMyQueuesLazyQuery>;
+export type MyQueuesSuspenseQueryHookResult = ReturnType<typeof useMyQueuesSuspenseQuery>;
+export type MyQueuesQueryResult = Apollo.QueryResult<MyQueuesQuery, MyQueuesQueryVariables>;
+export const MyQueueJobsDocument = gql`
+    query MyQueueJobs($paging: OffsetPaging!, $filter: MyQueueJobFilter!, $sorting: [MyQueueJobSort!]!) {
+  myQueueJobs(paging: $paging, filter: $filter, sorting: $sorting) {
+    nodes {
+      id
+      queueId
+      queueName
+      data
+      status
+      availableAt
+      attempts
+      runCount
+      errorMessage
+      createdAt
+      updatedAt
+      runningAt
+      completedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useMyQueueJobsQuery__
+ *
+ * To run a query within a React component, call `useMyQueueJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQueueJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQueueJobsQuery({
+ *   variables: {
+ *      paging: // value for 'paging'
+ *      filter: // value for 'filter'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function useMyQueueJobsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<MyQueueJobsQuery, MyQueueJobsQueryVariables> & ({ variables: MyQueueJobsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MyQueueJobsQuery, MyQueueJobsQueryVariables>(MyQueueJobsDocument, options);
+      }
+export function useMyQueueJobsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyQueueJobsQuery, MyQueueJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MyQueueJobsQuery, MyQueueJobsQueryVariables>(MyQueueJobsDocument, options);
+        }
+// @ts-ignore
+export function useMyQueueJobsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<MyQueueJobsQuery, MyQueueJobsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueueJobsQuery, MyQueueJobsQueryVariables>;
+export function useMyQueueJobsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueueJobsQuery, MyQueueJobsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueueJobsQuery | undefined, MyQueueJobsQueryVariables>;
+export function useMyQueueJobsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueueJobsQuery, MyQueueJobsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<MyQueueJobsQuery, MyQueueJobsQueryVariables>(MyQueueJobsDocument, options);
+        }
+export type MyQueueJobsQueryHookResult = ReturnType<typeof useMyQueueJobsQuery>;
+export type MyQueueJobsLazyQueryHookResult = ReturnType<typeof useMyQueueJobsLazyQuery>;
+export type MyQueueJobsSuspenseQueryHookResult = ReturnType<typeof useMyQueueJobsSuspenseQuery>;
+export type MyQueueJobsQueryResult = Apollo.QueryResult<MyQueueJobsQuery, MyQueueJobsQueryVariables>;
+export const MyQueueStatsDocument = gql`
+    query MyQueueStats($queueId: String!) {
+  total: myQueueJobs(
+    paging: {offset: 0, limit: 1}
+    filter: {queueId: {eq: $queueId}}
+    sorting: [{field: createdAt, direction: DESC}]
+  ) {
+    totalCount
+  }
+  pending: myQueueJobs(
+    paging: {offset: 0, limit: 1}
+    filter: {queueId: {eq: $queueId}, status: {eq: pending}}
+    sorting: [{field: createdAt, direction: DESC}]
+  ) {
+    totalCount
+  }
+  running: myQueueJobs(
+    paging: {offset: 0, limit: 1}
+    filter: {queueId: {eq: $queueId}, status: {eq: running}}
+    sorting: [{field: createdAt, direction: DESC}]
+  ) {
+    totalCount
+  }
+  succeeded: myQueueJobs(
+    paging: {offset: 0, limit: 1}
+    filter: {queueId: {eq: $queueId}, status: {eq: succeeded}}
+    sorting: [{field: createdAt, direction: DESC}]
+  ) {
+    totalCount
+  }
+  failed: myQueueJobs(
+    paging: {offset: 0, limit: 1}
+    filter: {queueId: {eq: $queueId}, status: {eq: failed}}
+    sorting: [{field: createdAt, direction: DESC}]
+  ) {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useMyQueueStatsQuery__
+ *
+ * To run a query within a React component, call `useMyQueueStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyQueueStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyQueueStatsQuery({
+ *   variables: {
+ *      queueId: // value for 'queueId'
+ *   },
+ * });
+ */
+export function useMyQueueStatsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<MyQueueStatsQuery, MyQueueStatsQueryVariables> & ({ variables: MyQueueStatsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MyQueueStatsQuery, MyQueueStatsQueryVariables>(MyQueueStatsDocument, options);
+      }
+export function useMyQueueStatsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyQueueStatsQuery, MyQueueStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MyQueueStatsQuery, MyQueueStatsQueryVariables>(MyQueueStatsDocument, options);
+        }
+// @ts-ignore
+export function useMyQueueStatsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<MyQueueStatsQuery, MyQueueStatsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueueStatsQuery, MyQueueStatsQueryVariables>;
+export function useMyQueueStatsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueueStatsQuery, MyQueueStatsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<MyQueueStatsQuery | undefined, MyQueueStatsQueryVariables>;
+export function useMyQueueStatsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<MyQueueStatsQuery, MyQueueStatsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<MyQueueStatsQuery, MyQueueStatsQueryVariables>(MyQueueStatsDocument, options);
+        }
+export type MyQueueStatsQueryHookResult = ReturnType<typeof useMyQueueStatsQuery>;
+export type MyQueueStatsLazyQueryHookResult = ReturnType<typeof useMyQueueStatsLazyQuery>;
+export type MyQueueStatsSuspenseQueryHookResult = ReturnType<typeof useMyQueueStatsSuspenseQuery>;
+export type MyQueueStatsQueryResult = Apollo.QueryResult<MyQueueStatsQuery, MyQueueStatsQueryVariables>;
+export const UpdateMyQueueDocument = gql`
+    mutation UpdateMyQueue($input: UpdateOneMyQueueInput!) {
+  updateOneMyQueue(input: $input) {
+    id
+    name
+    maxConcurrency
+    attempts
+    isPaused
+  }
+}
+    `;
+export type UpdateMyQueueMutationFn = Apollo.MutationFunction<UpdateMyQueueMutation, UpdateMyQueueMutationVariables>;
+
+/**
+ * __useUpdateMyQueueMutation__
+ *
+ * To run a mutation, you first call `useUpdateMyQueueMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMyQueueMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMyQueueMutation, { data, loading, error }] = useUpdateMyQueueMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateMyQueueMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateMyQueueMutation, UpdateMyQueueMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateMyQueueMutation, UpdateMyQueueMutationVariables>(UpdateMyQueueDocument, options);
+      }
+export type UpdateMyQueueMutationHookResult = ReturnType<typeof useUpdateMyQueueMutation>;
+export type UpdateMyQueueMutationResult = Apollo.MutationResult<UpdateMyQueueMutation>;
+export type UpdateMyQueueMutationOptions = Apollo.BaseMutationOptions<UpdateMyQueueMutation, UpdateMyQueueMutationVariables>;
+export const CreateMyQueueJobDocument = gql`
+    mutation CreateMyQueueJob($input: CreateOneMyQueueJobInput!) {
+  createOneMyQueueJob(input: $input) {
+    id
+    queueId
+    queueName
+    status
+    availableAt
+    attempts
+    runCount
+    errorMessage
+    createdAt
+  }
+}
+    `;
+export type CreateMyQueueJobMutationFn = Apollo.MutationFunction<CreateMyQueueJobMutation, CreateMyQueueJobMutationVariables>;
+
+/**
+ * __useCreateMyQueueJobMutation__
+ *
+ * To run a mutation, you first call `useCreateMyQueueJobMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateMyQueueJobMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createMyQueueJobMutation, { data, loading, error }] = useCreateMyQueueJobMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateMyQueueJobMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateMyQueueJobMutation, CreateMyQueueJobMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateMyQueueJobMutation, CreateMyQueueJobMutationVariables>(CreateMyQueueJobDocument, options);
+      }
+export type CreateMyQueueJobMutationHookResult = ReturnType<typeof useCreateMyQueueJobMutation>;
+export type CreateMyQueueJobMutationResult = Apollo.MutationResult<CreateMyQueueJobMutation>;
+export type CreateMyQueueJobMutationOptions = Apollo.BaseMutationOptions<CreateMyQueueJobMutation, CreateMyQueueJobMutationVariables>;
+export const DeleteMyQueueJobDocument = gql`
+    mutation DeleteMyQueueJob($input: DeleteOneMyQueueJobInput!) {
+  deleteOneMyQueueJob(input: $input) {
+    id
+  }
+}
+    `;
+export type DeleteMyQueueJobMutationFn = Apollo.MutationFunction<DeleteMyQueueJobMutation, DeleteMyQueueJobMutationVariables>;
+
+/**
+ * __useDeleteMyQueueJobMutation__
+ *
+ * To run a mutation, you first call `useDeleteMyQueueJobMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMyQueueJobMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMyQueueJobMutation, { data, loading, error }] = useDeleteMyQueueJobMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteMyQueueJobMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteMyQueueJobMutation, DeleteMyQueueJobMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteMyQueueJobMutation, DeleteMyQueueJobMutationVariables>(DeleteMyQueueJobDocument, options);
+      }
+export type DeleteMyQueueJobMutationHookResult = ReturnType<typeof useDeleteMyQueueJobMutation>;
+export type DeleteMyQueueJobMutationResult = Apollo.MutationResult<DeleteMyQueueJobMutation>;
+export type DeleteMyQueueJobMutationOptions = Apollo.BaseMutationOptions<DeleteMyQueueJobMutation, DeleteMyQueueJobMutationVariables>;
 export const PurfenceScheduledTasksDocument = gql`
     query PurfenceScheduledTasks($paging: OffsetPaging, $sorting: [PurfenceScheduledTaskSort!]) {
   purfenceScheduledTasks(paging: $paging, sorting: $sorting) {

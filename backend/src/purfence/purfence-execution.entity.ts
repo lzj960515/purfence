@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 
 @Index(['projectId'])
 @Index(['issueId'])
+@Index(['queueJobId'])
 @Entity()
 export class PurfenceExecution extends BaseEntity {
   @Column({ type: 'varchar', length: 36 })
@@ -22,6 +23,9 @@ export class PurfenceExecution extends BaseEntity {
 
   @Column({ type: 'varchar', length: 36, nullable: true })
   parentExecutionId?: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  queueJobId?: string;
 
   @Column({ type: 'varchar', length: 32, default: PurfenceStatus.running })
   status: PurfenceStatus;

@@ -183,6 +183,7 @@
       "^@src(|/.*)$": "<rootDir>/src/$1",
       "^@app/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
       "^@app/hotfix(|/.*)$": "<rootDir>/libs/hotfix/src/$1",
+      "^@app/my-queue(|/.*)$": "<rootDir>/libs/my-queue/src/$1",
       "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1",
       "^@app/my-agent(|/.*)$": "<rootDir>/libs/my-agent/src/$1"
     },

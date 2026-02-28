@@ -14,7 +14,11 @@ import { Toaster } from '@/components/ui/sonner'
 import { ScheduledTaskSettingsPage } from '@/pages/ScheduledTaskSettingsPage'
 import { AppConfigPage } from '@/pages/AppConfigPage'
 import { SkillsSettingsPage } from '@/pages/SkillsSettingsPage'
+import { QueueManagementPage } from '@/pages/QueueManagementPage'
 import { ErrorBoundary } from '@/components/error'
+import { RemoteRepositorySettingsPage } from '@/pages/RemoteRepositorySettingsPage'
+import { RemoteIssuesPage } from '@/pages/RemoteIssuesPage'
+import { WorkflowSettingsPage } from '@/pages/WorkflowSettingsPage'
 
 function RootRedirect() {
   return hasOnboardingCompleted() ? (
@@ -34,6 +38,9 @@ function App() {
             <Route index element={<RootRedirect />} />
             <Route path="projects" element={<ProjectListPage />} />
             <Route path="projects/:id" element={<ProjectDetailPage />} />
+            <Route path="projects/:projectId/settings/remote" element={<RemoteRepositorySettingsPage />} />
+            <Route path="projects/:projectId/settings/workflow" element={<WorkflowSettingsPage />} />
+            <Route path="projects/:projectId/remote-issues" element={<RemoteIssuesPage />} />
             <Route path="issues/:id" element={<IssueDetailPage />} />
             <Route path="agent" element={<AgentPage />} />
             <Route path="settings" element={<SettingsPage />}>
@@ -45,6 +52,8 @@ function App() {
               <Route path="scheduled-tasks" element={<ScheduledTaskSettingsPage />} />
               <Route path="app" element={<AppConfigPage />} />
               <Route path="skills" element={<SkillsSettingsPage />} />
+              <Route path="queue" element={<QueueManagementPage />} />
+              <Route path="queue/:queueId" element={<QueueManagementPage />} />
             </Route>
           </Route>
         </Routes>

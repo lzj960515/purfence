@@ -213,7 +213,6 @@ export function OnboardingPage() {
       await saveConfig({
         projectsRootPath: normalizedProjectsRootPath,
         proxyUrl: purfenceConfig?.proxyUrl || '',
-        maxIssueConcurrency: purfenceConfig?.maxIssueConcurrency ?? 2,
       })
       await refetch()
       setWorkspaceDialogOpen(false)

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
 import {
@@ -10,7 +10,7 @@ import {
 import { UPDATE_ONE_PURFENCE_PROJECT_MUTATION } from '@/api/purfence.graphql'
 import { GET_APP_CONFIGS } from '@/api/app-config.graphql'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Calendar, FolderOpen, FileText, Plus, Bell, Pencil, Check } from 'lucide-react'
+import { ArrowLeft, Calendar, FolderOpen, FileText, Plus, Bell, Pencil, Check, GitBranch, Settings, ListTodo } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -265,6 +265,26 @@ export function ProjectDetailPage() {
         </Button>
         <div className="flex-1">
           <h2 className="text-2xl font-semibold tracking-tight">{project.name}</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/projects/${id}/settings/remote`}>
+              <GitBranch className="h-4 w-4 mr-1" />
+              远程仓库
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/projects/${id}/settings/workflow`}>
+              <Settings className="h-4 w-4 mr-1" />
+              工作流
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/projects/${id}/remote-issues`}>
+              <ListTodo className="h-4 w-4 mr-1" />
+              远程 Issue
+            </Link>
+          </Button>
         </div>
       </div>
 
