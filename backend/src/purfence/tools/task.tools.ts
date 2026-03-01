@@ -3,7 +3,9 @@ import {
   getAgentPrompt,
   Tool,
   type EnhancedExecutionResult,
+  type ExecutionErrorInfo,
 } from '@app/my-agent';
+import type { SDKResultMessage } from '@anthropic-ai/claude-agent-sdk';
 import { Injectable, Logger } from '@nestjs/common';
 import { ToolExecuteOptions } from '@voltagent/core';
 import path from 'node:path';
@@ -40,6 +42,17 @@ Available agent types and the tools they have access to:
 When using this tool, you must specify a subagent_type parameter to select which agent type to use.
 
 `;
+
+/**
+ * Task 工具的返回结果类型
+ * 包含 SDK 原始结果和可选的错误/重试信息
+ */
+export interface TaskToolResult {
+  /** SDK 原始结果 */
+  result: SDKResultMessage;
+  /** 错误信息（如果发生了 conversation not found 并进行了重试） */
+  error?: ExecutionErrorInfo;
+}
 
 @Injectable()
 export class TaskTools {
@@ -128,18 +141,17 @@ export class TaskTools {
 
   /**
    * 格式化返回结果，包含错误信息（如果有）
+   * 返回一个包装对象，包含 SDK 结果和可选的错误/重试信息
    */
-  private formatResult(enhancedResult: EnhancedExecutionResult) {
+  private formatResult(enhancedResult: EnhancedExecutionResult): TaskToolResult {
     const { result, error } = enhancedResult;
 
-    // 如果没有错误，直接返回原始结果
+    // 如果没有错误，直接返回包装结果
     if (!error) {
-      return result;
+      return { result };
     }
 
-    // 如果有错误信息，附加到结果中
-    // 注意：SDKResultMessage 是 SDK 定义的类型，我们无法直接修改
-    // 但可以在日志中记录，并在返回时附加错误信息
+    // 记录错误和重试信息到日志
     this.logger.warn(
       `Task completed with retry: type=${error.type}, retried=${error.retried}, success=${error.retrySuccess}`,
     );
@@ -148,11 +160,17 @@ export class TaskTools {
       this.logger.log(
         `Task recovered successfully. Original sessionId: ${error.originalSessionId}, New sessionId: ${error.newSessionId}`,
       );
+    } else {
+      this.logger.error(
+        `Task retry failed. Original sessionId: ${error.originalSessionId}, New sessionId: ${error.newSessionId}`,
+      );
     }
 
-    // 返回原始结果，错误信息已通过日志记录
-    // 如果需要在客户端看到错误信息，可以考虑扩展返回结构
-    return result;
+    // 返回包含错误信息的包装结果
+    return {
+      result,
+      error,
+    };
   }
 
   // 确定
