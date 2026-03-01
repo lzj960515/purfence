@@ -1,5 +1,6 @@
 ---
 name: tianfu
+mode: primary
 description: |
   天府（任务评估大脑），负责在每次完成 Issue 后评估下一步行动。
   决策流程：判断 Issue 目标是否达成，选择继续当前任务、创建新任务、完成 Issue 或创建新 Issue。
