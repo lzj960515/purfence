@@ -20,37 +20,64 @@ pub struct UpdateProgress {
 /// Check for updates from GitHub Releases API
 #[tauri::command]
 pub async fn check_for_updates() -> Result<Option<UpdateInfo>, String> {
+    log::info!("[Update] Starting update check...");
+
     let client = reqwest::Client::builder()
         .user_agent("Purfence-Updater")
         .build()
-        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+        .map_err(|e| {
+            log::error!("[Update] Failed to create HTTP client: {}", e);
+            format!("Failed to create HTTP client: {}", e)
+        })?;
+
+    log::info!("[Update] Fetching latest release from GitHub API...");
 
     let response = client
         .get("https://api.github.com/repos/lzj960515/purfence/releases/latest")
         .send()
         .await
-        .map_err(|e| format!("Failed to fetch releases: {}", e))?;
+        .map_err(|e| {
+            log::error!("[Update] Failed to fetch releases: {}", e);
+            format!("Failed to fetch releases: {}", e)
+        })?;
 
     if !response.status().is_success() {
+        log::error!("[Update] GitHub API returned status: {}", response.status());
         return Err(format!("GitHub API returned status: {}", response.status()));
     }
+
+    log::info!("[Update] Parsing release information...");
 
     let release: GitHubRelease = response
         .json()
         .await
-        .map_err(|e| format!("Failed to parse release: {}", e))?;
+        .map_err(|e| {
+            log::error!("[Update] Failed to parse release: {}", e);
+            format!("Failed to parse release: {}", e)
+        })?;
 
     let current_version = env!("CARGO_PKG_VERSION").to_string();
+
+    log::info!(
+        "[Update] Current version: {}, Latest version: {}",
+        current_version,
+        release.tag_name
+    );
 
     // Compare versions (simple semver comparison)
     let has_update = compare_versions(&release.tag_name, &current_version)?;
 
     if !has_update {
+        log::info!("[Update] No update available (already on latest version)");
         return Ok(None);
     }
 
+    log::info!("[Update] Update available! Finding download URL...");
+
     // Find the appropriate download URL based on platform
     let download_url = find_download_url(&release.assets);
+
+    log::info!("[Update] Download URL: {:?}", download_url);
 
     Ok(Some(UpdateInfo {
         version: release.tag_name,
@@ -79,6 +106,8 @@ struct GitHubAsset {
 
 /// Compare two version strings (returns true if latest > current)
 fn compare_versions(latest: &str, current: &str) -> Result<bool, String> {
+    log::debug!("[Update] Comparing versions: latest={}, current={}", latest, current);
+
     let latest = latest.trim_start_matches('v');
     let current = current.trim_start_matches('v');
 
@@ -91,7 +120,10 @@ fn compare_versions(latest: &str, current: &str) -> Result<bool, String> {
         .filter_map(|s| s.parse().ok())
         .collect();
 
+    log::debug!("[Update] Parsed version parts: latest={:?}, current={:?}", latest_parts, current_parts);
+
     if latest_parts.is_empty() || current_parts.is_empty() {
+        log::error!("[Update] Invalid version format: latest_parts={:?}, current_parts={:?}", latest_parts, current_parts);
         return Err("Invalid version format".to_string());
     }
 
@@ -107,14 +139,24 @@ fn compare_versions(latest: &str, current: &str) -> Result<bool, String> {
         current_padded.push(0);
     }
 
-    for (l, c) in latest_padded.iter().zip(current_padded.iter()) {
+    log::debug!("[Update] Padded versions: latest={:?}, current={:?}", latest_padded, current_padded);
+
+    for (i, (l, c)) in latest_padded.iter().zip(current_padded.iter()).enumerate() {
+        log::debug!("[Update] Comparing part {}: {} vs {}", i, l, c);
         match l.cmp(c) {
-            std::cmp::Ordering::Greater => return Ok(true),
-            std::cmp::Ordering::Less => return Ok(false),
+            std::cmp::Ordering::Greater => {
+                log::info!("[Update] Version {} is greater at part {}", latest, i);
+                return Ok(true);
+            }
+            std::cmp::Ordering::Less => {
+                log::info!("[Update] Version {} is less at part {}", latest, i);
+                return Ok(false);
+            }
             std::cmp::Ordering::Equal => continue,
         }
     }
 
+    log::info!("[Update] Versions are equal");
     Ok(false)
 }
 

@@ -134,6 +134,8 @@ export function useUpdate(): UseUpdateReturn {
     setError(null)
 
     try {
+      console.log('[useUpdate] Checking for updates via GitHub API...')
+
       // First check using our GitHub API
       const rawInfo = await invoke<UpdateInfo | null>('check_for_updates')
 
@@ -146,6 +148,8 @@ export function useUpdate(): UseUpdateReturn {
         }
 
         console.log('[useUpdate] Update info received:', info)
+        console.log('[useUpdate] Current version:', info.currentVersion)
+        console.log('[useUpdate] Latest version:', info.version)
 
         // Check if this version has been skipped
         const skippedVersion = localStorage.getItem('purfence:skippedVersion')
@@ -159,14 +163,24 @@ export function useUpdate(): UseUpdateReturn {
         setUpdateInfo(info)
 
         // Also check using Tauri updater plugin (for actual download)
-        const manifest = await check()
-        if (manifest) {
-          setUpdateManifest(manifest)
+        console.log('[useUpdate] Checking Tauri updater plugin...')
+        try {
+          const manifest = await check()
+          if (manifest) {
+            console.log('[useUpdate] Tauri updater manifest received:', manifest)
+            setUpdateManifest(manifest)
+          } else {
+            console.log('[useUpdate] No Tauri updater manifest available')
+          }
+        } catch (manifestError) {
+          // Tauri updater plugin might not be configured, log but don't fail
+          console.warn('[useUpdate] Tauri updater plugin check failed:', manifestError)
         }
 
         setStatus('available')
         return true
       } else {
+        console.log('[useUpdate] No update available')
         setStatus('idle')
         return false
       }
