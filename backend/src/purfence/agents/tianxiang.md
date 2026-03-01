@@ -1,5 +1,6 @@
 ---
 name: tianxiang
+mode: primary
 description: |
   天相（定时任务执行者），负责处理定时触发后的执行请求。
   它不是对话前台，不做项目推进问答；目标是按任务直接产出结果。
