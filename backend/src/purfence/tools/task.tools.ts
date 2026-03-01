@@ -1,4 +1,9 @@
-import { ClaudeAgentSdkService, getAgentPrompt, Tool } from '@app/my-agent';
+import {
+  ClaudeAgentSdkService,
+  getAgentPrompt,
+  Tool,
+  type EnhancedExecutionResult,
+} from '@app/my-agent';
 import { Injectable, Logger } from '@nestjs/common';
 import { ToolExecuteOptions } from '@voltagent/core';
 import path from 'node:path';
@@ -82,7 +87,7 @@ export class TaskTools {
     const claudeCodeEnv =
       await this.claudeCodeConfigService.buildClaudeCodeEnv();
 
-    return await this.claudeAgentSdkService.executeClaudeAgent({
+    const enhancedResult = await this.claudeAgentSdkService.executeClaudeAgent({
       prompt: fullTask,
       resume,
       threadId: conversationId,
@@ -91,7 +96,63 @@ export class TaskTools {
       cwd,
       systemPrompt: getAgentPrompt(agent),
       env: claudeCodeEnv,
+      // 提供回调：当 sessionId 更新时同步更新 execution
+      onSessionIdUpdate: async (newSessionId: string) => {
+        await this.updateExecutionSessionId(executionId, newSessionId);
+      },
     });
+
+    return this.formatResult(enhancedResult);
+  }
+
+  /**
+   * 更新 execution 的 sessionId
+   */
+  private async updateExecutionSessionId(
+    executionId: string,
+    newSessionId: string,
+  ) {
+    const execution = await PurfenceExecution.findOne({
+      where: { id: executionId },
+    });
+    if (execution) {
+      execution.sessionId = newSessionId;
+      await execution.save();
+      this.logger.log(
+        `Updated execution ${executionId} sessionId to ${newSessionId}`,
+      );
+    } else {
+      this.logger.warn(`Execution ${executionId} not found for sessionId update`);
+    }
+  }
+
+  /**
+   * 格式化返回结果，包含错误信息（如果有）
+   */
+  private formatResult(enhancedResult: EnhancedExecutionResult) {
+    const { result, error } = enhancedResult;
+
+    // 如果没有错误，直接返回原始结果
+    if (!error) {
+      return result;
+    }
+
+    // 如果有错误信息，附加到结果中
+    // 注意：SDKResultMessage 是 SDK 定义的类型，我们无法直接修改
+    // 但可以在日志中记录，并在返回时附加错误信息
+    this.logger.warn(
+      `Task completed with retry: type=${error.type}, retried=${error.retried}, success=${error.retrySuccess}`,
+    );
+
+    if (error.retrySuccess) {
+      this.logger.log(
+        `Task recovered successfully. Original sessionId: ${error.originalSessionId}, New sessionId: ${error.newSessionId}`,
+      );
+    }
+
+    // 返回原始结果，错误信息已通过日志记录
+    // 如果需要在客户端看到错误信息，可以考虑扩展返回结构
+    return result;
   }
 
   // 确定
@@ -183,7 +244,8 @@ export class TaskTools {
     const claudeCodeEnv =
       await this.claudeCodeConfigService.buildClaudeCodeEnv();
 
-    return await this.claudeAgentSdkService.executeClaudeAgent({
+    // 注意：executeTask 不需要 onSessionIdUpdate 回调，因为它不关联 execution
+    const enhancedResult = await this.claudeAgentSdkService.executeClaudeAgent({
       prompt: task,
       resume: resume ? true : false,
       threadId: conversationId,
@@ -193,5 +255,7 @@ export class TaskTools {
       env: claudeCodeEnv,
       systemPrompt: subagent_type === 'default' ? undefined : getAgentPrompt(subagent_type),
     });
+
+    return this.formatResult(enhancedResult);
   }
 }
