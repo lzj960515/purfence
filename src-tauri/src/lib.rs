@@ -49,7 +49,7 @@ pub fn run() {
                 });
             }
 
-            environment::auto_sync_builtin_agents_on_startup(&app.handle());
+            environment::auto_sync_builtin_agents_on_startup(app.handle());
 
             Ok(())
         })
