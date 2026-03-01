@@ -28,4 +28,9 @@ export {
 export type { AgentFrontmatter } from './utils/agent-loader.util';
 
 // Claude Agent SDK 导出
-export { ClaudeAgentSdkService } from './claude-agent-sdk.service';
+export {
+  ClaudeAgentSdkService,
+  type ExecutionErrorInfo,
+  type EnhancedExecutionResult,
+  type UpdateSessionIdCallback,
+} from './claude-agent-sdk.service';

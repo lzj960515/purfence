@@ -13,6 +13,39 @@ import type {
   SDKUserMessage,
 } from '@anthropic-ai/claude-agent-sdk';
 
+/**
+ * 执行错误信息
+ */
+export interface ExecutionErrorInfo {
+  /** 错误消息 */
+  message: string;
+  /** 错误类型 */
+  type: 'conversation_not_found' | 'unknown';
+  /** 是否进行了重试 */
+  retried: boolean;
+  /** 重试是否成功 */
+  retrySuccess: boolean;
+  /** 原始 sessionId */
+  originalSessionId: string;
+  /** 新的 sessionId（如果重试了） */
+  newSessionId?: string;
+}
+
+/**
+ * 增强的执行结果
+ */
+export interface EnhancedExecutionResult {
+  /** SDK 原始结果 */
+  result: SDKResultMessage;
+  /** 错误信息（如果有） */
+  error?: ExecutionErrorInfo;
+}
+
+/**
+ * 回调函数类型：用于更新 execution 的 sessionId
+ */
+export type UpdateSessionIdCallback = (newSessionId: string) => Promise<void>;
+
 // 动态加载 SDK（ESM only）
 async function loadSDK() {
   const candidates = resolveSdkEntries();
@@ -46,6 +79,10 @@ function resolveSdkEntries(): string[] {
   ].filter((value): value is string => Boolean(value));
 }
 
+/** "No conversation found" 错误的匹配模式 */
+const CONVERSATION_NOT_FOUND_PATTERN =
+  /No conversation found with session ID:/i;
+
 /**
  * Claude Agent SDK Service
  * 封装 @anthropic-ai/claude-agent-sdk，提供 NestJS 集成
@@ -55,9 +92,124 @@ export class ClaudeAgentSdkService {
   private readonly logger = new Logger(ClaudeAgentSdkService.name);
 
   /**
-   * 执行 Claude Agent 任务，返回 SDK 原始结果
+   * 执行 Claude Agent 任务，返回增强结果（包含错误信息和重试状态）
    */
   async executeClaudeAgent({
+    prompt,
+    resume,
+    threadId,
+    sessionId,
+    callId,
+    cwd,
+    systemPrompt,
+    env,
+    onSessionIdUpdate,
+  }: {
+    prompt: string;
+    resume: boolean;
+    threadId: string;
+    sessionId: string;
+    callId: string;
+    cwd?: string;
+    systemPrompt?: string;
+    env?: Record<string, string>;
+    /** 当 sessionId 更新时的回调（用于更新 execution） */
+    onSessionIdUpdate?: UpdateSessionIdCallback;
+  }): Promise<EnhancedExecutionResult> {
+    // 记录原始 sessionId
+    const originalSessionId = sessionId;
+
+    // 第一次执行
+    const { result, conversationNotFoundError } =
+      await this.executeClaudeAgentInternal({
+        prompt,
+        resume,
+        threadId,
+        sessionId,
+        callId,
+        cwd,
+        systemPrompt,
+        env,
+      });
+
+    // 如果没有 "conversation not found" 错误，直接返回结果
+    if (!conversationNotFoundError) {
+      return { result };
+    }
+
+    this.logger.warn(
+      `Conversation not found with session ID: ${sessionId}, will retry with new session`,
+    );
+
+    // 生成新的 sessionId 并重试
+    const newSessionId = crypto.randomUUID();
+    this.logger.log(
+      `Retrying with new sessionId: ${newSessionId} (original: ${originalSessionId})`,
+    );
+
+    // 调用回调更新 execution 的 sessionId
+    if (onSessionIdUpdate) {
+      try {
+        await onSessionIdUpdate(newSessionId);
+        this.logger.log(`Updated execution sessionId to: ${newSessionId}`);
+      } catch (err) {
+        this.logger.error(`Failed to update execution sessionId: ${err}`);
+        // 即使更新失败也继续重试，因为主要目标是完成任务
+      }
+    }
+
+    // 使用新 sessionId 重试（resume=false，因为是新会话）
+    const retryResult = await this.executeClaudeAgentInternal({
+      prompt,
+      resume: false, // 新会话不需要 resume
+      threadId,
+      sessionId: newSessionId,
+      callId,
+      cwd,
+      systemPrompt,
+      env,
+    });
+
+    // 如果重试后仍然有 conversation not found 错误，说明有其他问题
+    if (retryResult.conversationNotFoundError) {
+      this.logger.error(
+        `Retry failed: Conversation still not found with new sessionId: ${newSessionId}`,
+      );
+
+      return {
+        result: retryResult.result,
+        error: {
+          message: `Conversation not found error persisted after retry`,
+          type: 'conversation_not_found',
+          retried: true,
+          retrySuccess: false,
+          originalSessionId,
+          newSessionId,
+        },
+      };
+    }
+
+    this.logger.log(
+      `Retry successful with new sessionId: ${newSessionId}`,
+    );
+
+    return {
+      result: retryResult.result,
+      error: {
+        message: conversationNotFoundError,
+        type: 'conversation_not_found',
+        retried: true,
+        retrySuccess: true,
+        originalSessionId,
+        newSessionId,
+      },
+    };
+  }
+
+  /**
+   * 内部执行方法
+   */
+  private async executeClaudeAgentInternal({
     prompt,
     resume,
     threadId,
@@ -75,10 +227,17 @@ export class ClaudeAgentSdkService {
     cwd?: string;
     systemPrompt?: string;
     env?: Record<string, string>;
-  }): Promise<SDKResultMessage> {
+  }): Promise<{
+    result: SDKResultMessage;
+    conversationNotFoundError: string | null;
+  }> {
     // 动态加载 SDK
     const { query } = await loadSDK();
     this.logger.verbose(`executeClaudeAgent: ${sessionId}`);
+
+    // 用于捕获 "No conversation found" 错误
+    let conversationNotFoundError: string | null = null;
+
     // 默认配置
     const defaultOptions: Omit<Options, 'prompt' | 'resume'> = {
       // 全部工具（默认 preset）
@@ -108,7 +267,13 @@ export class ClaudeAgentSdkService {
         ...process.env,
         ...(env ?? {}),
       },
-      stderr: (data: string) => this.logger.error(`[claude-agent-sdk] ${data}`),
+      stderr: (data: string) => {
+        this.logger.error(`[claude-agent-sdk] ${data}`);
+        // 检测 "No conversation found" 错误
+        if (CONVERSATION_NOT_FOUND_PATTERN.test(data)) {
+          conversationNotFoundError = data;
+        }
+      },
     };
 
     // 创建查询
@@ -140,7 +305,7 @@ export class ClaudeAgentSdkService {
       throw new Error('No result received');
     }
 
-    return finalResult;
+    return { result: finalResult, conversationNotFoundError };
   }
 
   private handleEvent(message: SDKMessage) {
