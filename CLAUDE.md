@@ -165,3 +165,52 @@ Execution 创建 → ExecutionSubscriber → execute-ai 队列
 - 中型/大型功能开发前，优先在 `issues/` 下创建对应 Issue 文件，明确背景、范围和验收标准。
 - 智能代理在开发时，应参照这些 Issue，一次聚焦完成一个或少量 Issue，并在 Issue 文档中更新状态（例如在结尾打勾）。
 - 如需调整工作方式或约定，请同步更新 `issues/README.md` 和本文件。
+
+## 发布流程规则
+
+### ⚠️ 版本发布规范（重要！）
+
+1. **发布前检查**：
+   ```bash
+   # 确保在正确的分支
+   git branch --show-current
+
+   # 确保代码已提交
+   git status
+
+   # 运行测试（如有）
+   npm -w backend run test
+   ```
+
+2. **版本号规范**：
+   - 遵循语义化版本（SemVer）：`MAJOR.MINOR.PATCH`
+   - `MAJOR`：不兼容的 API 变更
+   - `MINOR`：向后兼容的功能新增
+   - `PATCH`：向后兼容的问题修复
+
+3. **发布流程**：
+   ```bash
+   # 1. 切换到主分支
+   git checkout main
+
+   # 2. 拉取最新代码
+   git pull origin main
+
+   # 3. 构建项目
+   npm run build
+
+   # 4. 创建版本标签
+   git tag -a v<version> -m "Release v<version>"
+
+   # 5. 推送标签
+   git push origin v<version>
+   ```
+
+4. **Changelog 要求**：
+   - 每次发布需更新 `CHANGELOG.md`
+   - 记录新增功能、修复问题、破坏性变更
+
+5. **禁止事项**：
+   - **✗ 禁止**：跳过测试直接发布
+   - **✗ 禁止**：在非 main 分支发布正式版本
+   - **✗ 禁止**：覆盖已存在的版本标签
