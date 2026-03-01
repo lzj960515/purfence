@@ -59,6 +59,113 @@ fn check_command_installed(command: &str, args: &[&str]) -> bool {
     }
 }
 
+/// Windows 专用：通过 PowerShell 检测命令（会继承用户的完整环境变量）
+#[cfg(target_os = "windows")]
+fn check_command_via_powershell(command: &str, args: &[&str]) -> bool {
+    let full_args = format!("{} {}", command, args.join(" "));
+    let output = Command::new("powershell.exe")
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            &full_args,
+        ])
+        .output();
+
+    match output {
+        Ok(o) => o.status.success(),
+        Err(_) => false,
+    }
+}
+
+/// Windows 专用：通过 PowerShell 获取命令输出（会继承用户的完整环境变量）
+#[cfg(target_os = "windows")]
+fn get_command_output_via_powershell(command: &str, args: &[&str]) -> Option<String> {
+    let full_args = format!("{} {}", command, args.join(" "));
+    let output = Command::new("powershell.exe")
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            &full_args,
+        ])
+        .output()
+        .ok()?;
+
+    if output.status.success() {
+        Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        None
+    }
+}
+
+/// Windows 专用：检测 nvm-windows 是否安装并获取当前 Node 版本
+#[cfg(target_os = "windows")]
+fn get_node_version_via_nvm_windows() -> Option<String> {
+    // nvm-windows 使用 cmd 或 powershell
+    let output = Command::new("cmd.exe")
+        .args(["/C", "nvm current"])
+        .output()
+        .ok()?;
+
+    if !output.status.success() {
+        return None;
+    }
+
+    let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    // nvm-windows 返回 "v22.x.x" 或 "No current version"
+    if version.starts_with('v') {
+        return Some(version);
+    }
+    None
+}
+
+/// Windows 专用：通过 nvm-windows 检测 Node 是否安装
+#[cfg(target_os = "windows")]
+fn check_node_via_nvm_windows() -> bool {
+    // 检查 NVM_HOME 环境变量
+    if env::var("NVM_HOME").is_err() {
+        return false;
+    }
+
+    // 尝试运行 nvm current
+    let output = Command::new("cmd.exe").args(["/C", "nvm current"]).output();
+
+    match output {
+        Ok(o) => {
+            if !o.status.success() {
+                return false;
+            }
+            let stdout = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            // 不是 "No current version" 说明有安装的版本
+            stdout.starts_with('v')
+        }
+        Err(_) => false,
+    }
+}
+
+/// Windows 专用：通过 fnm 检测 Node 版本
+#[cfg(target_os = "windows")]
+fn check_node_via_fnm() -> Option<String> {
+    // fnm 是跨平台的，在 Windows 上也常用
+    let output = Command::new("cmd.exe")
+        .args(["/C", "fnm current"])
+        .output()
+        .ok()?;
+
+    if output.status.success() {
+        let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !version.is_empty() && version != "none" {
+            return Some(format!("v{}", version));
+        }
+    }
+    None
+}
+
 fn check_command_path_installed(command_path: &Path, args: &[&str]) -> bool {
     match Command::new(command_path).args(args).output() {
         Ok(output) => output.status.success(),
@@ -85,11 +192,21 @@ fn preferred_unix_shell() -> &'static str {
 }
 
 fn get_node_version() -> Option<String> {
+    // 方法 1: 直接调用
     let output = Command::new("node").args(["--version"]).output().ok()?;
-    if !output.status.success() {
-        return None;
+    if output.status.success() {
+        return Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
     }
-    Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+
+    // 方法 2: Windows 下通过 PowerShell 检测
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(version) = get_command_output_via_powershell("node", &["--version"]) {
+            return Some(version);
+        }
+    }
+
+    None
 }
 
 fn get_node_version_with_nvm() -> Option<String> {
@@ -107,21 +224,56 @@ fn get_node_version_with_nvm() -> Option<String> {
 }
 
 fn is_node_22_ready() -> bool {
+    // 方法 1: 检测系统 Node 22
     let system_node_22 = get_node_version()
         .map(|v| v.starts_with("v22."))
-        .unwrap_or(false)
-        && check_command_installed("npm", &["--version"]);
-    if system_node_22 {
-        return true;
+        .unwrap_or(false);
+
+    let npm_available = check_command_installed("npm", &["--version"]);
+
+    #[cfg(target_os = "windows")]
+    {
+        // Windows: 如果直接检测失败，通过 PowerShell 重试
+        let npm_available = npm_available || check_command_via_powershell("npm", &["--version"]);
+
+        if system_node_22 && npm_available {
+            return true;
+        }
+
+        // 检测 nvm-windows 的 Node 22
+        if let Some(version) = get_node_version_via_nvm_windows() {
+            if version.starts_with("v22.") {
+                return true;
+            }
+        }
+
+        // 检测 fnm 的 Node 22
+        if let Some(version) = check_node_via_fnm() {
+            if version.starts_with("v22.") {
+                return true;
+            }
+        }
     }
 
-    let nvm_node_22 = get_node_version_with_nvm()
-        .map(|v| v.starts_with("v22."))
-        .unwrap_or(false)
-        && check_with_nvm(
-            "export NVM_DIR=\"${NVM_DIR:-$HOME/.nvm}\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; npm --version >/dev/null 2>&1",
-        );
-    nvm_node_22
+    #[cfg(not(target_os = "windows"))]
+    {
+        if system_node_22 && npm_available {
+            return true;
+        }
+
+        // Unix/macOS: 检测 nvm
+        let nvm_node_22 = get_node_version_with_nvm()
+            .map(|v| v.starts_with("v22."))
+            .unwrap_or(false)
+            && check_with_nvm(
+                "export NVM_DIR=\"${NVM_DIR:-$HOME/.nvm}\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; npm --version >/dev/null 2>&1",
+            );
+        if nvm_node_22 {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn claude_candidate_paths() -> Vec<PathBuf> {
@@ -186,15 +338,48 @@ fn is_claude_installed() -> bool {
 }
 
 fn is_node_installed() -> bool {
+    // 方法 1: 直接检测（可能失败，因为 GUI 进程可能没有完整的用户 PATH）
     if check_command_installed("node", &["--version"])
         && check_command_installed("npm", &["--version"])
     {
         return true;
     }
 
-    check_with_nvm(
-        "export NVM_DIR=\"${NVM_DIR:-$HOME/.nvm}\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1",
-    )
+    // 方法 2: 平台特定检测
+    #[cfg(target_os = "windows")]
+    {
+        // Windows: 通过 PowerShell 检测（会继承用户的完整环境变量）
+        if check_command_via_powershell("node", &["--version"])
+            && check_command_via_powershell("npm", &["--version"])
+        {
+            log::info!("Node.js detected via PowerShell (user PATH propagation)");
+            return true;
+        }
+
+        // Windows: 检测 nvm-windows
+        if check_node_via_nvm_windows() {
+            log::info!("Node.js detected via nvm-windows");
+            return true;
+        }
+
+        // Windows: 检测 fnm
+        if check_node_via_fnm().is_some() {
+            log::info!("Node.js detected via fnm");
+            return true;
+        }
+    }
+
+    // 方法 3: Unix/macOS 的 nvm 检测
+    #[cfg(not(target_os = "windows"))]
+    {
+        if check_with_nvm(
+            "export NVM_DIR=\"${NVM_DIR:-$HOME/.nvm}\"; [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"; node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1",
+        ) {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn resolve_brew_command() -> Option<String> {
@@ -328,12 +513,20 @@ fn resolve_builtin_skills_dir(app: &AppHandle) -> Option<PathBuf> {
 
     if let Ok(current) = env::current_dir() {
         candidates.push(current.join("src-tauri").join("binaries").join("skills"));
-        candidates.push(current.join("backend").join("src").join("purfence").join("skills"));
+        candidates.push(
+            current
+                .join("backend")
+                .join("src")
+                .join("purfence")
+                .join("skills"),
+        );
     }
 
-    candidates
-        .into_iter()
-        .find(|dir| list_skill_dirs(dir).map(|it| !it.is_empty()).unwrap_or(false))
+    candidates.into_iter().find(|dir| {
+        list_skill_dirs(dir)
+            .map(|it| !it.is_empty())
+            .unwrap_or(false)
+    })
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {
@@ -832,7 +1025,11 @@ fn install_missing_toolchain(
 
         let mut brew_cmd = resolve_brew_command();
         if brew_cmd.is_none() && cfg!(target_os = "macos") {
-            emit_install_log(app, "meta", "未检测到 Homebrew，开始自动安装（用于安装 Git）");
+            emit_install_log(
+                app,
+                "meta",
+                "未检测到 Homebrew，开始自动安装（用于安装 Git）",
+            );
             run_install_step(
                 app,
                 "安装 Homebrew",
@@ -1113,12 +1310,10 @@ pub async fn desktop_environment_status(
             installed: claude_installed,
             detail: if claude_installed {
                 "已安装".to_string()
+            } else if node_installed && git_installed {
+                "未安装".to_string()
             } else {
-                if node_installed && git_installed {
-                    "未安装".to_string()
-                } else {
-                    "依赖 Node.js 与 Git".to_string()
-                }
+                "依赖 Node.js 与 Git".to_string()
             },
         },
         git: EnvironmentItemStatus {
@@ -1195,9 +1390,7 @@ pub async fn install_builtin_agents_desktop(
 }
 
 #[tauri::command]
-pub async fn desktop_skills_catalog(
-    app: AppHandle,
-) -> Result<DesktopSkillsCatalog, String> {
+pub async fn desktop_skills_catalog(app: AppHandle) -> Result<DesktopSkillsCatalog, String> {
     let installed_dir = claude_skills_dir()?;
     let installed_dirs = list_skill_dirs(&installed_dir)?;
     let mut installed: Vec<DesktopSkillItem> = installed_dirs
@@ -1267,8 +1460,8 @@ pub async fn install_desktop_skill(
     fs::create_dir_all(&target_root).map_err(|e| e.to_string())?;
 
     if source == "builtin" {
-        let source_root = resolve_builtin_skills_dir(&app)
-            .ok_or("未找到内置 skills 目录，请先完成应用安装")?;
+        let source_root =
+            resolve_builtin_skills_dir(&app).ok_or("未找到内置 skills 目录，请先完成应用安装")?;
         let source_dir = source_root.join(&name);
         if !source_dir.exists() {
             return Err(format!("未找到内置 skill: {}", name));

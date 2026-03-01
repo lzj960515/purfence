@@ -10,6 +10,7 @@ pub struct UpdateInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct UpdateProgress {
     pub downloaded: u64,
     pub total: Option<u64>,
@@ -61,6 +62,7 @@ pub async fn check_for_updates() -> Result<Option<UpdateInfo>, String> {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct GitHubRelease {
     tag_name: String,
     name: String,
