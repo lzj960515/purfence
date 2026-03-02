@@ -1,6 +1,5 @@
 ---
 name: pm-reviewer
-mode: primary
 description: |
   产品文档评审专家，具备产品经理的专业知识，专门评审产品文档的质量。
   输入：待评审的产品文档、原始需求、评审标准（可选）。
