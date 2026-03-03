@@ -19,7 +19,9 @@ function normalizeDesktopPath() {
   if (process.env.APP_ENV !== 'desktop') return;
 
   const home = os.homedir();
-  const existing = new Set((process.env.PATH ?? '').split(delimiter).filter(Boolean));
+  const existing = new Set(
+    (process.env.PATH ?? '').split(delimiter).filter(Boolean),
+  );
 
   const candidates =
     process.platform === 'win32'
@@ -28,11 +30,7 @@ function normalizeDesktopPath() {
           join(home, '.local', 'bin'),
           join(home, 'scoop', 'shims'),
         ]
-      : [
-          join(home, '.local', 'bin'),
-          '/opt/homebrew/bin',
-          '/usr/local/bin',
-        ];
+      : [join(home, '.local', 'bin'), '/opt/homebrew/bin', '/usr/local/bin'];
 
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
@@ -54,20 +52,26 @@ function initFileLogging() {
     type WriteFn = (...args: unknown[]) => boolean;
 
     // Tee stdout/stderr into a persistent file. Keep writes best-effort.
-    const outWrite = process.stdout.write.bind(process.stdout) as unknown as WriteFn;
-    const errWrite = process.stderr.write.bind(process.stderr) as unknown as WriteFn;
+    const outWrite = process.stdout.write.bind(
+      process.stdout,
+    ) as unknown as WriteFn;
+    const errWrite = process.stderr.write.bind(
+      process.stderr,
+    ) as unknown as WriteFn;
 
-    const wrap = (orig: WriteFn): WriteFn => (...args) => {
-      const chunk = args[0];
-      try {
-        if (typeof chunk === 'string' || chunk instanceof Uint8Array) {
-          stream.write(chunk);
+    const wrap =
+      (orig: WriteFn): WriteFn =>
+      (...args) => {
+        const chunk = args[0];
+        try {
+          if (typeof chunk === 'string' || chunk instanceof Uint8Array) {
+            stream.write(chunk);
+          }
+        } catch {
+          // ignore
         }
-      } catch {
-        // ignore
-      }
-      return orig(...args);
-    };
+        return orig(...args);
+      };
 
     const stdout = process.stdout as unknown as { write: WriteFn };
     const stderr = process.stderr as unknown as { write: WriteFn };
@@ -78,7 +82,9 @@ function initFileLogging() {
   } catch (e) {
     // Do not fail the process if logging setup fails.
     try {
-      process.stderr.write(`[purfence] failed to init log file: ${String(e)}\n`);
+      process.stderr.write(
+        `[purfence] failed to init log file: ${String(e)}\n`,
+      );
     } catch {
       // ignore
     }

@@ -17,9 +17,7 @@ import { MyQueueJobStatus } from './my-queue-job-status.enum';
 import { MyQueue } from './my-queue.entity';
 
 @Injectable()
-export class MyQueueService
-  implements OnModuleInit, OnModuleDestroy
-{
+export class MyQueueService implements OnModuleInit, OnModuleDestroy {
   private static readonly DEFAULT_MAX_CONCURRENCY = 3;
   private static readonly DEFAULT_ATTEMPTS = 1;
   private static readonly DISPATCH_INTERVAL_MS = 1000;
@@ -159,7 +157,10 @@ export class MyQueueService
       }
     }
 
-    if (options.isPaused !== undefined && existingQueue.isPaused !== options.isPaused) {
+    if (
+      options.isPaused !== undefined &&
+      existingQueue.isPaused !== options.isPaused
+    ) {
       existingQueue.isPaused = options.isPaused;
       changed = true;
     }
@@ -266,7 +267,9 @@ export class MyQueueService
         await CommonService.emitAsync(queue.name, job.id, job.data);
       } catch (error) {
         const reason =
-          error instanceof Error ? error.message : `dispatch error: ${String(error)}`;
+          error instanceof Error
+            ? error.message
+            : `dispatch error: ${String(error)}`;
         await MyQueueJob.update(
           {
             id: job.id,
@@ -289,7 +292,9 @@ export class MyQueueService
 
     this.isCheckingStale = true;
     try {
-      const threshold = new Date(Date.now() - MyQueueService.RUNNING_TIMEOUT_MS);
+      const threshold = new Date(
+        Date.now() - MyQueueService.RUNNING_TIMEOUT_MS,
+      );
       const staleJobs = await MyQueueJob.find({
         where: {
           status: MyQueueJobStatus.running,

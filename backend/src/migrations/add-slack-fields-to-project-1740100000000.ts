@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddSlackFieldsToProject1740100000000
-  implements MigrationInterface
-{
+export class AddSlackFieldsToProject1740100000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Add slackAppConfigId column to purfence_project table
     await queryRunner.addColumn(

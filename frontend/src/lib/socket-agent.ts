@@ -34,6 +34,8 @@ export interface ChatMessage {
   status?: 'error';
   artifact?: ChatArtifact[];
   createdAt?: string | Date;
+  /** 用户发送的图片路径 */
+  imageUrl?: string;
 }
 
 export type ArtifactKind = 'IMAGE' | 'FILE';

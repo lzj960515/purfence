@@ -16,7 +16,9 @@ export class PurfenceConfigService {
   async getProjectsRootPathOrThrow(): Promise<string> {
     const projectsRootPath = await this.getProjectsRootPath();
     if (!projectsRootPath) {
-      throw new Error('projectsRootPath is required. Please configure it in 基础配置.');
+      throw new Error(
+        'projectsRootPath is required. Please configure it in 基础配置.',
+      );
     }
     return projectsRootPath;
   }

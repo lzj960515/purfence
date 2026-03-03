@@ -74,9 +74,9 @@ export class PurfenceEventListenerService {
         // New project: create default issue
         await this.issueService.createIssue({
           projectId: project.id,
-          title: project.name!,
-          slug: project.slug!,
-          description: project.description || project.name!,
+          title: project.name,
+          slug: project.slug,
+          description: project.description || project.name,
         });
       }
 

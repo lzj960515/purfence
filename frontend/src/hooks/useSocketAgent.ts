@@ -310,6 +310,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
           type: 'user',
           content: args.query,
           timestamp: new Date(),
+          imageUrl: args.imageUrl,
         },
       ]);
 

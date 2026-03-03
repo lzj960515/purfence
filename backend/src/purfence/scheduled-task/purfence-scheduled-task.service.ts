@@ -1,5 +1,10 @@
 import { MyUtil } from '@app/shared';
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { CronJob } from 'cron';
 import { PurfenceScheduledTaskCreateInput } from './purfence-scheduled-task-create.input';
 import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-update.input';
@@ -15,14 +20,14 @@ type ScheduledHandle =
   | { type: 'timeout'; handle: NodeJS.Timeout };
 
 @Injectable()
-export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestroy {
+export class PurfenceScheduledTaskService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(PurfenceScheduledTaskService.name);
   private readonly handles = new Map<string, ScheduledHandle>();
   private readonly runningTaskIds = new Set<string>();
 
-  constructor(
-    private readonly purfenceAgentService: PurfenceAgentService,
-  ) {}
+  constructor(private readonly purfenceAgentService: PurfenceAgentService) {}
 
   async onModuleInit() {
     await this.reloadEnabledTasks();
@@ -39,7 +44,9 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
       ...payload,
       enabled: input.enabled ?? true,
       nextRunAt:
-        payload.kind === PurfenceScheduledTaskKind.one_time ? payload.runAt : undefined,
+        payload.kind === PurfenceScheduledTaskKind.one_time
+          ? payload.runAt
+          : undefined,
     });
     await task.save();
 
@@ -58,9 +65,7 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
       kind: update.kind ?? task.kind,
       cronExpr: update.cronExpr ?? task.cronExpr,
       runAt:
-        update.runAt === undefined
-          ? task.runAt?.toISOString()
-          : update.runAt,
+        update.runAt === undefined ? task.runAt?.toISOString() : update.runAt,
       enabled: update.enabled ?? task.enabled,
       slackAppConfigId: update.slackAppConfigId ?? task.slackAppConfigId,
       slackChannelId: update.slackChannelId ?? task.slackChannelId,
@@ -100,7 +105,9 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
   }
 
   async reloadEnabledTasks() {
-    const tasks = await PurfenceScheduledTask.find({ where: { enabled: true } });
+    const tasks = await PurfenceScheduledTask.find({
+      where: { enabled: true },
+    });
     for (const task of tasks) {
       await this.registerTask(task);
     }
@@ -110,7 +117,7 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
     if (task.kind === PurfenceScheduledTaskKind.recurring) {
       const timezone = this.getSystemTimeZone();
       const job = new CronJob(
-        task.cronExpr!,
+        task.cronExpr,
         () => {
           void this.executeTask(task.id, 'scheduled');
         },
@@ -160,10 +167,7 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
     }
   }
 
-  private async executeTask(
-    taskId: string,
-    trigger: 'scheduled' | 'manual',
-  ) {
+  private async executeTask(taskId: string, trigger: 'scheduled' | 'manual') {
     if (this.runningTaskIds.has(taskId)) {
       this.logger.warn(`Scheduled task is already running: ${taskId}`);
       return null;
@@ -199,7 +203,9 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
         lastError: undefined,
         nextRunAt,
         enabled:
-          task.kind === PurfenceScheduledTaskKind.one_time ? false : task.enabled,
+          task.kind === PurfenceScheduledTaskKind.one_time
+            ? false
+            : task.enabled,
       });
 
       if (task.kind === PurfenceScheduledTaskKind.one_time) {
@@ -208,7 +214,9 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
 
       return threadId;
     } catch (error) {
-      const task = await PurfenceScheduledTask.findOne({ where: { id: taskId } });
+      const task = await PurfenceScheduledTask.findOne({
+        where: { id: taskId },
+      });
       if (task) {
         const now = new Date();
         const nextRunAt =
@@ -291,7 +299,10 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
   }
 
   private buildStreamContext(
-    task: Pick<PurfenceScheduledTask, 'id' | 'slackAppConfigId' | 'slackChannelId'>,
+    task: Pick<
+      PurfenceScheduledTask,
+      'id' | 'slackAppConfigId' | 'slackChannelId'
+    >,
     trigger: 'scheduled' | 'manual',
   ) {
     const context: Record<string, unknown> = {
@@ -310,7 +321,7 @@ export class PurfenceScheduledTaskService implements OnModuleInit, OnModuleDestr
 
   private computeNextRecurringRunAt(cronExpr?: string) {
     const job = new CronJob(
-      cronExpr!,
+      cronExpr,
       () => undefined,
       null,
       false,

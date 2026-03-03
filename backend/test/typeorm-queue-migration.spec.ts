@@ -2,7 +2,10 @@ import { DataSource } from 'typeorm';
 import { CommonService } from '../src/common/common.service';
 import { PurfenceEventListenerService } from '../src/purfence/purfence-event-listener.service';
 import { PurfenceExecution } from '../src/purfence/purfence-execution.entity';
-import { ExecutionStage, PurfenceStatus } from '../src/purfence/purfence-status.enum';
+import {
+  ExecutionStage,
+  PurfenceStatus,
+} from '../src/purfence/purfence-status.enum';
 import { MyQueue } from '../libs/my-queue/src/my-queue.entity';
 import { MyQueueJob } from '../libs/my-queue/src/my-queue-job.entity';
 import { MyQueueJobStatus } from '../libs/my-queue/src/my-queue-job-status.enum';
@@ -43,7 +46,9 @@ describe('MyQueue behavior', () => {
       { maxConcurrency: 2, attempts: 3 },
     );
 
-    const queue = await MyQueue.findOneOrFail({ where: { name: 'issue-queue' } });
+    const queue = await MyQueue.findOneOrFail({
+      where: { name: 'issue-queue' },
+    });
     const job = await MyQueueJob.findOneOrFail({ where: { id: jobId } });
 
     expect(queue.maxConcurrency).toBe(2);
@@ -54,14 +59,20 @@ describe('MyQueue behavior', () => {
   });
 
   it('updates queue options on addJob when queue already exists', async () => {
-    await queueService.addJob('issue-queue', { issueId: 'issue-1' }, { attempts: 1 });
+    await queueService.addJob(
+      'issue-queue',
+      { issueId: 'issue-1' },
+      { attempts: 1 },
+    );
     await queueService.addJob(
       'issue-queue',
       { issueId: 'issue-2' },
       { maxConcurrency: 4, attempts: 5, isPaused: true },
     );
 
-    const queue = await MyQueue.findOneOrFail({ where: { name: 'issue-queue' } });
+    const queue = await MyQueue.findOneOrFail({
+      where: { name: 'issue-queue' },
+    });
     expect(queue.maxConcurrency).toBe(4);
     expect(queue.attempts).toBe(5);
     expect(queue.isPaused).toBe(true);
@@ -74,9 +85,15 @@ describe('MyQueue behavior', () => {
       { maxConcurrency: 4, attempts: 2 },
     );
 
-    await queueService.addJob('issue-queue', { issueId: 'issue-2' }, { delayMs: 1000 });
+    await queueService.addJob(
+      'issue-queue',
+      { issueId: 'issue-2' },
+      { delayMs: 1000 },
+    );
 
-    const queue = await MyQueue.findOneOrFail({ where: { name: 'issue-queue' } });
+    const queue = await MyQueue.findOneOrFail({
+      where: { name: 'issue-queue' },
+    });
     expect(queue.maxConcurrency).toBe(4);
     expect(queue.attempts).toBe(2);
   });
@@ -84,7 +101,9 @@ describe('MyQueue behavior', () => {
   it('uses default concurrency 3 for newly created queue', async () => {
     await queueService.addJob('issue-queue', { issueId: 'issue-default' });
 
-    const queue = await MyQueue.findOneOrFail({ where: { name: 'issue-queue' } });
+    const queue = await MyQueue.findOneOrFail({
+      where: { name: 'issue-queue' },
+    });
     expect(queue.maxConcurrency).toBe(3);
   });
 

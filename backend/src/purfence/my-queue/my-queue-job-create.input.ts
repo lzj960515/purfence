@@ -1,5 +1,12 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsInt, IsNotEmpty, IsObject, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsObject,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { GraphQLJSON } from 'graphql-scalars';
 
 @InputType()

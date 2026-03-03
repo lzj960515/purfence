@@ -47,6 +47,10 @@ import { PurfenceAgentService } from '../agent.service';
     ProviderModelService,
     PurfenceAgentService,
   ],
-  exports: [PurfenceScheduledTaskService, ProviderModelService, PurfenceAgentService],
+  exports: [
+    PurfenceScheduledTaskService,
+    ProviderModelService,
+    PurfenceAgentService,
+  ],
 })
 export class PurfenceScheduledTaskModule {}

@@ -130,6 +130,7 @@
     "@types/lodash": "^4.17.20",
     "@types/mime-types": "^3.0.1",
     "@types/ms": "^2.1.0",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.16.5",
     "@types/supertest": "^6.0.3",
     "cross-env": "^10.0.0",

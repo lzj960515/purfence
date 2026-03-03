@@ -90,7 +90,9 @@ export class StateService implements OnModuleInit {
     }
 
     this.states.set(state, data);
-    this.logger.debug(`Stored OAuth state: ${state} (total: ${this.states.size})`);
+    this.logger.debug(
+      `Stored OAuth state: ${state} (total: ${this.states.size})`,
+    );
   }
 
   /**

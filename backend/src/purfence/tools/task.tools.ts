@@ -191,7 +191,8 @@ export class TaskTools {
       callId: toolContext.callId,
       cwd: _cwd,
       env: claudeCodeEnv,
-      systemPrompt: subagent_type === 'default' ? undefined : getAgentPrompt(subagent_type),
+      systemPrompt:
+        subagent_type === 'default' ? undefined : getAgentPrompt(subagent_type),
     });
   }
 }

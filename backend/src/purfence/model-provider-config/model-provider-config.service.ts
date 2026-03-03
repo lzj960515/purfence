@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { Not } from 'typeorm';
 import { ModelProviderConfig } from './model-provider-config.entity';
 import { ModelProviderConfigCreateInput } from './model-provider-config-create.input';
@@ -36,7 +40,10 @@ export class ModelProviderConfigService {
     await ModelProviderConfig.update({ isDefault: true }, { isDefault: false });
   }
 
-  private async assertNameUnique(name: string, excludeId?: string): Promise<void> {
+  private async assertNameUnique(
+    name: string,
+    excludeId?: string,
+  ): Promise<void> {
     const existing = await ModelProviderConfig.findOne({ where: { name } });
     if (!existing) {
       return;
@@ -59,7 +66,9 @@ export class ModelProviderConfigService {
    * @returns Created configuration (without sensitive data)
    * @throws ConflictException if configuration with same provider+name already exists
    */
-  async create(input: ModelProviderConfigCreateInput): Promise<ModelProviderConfig> {
+  async create(
+    input: ModelProviderConfigCreateInput,
+  ): Promise<ModelProviderConfig> {
     await this.assertNameUnique(input.name);
 
     // If setting to active, deactivate other configurations for this provider
@@ -207,9 +216,7 @@ export class ModelProviderConfigService {
    * @param provider Provider type
    * @returns Configuration with decrypted API key, or null if no active configuration exists
    */
-  async getActiveProviderConfig(
-    provider: ProviderType,
-  ): Promise<{
+  async getActiveProviderConfig(provider: ProviderType): Promise<{
     apiKey: string;
     baseUrl?: string;
     model?: string;
@@ -287,7 +294,7 @@ export class ModelProviderConfigService {
       where: { isDefault: true, isActive: true },
     });
     if (!defaultConfig) {
-      console.log('未配置默认模型，请先在设置中设置默认配置')
+      console.log('未配置默认模型，请先在设置中设置默认配置');
       throw new Error('未配置默认模型，请先在设置中设置默认配置');
     }
     return defaultConfig;

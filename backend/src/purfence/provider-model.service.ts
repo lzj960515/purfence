@@ -48,7 +48,9 @@ export class ProviderModelService {
     };
 
     if (model === 'codex') {
-      const codexOptions = await this.codexTokenService.resolveCodexOptions(config.id);
+      const codexOptions = await this.codexTokenService.resolveCodexOptions(
+        config.id,
+      );
       modelOptions.accessToken = codexOptions.accessToken;
       modelOptions.accountId = codexOptions.accountId;
     }

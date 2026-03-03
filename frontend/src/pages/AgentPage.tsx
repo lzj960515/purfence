@@ -4,7 +4,7 @@ import { MessageList } from '@/components/agent/MessageList';
 import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
 import { useProviderConfigs } from '@/hooks/useProviderConfigs';
-import { fetchConversationMessages } from '@/api/agent.api';
+import { fetchConversationMessages, uploadImage } from '@/api/agent.api';
 import type { ChatMessage, AgentType } from '@/lib/socket-agent';
 
 export function AgentPage() {
@@ -19,6 +19,9 @@ export function AgentPage() {
   const [isExecutionMode, setIsExecutionMode] = useState(false);
   const [executionId, setExecutionId] = useState<string>('');
   const [selectedAgent, setSelectedAgent] = useState<AgentType>('tianji');
+
+  // 待发送图片状态
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
 
   const activeProviderOptions = configs
     .filter((config) => config.isEnabled)
@@ -229,8 +232,21 @@ export function AgentPage() {
 
   // 发送消息
   const handleSendMessage = useCallback(
-    (query: string) => {
+    async (query: string) => {
       if (!threadId) return;
+
+      let imageUrl: string | undefined;
+
+      // 如果有待发送图片，先上传
+      if (pendingImage) {
+        try {
+          const result = await uploadImage(pendingImage, threadId);
+          imageUrl = result.path;
+        } catch (e) {
+          console.error('Failed to upload image:', e as unknown);
+          // 上传失败继续发送消息（不带图片）
+        }
+      }
 
       if (isExecutionMode && executionId) {
         // Execution 模式：使用 chat_execution 事件
@@ -247,8 +263,12 @@ export function AgentPage() {
           threadId,
           query,
           providerName: selectedProviderName || undefined,
+          imageUrl,
         });
       }
+
+      // 发送成功后清除待发送图片
+      setPendingImage(null);
 
       // 发送第一条消息后，输入框移至底部
       if (isFirstMessage) {
@@ -264,6 +284,7 @@ export function AgentPage() {
       isExecutionMode,
       executionId,
       selectedAgent,
+      pendingImage,
     ],
   );
 
@@ -316,6 +337,8 @@ export function AgentPage() {
             showAgentSelector={isExecutionMode}
             selectedAgent={selectedAgent}
             onAgentChange={setSelectedAgent}
+            pendingImage={pendingImage}
+            onPendingImageChange={setPendingImage}
           />
           
           <div className="mt-8 flex flex-wrap justify-center gap-2 max-w-2xl opacity-0 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-forwards">
@@ -349,6 +372,8 @@ export function AgentPage() {
               showAgentSelector={isExecutionMode}
               selectedAgent={selectedAgent}
               onAgentChange={setSelectedAgent}
+              pendingImage={pendingImage}
+              onPendingImageChange={setPendingImage}
             />
           </div>
         </>

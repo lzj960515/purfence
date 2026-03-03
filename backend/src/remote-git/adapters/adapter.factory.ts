@@ -18,7 +18,11 @@ export class GitAdapterFactory {
    * @param url - Repository URL
    * @returns GitAdapter instance
    */
-  createAdapter(type: RemoteRepositoryType, token: string, url: string): GitAdapter {
+  createAdapter(
+    type: RemoteRepositoryType,
+    token: string,
+    url: string,
+  ): GitAdapter {
     this.logger.debug(`Creating adapter for ${type} repository: ${url}`);
 
     // Sanitize URL for logging (remove credentials if present)

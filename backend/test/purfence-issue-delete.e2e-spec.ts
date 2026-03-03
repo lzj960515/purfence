@@ -15,7 +15,9 @@ const logger = new Logger('PurfenceIssueDeleteE2E');
 
 describe('PurfenceIssue Delete (e2e)', () => {
   let app: INestApplication;
-  let client: ReturnType<typeof import('./utils/create-test-graphql-client').createTestGraphqlClient>;
+  let client: ReturnType<
+    typeof import('./utils/create-test-graphql-client').createTestGraphqlClient
+  >;
   let dataSource: DataSource;
 
   beforeAll(async () => {
@@ -92,7 +94,9 @@ describe('PurfenceIssue Delete (e2e)', () => {
       expect(response.body.data.deleteOnePurfenceIssue).toBe(issue.id);
 
       // Verify issue is deleted
-      const deletedIssue = await PurfenceIssue.findOne({ where: { id: issue.id } });
+      const deletedIssue = await PurfenceIssue.findOne({
+        where: { id: issue.id },
+      });
       expect(deletedIssue).toBeNull();
     });
 
@@ -150,13 +154,18 @@ describe('PurfenceIssue Delete (e2e)', () => {
 
       // Assert
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].extensions.code).toBe('ISSUE_CANNOT_DELETE_RUNNING');
+      expect(response.body.errors[0].extensions.code).toBe(
+        'ISSUE_CANNOT_DELETE_RUNNING',
+      );
     });
 
     it('should return error when deleting needs_user issue', async () => {
       // Arrange
       const project = await createTestProject();
-      const issue = await createTestIssue(project.id, PurfenceStatus.needs_user);
+      const issue = await createTestIssue(
+        project.id,
+        PurfenceStatus.needs_user,
+      );
 
       const mutation = gql`
         mutation DeleteIssue($id: ID!) {
@@ -169,13 +178,18 @@ describe('PurfenceIssue Delete (e2e)', () => {
 
       // Assert
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].extensions.code).toBe('ISSUE_CANNOT_DELETE_NEEDS_USER');
+      expect(response.body.errors[0].extensions.code).toBe(
+        'ISSUE_CANNOT_DELETE_NEEDS_USER',
+      );
     });
 
     it('should return error when deleting needs_approval issue', async () => {
       // Arrange
       const project = await createTestProject();
-      const issue = await createTestIssue(project.id, PurfenceStatus.needs_approval);
+      const issue = await createTestIssue(
+        project.id,
+        PurfenceStatus.needs_approval,
+      );
 
       const mutation = gql`
         mutation DeleteIssue($id: ID!) {
@@ -188,7 +202,9 @@ describe('PurfenceIssue Delete (e2e)', () => {
 
       // Assert
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].extensions.code).toBe('ISSUE_CANNOT_DELETE_NEEDS_APPROVAL');
+      expect(response.body.errors[0].extensions.code).toBe(
+        'ISSUE_CANNOT_DELETE_NEEDS_APPROVAL',
+      );
     });
 
     it('should return error when issue not found', async () => {

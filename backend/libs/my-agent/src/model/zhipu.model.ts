@@ -2,17 +2,18 @@ import { AnthropicProviderOptions, createAnthropic } from '@ai-sdk/anthropic';
 import type { LanguageModelV3 } from '@ai-sdk/provider';
 import { ModelOptions } from '../types';
 import { MyModel } from './my.model';
+import { createZhipu } from 'zhipu-ai-provider';
 export class ZhipuModel extends MyModel {
   constructor(modelOptions: ModelOptions = {}) {
     super(modelOptions);
   }
 
   protected providerModel(): LanguageModelV3 {
-    const anthropic = createAnthropic({
+    const zhipu = createZhipu({
       apiKey: this.modelOptions.apiKey,
       baseURL: this.modelOptions.baseUrl,
     });
-    return anthropic('GLM-5');
+    return zhipu('GLM-5') as any;
   }
 
   tokenLimit() {

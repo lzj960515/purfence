@@ -74,5 +74,4 @@ export class ModelProviderConfig extends BaseEntity {
    */
   @Column({ type: 'boolean', default: false })
   isDefault: boolean;
-  
 }

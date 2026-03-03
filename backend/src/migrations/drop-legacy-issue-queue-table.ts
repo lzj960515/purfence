@@ -23,9 +23,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *   4. No TypeORM entity exists for this table
  *   5. Keeping deprecated tables causes database clutter
  */
-export class DropLegacyIssueQueueTable1710000000000
-  implements MigrationInterface
-{
+export class DropLegacyIssueQueueTable1710000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if the table exists before dropping
     const tableExists = await queryRunner.hasTable('tbl_issue_queue');

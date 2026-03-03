@@ -31,7 +31,8 @@ export class PurfenceResolver {
 
   @Mutation(() => ID)
   async deleteOnePurfenceIssue(
-    @Args('input', { type: () => DeleteOnePurfenceIssueInput }) input: DeleteOnePurfenceIssueInput,
+    @Args('input', { type: () => DeleteOnePurfenceIssueInput })
+    input: DeleteOnePurfenceIssueInput,
   ): Promise<string> {
     return this.issueService.deleteIssue(input.id);
   }

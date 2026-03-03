@@ -10,7 +10,12 @@ function schemaOutputPath() {
 
   // Prefer a writable, stable path in Desktop builds.
   if (process.platform === 'darwin') {
-    const dir = path.join(os.homedir(), 'Library', 'Application Support', appId);
+    const dir = path.join(
+      os.homedir(),
+      'Library',
+      'Application Support',
+      appId,
+    );
     fs.mkdirSync(dir, { recursive: true });
     return path.join(dir, 'schema.graphql');
   }

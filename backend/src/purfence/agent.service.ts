@@ -5,6 +5,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ProviderModelService } from './provider-model.service';
 import { PurfenceExecution } from './purfence-execution.entity';
 import { ExecutionStage } from './purfence-status.enum';
+import { readFile } from 'node:fs/promises';
 
 const ZIWEI_TOOLS = [
   'createProject',
@@ -26,10 +27,7 @@ const TIANXIANG_TOOLS = [
 ] as const;
 
 // 天机（Tianji）工具集 - 用于调度、分配任务
-const TIANJI_TOOLS = [
-  'delegateTask',
-  'getCurrentTime',
-] as const;
+const TIANJI_TOOLS = ['delegateTask', 'getCurrentTime'] as const;
 
 // 天府（Tianfu）工具集 - 用于评估、规划下一步
 const TIANFU_TOOLS = [
@@ -56,6 +54,7 @@ export class PurfenceAgentService {
     providerName?: string;
     context?: Record<string, unknown>;
     userId?: string;
+    imageUrl?: string;
   }) {
     const ziweiPrompt = getAgentPrompt('ziwei');
     if (!ziweiPrompt) {
@@ -71,6 +70,7 @@ export class PurfenceAgentService {
       providerName: params.providerName,
       context: params.context,
       userId: params.userId,
+      imageUrl: params.imageUrl,
     });
   }
 
@@ -105,9 +105,11 @@ export class PurfenceAgentService {
     providerName?: string;
     context?: Record<string, unknown>;
     userId?: string;
+    imageUrl?: string;
   }) {
-    const modelOptions =
-      await this.providerModelService.resolveModelOptions(params.providerName);
+    const modelOptions = await this.providerModelService.resolveModelOptions(
+      params.providerName,
+    );
 
     const agent = this.myAgentService.createAgent({
       tools: [...params.tools],
@@ -116,13 +118,32 @@ export class PurfenceAgentService {
       modelOptions,
     });
 
+    // 构建消息 parts，支持图片
+    const parts: Array<
+      | { type: 'text'; text: string }
+      | { type: 'file'; url: string; mediaType: string }
+    > = [{ type: 'text', text: params.query }];
+
+    if (params.imageUrl) {
+      // 读取文件转 base64
+      const buffer = await readFile(params.imageUrl);
+      const base64 = buffer.toString('base64');
+      const mediaType = this.inferMediaType(params.imageUrl);
+      parts.push({
+        type: 'file',
+        url: `data:${mediaType};base64,${base64}`,
+        mediaType,
+      });
+    }
+
+    console.log('parts', parts);
     await SocketService.warpSocket(params.threadId, () =>
       agent.stream({
         message: [
           {
             id: MyUtil.uuid(),
             role: 'user',
-            parts: [{ type: 'text', text: params.query }],
+            parts,
           },
         ],
         conversationId: params.threadId,
@@ -134,6 +155,28 @@ export class PurfenceAgentService {
         },
       }),
     );
+  }
+
+  /**
+   * 根据文件扩展名推断 media type
+   */
+  private inferMediaType(url: string): string {
+    const ext = url.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      case 'svg':
+        return 'image/svg+xml';
+      default:
+        return 'image/png';
+    }
   }
 
   /**
@@ -149,7 +192,8 @@ export class PurfenceAgentService {
     providerName?: string;
     context?: Record<string, unknown>;
   }) {
-    const { threadId, query, agent, executionId, providerName, context } = params;
+    const { threadId, query, agent, executionId, providerName, context } =
+      params;
 
     this.logger.log(
       `streamExecutionAgent: executionId=${executionId}, agent=${agent}`,
@@ -165,7 +209,8 @@ export class PurfenceAgentService {
     }
 
     // 更新 stage
-    const newStage = agent === 'tianji' ? ExecutionStage.tianji : ExecutionStage.tianfu;
+    const newStage =
+      agent === 'tianji' ? ExecutionStage.tianji : ExecutionStage.tianfu;
     execution.stage = newStage;
     await execution.save();
 
@@ -183,7 +228,10 @@ export class PurfenceAgentService {
     const streamContext = {
       executionId,
       issueId: execution.issueId,
-      event: agent === 'tianji' ? 'purfence.execution.evaluate' : 'purfence.evaluation.stream-ended',
+      event:
+        agent === 'tianji'
+          ? 'purfence.execution.evaluate'
+          : 'purfence.evaluation.stream-ended',
       ...context,
     };
 

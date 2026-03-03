@@ -87,7 +87,8 @@ export class RemoteGitResolver {
   async importedRemoteIssues(
     @Args('projectId') projectId: string,
   ): Promise<PurfenceIssueDto[]> {
-    const issues = await this.remoteGitService.getImportedRemoteIssues(projectId);
+    const issues =
+      await this.remoteGitService.getImportedRemoteIssues(projectId);
     return issues as PurfenceIssueDto[];
   }
 }

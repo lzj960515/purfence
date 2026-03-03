@@ -66,3 +66,25 @@ export async function deleteConversation(threadId: string): Promise<void> {
     throw new Error(`Failed to delete conversation: ${response.statusText}`);
   }
 }
+
+/** 上传图片 */
+export async function uploadImage(
+  file: File,
+  conversationId: string,
+): Promise<{ success: boolean; path: string; url: string }> {
+  const backendBaseUrl = getBackendBaseUrl();
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('conversationId', conversationId);
+
+  const response = await fetch(`${backendBaseUrl}/api/agent/upload-image`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Upload failed: ${response.statusText}`);
+  }
+
+  return response.json();
+}

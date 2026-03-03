@@ -6,9 +6,7 @@ import {
   TableUnique,
 } from 'typeorm';
 
-export class CreateRemoteRepositoryConfigTable1771905206
-  implements MigrationInterface
-{
+export class CreateRemoteRepositoryConfigTable1771905206 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({

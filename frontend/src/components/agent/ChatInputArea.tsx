@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Paperclip, ArrowUp, Square } from 'lucide-react'
+import { Paperclip, ArrowUp, Square, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AgentType } from '@/lib/socket-agent'
 import { AGENT_OPTIONS } from '@/lib/socket-agent'
@@ -32,6 +32,10 @@ interface ChatInputAreaProps {
   selectedAgent?: AgentType
   /** Agent 切换回调 */
   onAgentChange?: (agent: AgentType) => void
+  /** 待发送图片 */
+  pendingImage?: File | null
+  /** 待发送图片变化回调 */
+  onPendingImageChange?: (file: File | null) => void
 }
 
 export function ChatInputArea({
@@ -46,9 +50,19 @@ export function ChatInputArea({
   showAgentSelector = false,
   selectedAgent = 'tianji',
   onAgentChange,
+  pendingImage: externalPendingImage,
+  onPendingImageChange,
 }: ChatInputAreaProps) {
   const [value, setValue] = useState('')
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 使用外部 pendingImage 状态
+  const pendingImage = externalPendingImage ?? null
+  const setPendingImage = (file: File | null) => {
+    onPendingImageChange?.(file)
+  }
 
   // Auto-resize textarea
   useEffect(() => {
@@ -57,6 +71,19 @@ export function ChatInputArea({
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [value])
+
+  // 同步外部 pendingImage 变化到预览
+  useEffect(() => {
+    if (pendingImage) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(pendingImage)
+    } else {
+      setImagePreview(null)
+    }
+  }, [pendingImage])
 
   const handleSend = () => {
     const content = value.trim()
@@ -77,26 +104,90 @@ export function ChatInputArea({
     }
   }
 
+  // Handle image paste
+  const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault()
+        const file = item.getAsFile()
+        if (file) {
+          handleImageSelect(file)
+        }
+        break
+      }
+    }
+  }
+
+  // Handle image selection
+  const handleImageSelect = (file: File) => {
+    setPendingImage(file)
+  }
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setPendingImage(null)
+    setImagePreview(null)
+  }
+
+  // Handle file input change
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      handleImageSelect(file)
+    }
+    // Reset input value to allow selecting the same file again
+    event.target.value = ''
+  }
+
+  // Trigger file input click
+  const handleAttachClick = () => {
+    fileInputRef.current?.click()
+  }
+
   return (
-    <div 
+    <div
       className={cn(
         "transition-all duration-500 ease-in-out w-full px-4",
-        isFirstMessage 
-          ? "w-full max-w-2xl mx-auto" 
+        isFirstMessage
+          ? "w-full max-w-2xl mx-auto"
           : "max-w-3xl mx-auto py-4"
       )}
     >
-      <div 
+      <div
         className={cn(
           "relative flex flex-col gap-2 rounded-3xl border bg-background px-4 pb-3 pt-3 shadow-sm transition-all focus-within:ring-1 focus-within:ring-ring/20 focus-within:border-ring/50 hover:shadow-md",
           isFirstMessage ? "min-h-[120px] shadow-md border-muted-foreground/10" : "min-h-[52px]"
         )}
       >
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="relative inline-flex items-center gap-2 mb-2">
+            <div className="relative rounded-lg overflow-hidden border border-border/50">
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="max-h-[120px] max-w-[200px] object-contain"
+              />
+              <button
+                onClick={handleRemoveImage}
+                className="absolute top-1 right-1 h-5 w-5 rounded-full bg-background/90 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background transition-colors"
+                type="button"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <Textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           disabled={disabled}
           placeholder={isFirstMessage ? "推进项目或者处理任何事情" : "随便做点什么吧..."}
           className={cn(
@@ -106,15 +197,23 @@ export function ChatInputArea({
           rows={1}
           style={{ maxHeight: '200px' }}
         />
-        
+
         <div className="flex items-center justify-between mt-auto pt-2">
           {/* Left Actions */}
           <div className="flex items-center gap-1 -ml-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
               title="Attach file"
+              onClick={handleAttachClick}
             >
               <Paperclip className="h-4 w-4" />
             </Button>
@@ -162,7 +261,7 @@ export function ChatInputArea({
             ) : null}
 
             {isSending ? (
-              <Button 
+              <Button
                 onClick={onStop}
                 variant="secondary"
                 size="icon"
@@ -171,14 +270,14 @@ export function ChatInputArea({
                 <Square className="h-3 w-3 fill-current" />
               </Button>
             ) : (
-              <Button 
-                onClick={handleSend} 
+              <Button
+                onClick={handleSend}
                 disabled={!value.trim() || disabled}
                 size="icon"
                 className={cn(
                   "h-8 w-8 rounded-full transition-all duration-200 shrink-0",
-                  value.trim() 
-                    ? "bg-foreground text-background hover:bg-foreground/90" 
+                  value.trim()
+                    ? "bg-foreground text-background hover:bg-foreground/90"
                     : "bg-muted text-muted-foreground hover:bg-muted/80 cursor-not-allowed"
                 )}
               >

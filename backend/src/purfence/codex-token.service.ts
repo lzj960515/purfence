@@ -52,7 +52,10 @@ export class CodexTokenService {
     );
   }
 
-  buildOauthInfo(tokens: TokenResponse, fallbackAccountId?: string): CodexOAuthInfo {
+  buildOauthInfo(
+    tokens: TokenResponse,
+    fallbackAccountId?: string,
+  ): CodexOAuthInfo {
     const accountId = this.extractAccountId(tokens, fallbackAccountId);
 
     return {
@@ -66,8 +69,11 @@ export class CodexTokenService {
     };
   }
 
-  async refreshCodexConfigToken(configId: string): Promise<ModelProviderConfig> {
-    const config = await this.modelProviderConfigService.findOneWithSensitive(configId);
+  async refreshCodexConfigToken(
+    configId: string,
+  ): Promise<ModelProviderConfig> {
+    const config =
+      await this.modelProviderConfigService.findOneWithSensitive(configId);
 
     if (!config.refreshToken) {
       throw new Error('Codex configuration is missing refresh token');
@@ -84,10 +90,11 @@ export class CodexTokenService {
     });
   }
 
-  async resolveCodexOptions(configId: string): Promise<
-    Pick<ModelOptions, 'accessToken' | 'accountId'>
-  > {
-    const config = await this.modelProviderConfigService.findOneWithSensitive(configId);
+  async resolveCodexOptions(
+    configId: string,
+  ): Promise<Pick<ModelOptions, 'accessToken' | 'accountId'>> {
+    const config =
+      await this.modelProviderConfigService.findOneWithSensitive(configId);
     const oauthInfo = (config.oauthInfo || {}) as Partial<CodexOAuthInfo>;
 
     if (oauthInfo.accessToken && !this.isExpiringSoon(oauthInfo.expiresAt)) {

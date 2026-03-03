@@ -1,6 +1,5 @@
 mod codex;
 mod environment;
-mod update;
 
 use tauri::{Emitter, Manager};
 
@@ -63,9 +62,7 @@ pub fn run() {
             environment::install_builtin_agents_desktop,
             environment::desktop_skills_catalog,
             environment::install_desktop_skill,
-            environment::git_install_prompt_desktop,
-            update::check_for_updates,
-            update::get_current_version
+            environment::git_install_prompt_desktop
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -301,7 +301,16 @@ export function MessageList({ messages }: MessageListProps) {
                       <span>{message.error}</span>
                     </div>
                   ) : isUserMessage ? (
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <>
+                      {message.imageUrl && (
+                        <img
+                          src={`${getBackendBaseUrl()}/api/agent/file?path=${encodeURIComponent(message.imageUrl)}`}
+                          alt="用户上传的图片"
+                          className="max-w-full rounded-lg mb-2 max-h-48 object-cover"
+                        />
+                      )}
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    </>
                   ) : Array.isArray(message.artifact) && message.artifact.length > 0 ? (
                     renderArtifacts(message.artifact)
                   ) : (

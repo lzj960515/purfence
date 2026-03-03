@@ -1,4 +1,11 @@
-import { Resolver, Mutation, Args, ID, ObjectType, Field } from '@nestjs/graphql';
+import {
+  Resolver,
+  Mutation,
+  Args,
+  ID,
+  ObjectType,
+  Field,
+} from '@nestjs/graphql';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { OAuthService } from './oauth.service';
 import { StateService } from './state.service';
@@ -6,9 +13,7 @@ import { ModelProviderConfigService } from '../model-provider-config/model-provi
 import { ModelProviderConfigDto } from '../model-provider-config/model-provider-config.dto';
 import { ProviderType } from '../types/provider-type.enum';
 import { CodexTokenService } from '../codex-token.service';
-import {
-  CodexJWTClaims,
-} from './types/oauth-types';
+import { CodexJWTClaims } from './types/oauth-types';
 
 /**
  * Quota Information
@@ -162,7 +167,9 @@ export class OAuthResolver {
       },
     });
 
-    this.logger.log(`OAuth initiated with state: ${state}, redirectUri: ${redirectUri}`);
+    this.logger.log(
+      `OAuth initiated with state: ${state}, redirectUri: ${redirectUri}`,
+    );
     this.logger.debug(`PKCE code_verifier stored for state: ${state}`);
 
     return {
@@ -223,10 +230,14 @@ export class OAuthResolver {
       );
     }
 
-    this.logger.log(`State validated successfully for OAuth callback: ${state}`);
+    this.logger.log(
+      `State validated successfully for OAuth callback: ${state}`,
+    );
 
     // Retrieve code_verifier from stored state metadata (PKCE)
-    const codeVerifier = storedState.metadata?.codeVerifier as string | undefined;
+    const codeVerifier = storedState.metadata?.codeVerifier as
+      | string
+      | undefined;
     if (codeVerifier) {
       this.logger.debug('Using PKCE code_verifier for token exchange');
     }
@@ -277,9 +288,7 @@ export class OAuthResolver {
         throw error;
       }
 
-      throw new BadRequestException(
-        `OAuth callback failed: ${error.message}`,
-      );
+      throw new BadRequestException(`OAuth callback failed: ${error.message}`);
     }
   }
 
@@ -311,8 +320,9 @@ export class OAuthResolver {
     try {
       return await this.codexTokenService.refreshCodexConfigToken(configId);
     } catch (error) {
-      throw new BadRequestException(error.message || 'Failed to refresh Codex token');
+      throw new BadRequestException(
+        error.message || 'Failed to refresh Codex token',
+      );
     }
   }
-
 }

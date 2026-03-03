@@ -77,7 +77,7 @@ export function AppSidebar() {
     downloadProgress,
     error: updateError,
     startDownload,
-    cancelDownload,
+    dismissUpdate,
     installAndRestart,
     skipVersion,
   } = useUpdate()
@@ -319,7 +319,7 @@ export function AppSidebar() {
           downloadProgress={downloadProgress}
           error={updateError}
           onConfirm={startDownload}
-          onCancel={cancelDownload}
+          onCancel={dismissUpdate}
           onInstallAndRestart={installAndRestart}
           onSkipVersion={() => {
             if (updateInfo?.version) {

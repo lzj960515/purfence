@@ -10,7 +10,6 @@ import {
 @Index(['toolCallId'])
 @Entity()
 export class AgentArtifact extends BaseEntity {
-
   @Column({ ...IDColumnOpts, nullable: true })
   conversationId: string;
 
@@ -31,7 +30,7 @@ export class AgentArtifact extends BaseEntity {
     content: AgentArtifactContent,
   ) {
     const { callId, name } = options.toolContext;
-  
+
     return this.create({
       toolCallId: callId,
       content,

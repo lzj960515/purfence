@@ -24,7 +24,7 @@ export function PurfenceConfigPage() {
     currentVersion,
     checkForUpdates,
     startDownload,
-    cancelDownload,
+    dismissUpdate,
     installAndRestart,
     skipVersion,
   } = useUpdate()
@@ -198,7 +198,7 @@ export function PurfenceConfigPage() {
         downloadProgress={downloadProgress}
         error={updateError}
         onConfirm={startDownload}
-        onCancel={cancelDownload}
+        onCancel={dismissUpdate}
         onInstallAndRestart={installAndRestart}
         onSkipVersion={() => {
           if (updateInfo?.version) {

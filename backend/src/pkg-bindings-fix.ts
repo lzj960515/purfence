@@ -42,7 +42,10 @@ function patchDlopenForSqliteAddon() {
   if (typeof original !== 'function') return;
 
   proc.dlopen = (module: unknown, filename: string) => {
-    if (typeof filename === 'string' && filename.endsWith('node_sqlite3.node')) {
+    if (
+      typeof filename === 'string' &&
+      filename.endsWith('node_sqlite3.node')
+    ) {
       return original(module, addonPath);
     }
     return original(module, filename);
@@ -56,7 +59,9 @@ function patchTypeOrmSqliteLoader() {
   } | null = null;
 
   try {
-    platformTools = localRequire('typeorm/platform/PlatformTools')?.PlatformTools;
+    platformTools = localRequire(
+      'typeorm/platform/PlatformTools',
+    )?.PlatformTools;
   } catch {
     return;
   }
@@ -98,7 +103,7 @@ function patchModuleLoadForSqlite() {
       request.endsWith('/node_modules/sqlite3') ||
       request.endsWith('\\node_modules\\sqlite3')
     ) {
-      return originalLoad(sqliteResolved!, parent, isMain);
+      return originalLoad(sqliteResolved, parent, isMain);
     }
     return originalLoad(request, parent, isMain);
   };

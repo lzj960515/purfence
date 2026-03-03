@@ -9,14 +9,13 @@ import { GraphQLURL } from 'graphql-scalars';
 
 export enum AgentArtifactType {
   IMAGE = 'IMAGE',
-  FILE = 'FILE'
+  FILE = 'FILE',
 }
 
 registerEnumType(AgentArtifactType, {
   name: 'AgentArtifactType',
   description: 'Type of agent artifact content',
 });
-
 
 export enum AgentArtifactFileType {
   PDF = 'PDF',
@@ -51,7 +50,7 @@ export interface AgentArtifactPdfContent extends AgentArtifactFileContent {
 
 export type AgentArtifactContent =
   | AgentArtifactImageContent
-  | AgentArtifactFileContent
+  | AgentArtifactFileContent;
 
 @InterfaceType({
   resolveType(value: AgentArtifactContent) {

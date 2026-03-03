@@ -43,7 +43,9 @@ describe('ProviderFactoryService', () => {
       const result = await service.createOpenAICompatible(ProviderType.KIMI);
 
       expect(result).toBeDefined();
-      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(ProviderType.KIMI);
+      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(
+        ProviderType.KIMI,
+      );
     });
 
     it('should create model instance when modelId is provided', async () => {
@@ -55,7 +57,10 @@ describe('ProviderFactoryService', () => {
 
       providerConfigService.getActiveConfig.mockResolvedValue(mockConfig);
 
-      const result = await service.createOpenAICompatible(ProviderType.KIMI, 'kimi-k2-0905-preview');
+      const result = await service.createOpenAICompatible(
+        ProviderType.KIMI,
+        'kimi-k2-0905-preview',
+      );
 
       expect(result).toBeDefined();
     });
@@ -74,7 +79,9 @@ describe('ProviderFactoryService', () => {
       const result = await service.createKimi();
 
       expect(result).toBeDefined();
-      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(ProviderType.KIMI);
+      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(
+        ProviderType.KIMI,
+      );
     });
 
     it('should create Kimi client with custom model', async () => {
@@ -105,7 +112,9 @@ describe('ProviderFactoryService', () => {
       const result = await service.createZhipu();
 
       expect(result).toBeDefined();
-      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(ProviderType.ZHIPU);
+      expect(providerConfigService.getActiveConfig).toHaveBeenCalledWith(
+        ProviderType.ZHIPU,
+      );
     });
 
     it('should create Zhipu client with custom model', async () => {

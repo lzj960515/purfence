@@ -27,6 +27,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": [
       "app"
     ],
@@ -53,7 +54,7 @@
       "endpoints": [
         "https://github.com/lzj960515/purfence/releases/latest/download/latest.json"
       ],
-      "pubkey": ""
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5MmNtWjR5d3IyaUc1Y2NWUVBJQ1djcHAzc3BMOEkxMWRDaDJ3UWpDVmhwd0FBQkFBQUFBQUFBQUFBQUlBQUFBQW9vUDMvRlhBUGhmTzc4L1Q0TktETjBPVzVqRlByVERJUjJkWUJ5YUVwMTRhOVRVdS9oQ0Y3Tm1weGdtZEFoWHBTR0tGSis4QkR0aEJLcURrWW1oR2FHdjF2eVRPNFNtVUsyMVh1OVQ4MWN2c3RRUmN2RUVCTGcrcE9LVXJuOWZUUU1BSEtUQjJmWFU9Cg=="
     }
   }
 }

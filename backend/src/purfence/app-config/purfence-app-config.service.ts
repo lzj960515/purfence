@@ -52,7 +52,7 @@ export class PurfenceAppConfigService {
       return null;
     }
 
-    const payload = (config.config || {}) as Record<string, unknown>;
+    const payload = config.config || {};
     const botToken = String(payload.botToken || '').trim();
     const appToken = String(payload.appToken || '').trim();
     const providerNameRaw = String(payload.providerName || '').trim();

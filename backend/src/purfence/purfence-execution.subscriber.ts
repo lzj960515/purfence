@@ -10,9 +10,7 @@ import {
 import { PurfenceExecution } from './purfence-execution.entity';
 
 @EventSubscriber()
-export class PurfenceExecutionSubscriber
-  implements EntitySubscriberInterface<PurfenceExecution>
-{
+export class PurfenceExecutionSubscriber implements EntitySubscriberInterface<PurfenceExecution> {
   @Log() logger: Logger;
 
   constructor(
@@ -28,7 +26,9 @@ export class PurfenceExecutionSubscriber
 
   async afterInsert(event: InsertEvent<PurfenceExecution>) {
     const executionId = event.entity.id;
-    this.logger.log(`Execution created: ${executionId}, enqueueing execution-queue`);
+    this.logger.log(
+      `Execution created: ${executionId}, enqueueing execution-queue`,
+    );
     await this.myQueueService.addJob(
       'execution-queue',
       { executionId },

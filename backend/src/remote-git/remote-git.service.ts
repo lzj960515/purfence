@@ -23,9 +23,16 @@ import {
   ConnectionError,
 } from './errors/remote-git.error';
 import { GitAdapterFactory } from './adapters/adapter.factory';
-import { GitAdapter, ConnectionTestResult, RemoteIssue } from './adapters/git-adapter.interface';
+import {
+  GitAdapter,
+  ConnectionTestResult,
+  RemoteIssue,
+} from './adapters/git-adapter.interface';
 import { RemoteIssueDto } from './dto/remote-issue.dto';
-import { PurfenceIssue, RemoteIssueData } from '../purfence/purfence-issue.entity';
+import {
+  PurfenceIssue,
+  RemoteIssueData,
+} from '../purfence/purfence-issue.entity';
 import { generateBranchSuffix } from './utils/branch-suffix.util';
 import { IssueOrigin, PurfenceStatus } from '../purfence/purfence-status.enum';
 
@@ -40,13 +47,17 @@ export class RemoteGitService {
     private readonly configService: ConfigService,
     private readonly adapterFactory: GitAdapterFactory,
   ) {
-    const encryptionKey = this.configService.get<string>('REMOTE_GIT_ENCRYPTION_KEY');
+    const encryptionKey = this.configService.get<string>(
+      'REMOTE_GIT_ENCRYPTION_KEY',
+    );
     if (!encryptionKey) {
       this.logger.warn('REMOTE_GIT_ENCRYPTION_KEY not set, using default key');
     }
     // Use AES-256-CBC with 32-byte key
     const key = Buffer.from(
-      (encryptionKey || 'default-encryption-key-32-bytes!').padEnd(32, '0').slice(0, 32),
+      (encryptionKey || 'default-encryption-key-32-bytes!')
+        .padEnd(32, '0')
+        .slice(0, 32),
     );
     const iv = Buffer.alloc(16, 0); // Use zero IV for simplicity, consider using random IV in production
     this.crypto = new CryptoUtil('aes-256-cbc', key, iv);
@@ -79,7 +90,9 @@ export class RemoteGitService {
   /**
    * Get remote repository config by project ID
    */
-  async findByProjectId(projectId: string): Promise<RemoteRepositoryConfig | null> {
+  async findByProjectId(
+    projectId: string,
+  ): Promise<RemoteRepositoryConfig | null> {
     return this.remoteRepositoryRepository.findOne({
       where: { projectId },
     });
@@ -125,7 +138,9 @@ export class RemoteGitService {
       }
       config.status = RemoteRepositoryStatus.CONNECTED;
       config.errorMessage = undefined;
-      this.logger.log(`Updated remote repository config for project ${projectId}`);
+      this.logger.log(
+        `Updated remote repository config for project ${projectId}`,
+      );
     } else {
       // Create new config
       config = this.remoteRepositoryRepository.create({
@@ -136,7 +151,9 @@ export class RemoteGitService {
         defaultBranch: input.defaultBranch || 'main',
         status: RemoteRepositoryStatus.CONNECTED,
       });
-      this.logger.log(`Created remote repository config for project ${projectId}`);
+      this.logger.log(
+        `Created remote repository config for project ${projectId}`,
+      );
     }
 
     return this.remoteRepositoryRepository.save(config);
@@ -170,7 +187,9 @@ export class RemoteGitService {
     }
     if (input.defaultBranch) config.defaultBranch = input.defaultBranch;
 
-    this.logger.log(`Updated remote repository config for project ${projectId}`);
+    this.logger.log(
+      `Updated remote repository config for project ${projectId}`,
+    );
     return this.remoteRepositoryRepository.save(config);
   }
 
@@ -291,7 +310,9 @@ export class RemoteGitService {
    * @param projectId - Project ID
    * @returns Connection test result
    */
-  async testConnectionForProject(projectId: string): Promise<ConnectionTestResult> {
+  async testConnectionForProject(
+    projectId: string,
+  ): Promise<ConnectionTestResult> {
     try {
       const adapter = await this.getAdapter(projectId);
       const result = await adapter.testConnection();
@@ -309,7 +330,10 @@ export class RemoteGitService {
 
       return result;
     } catch (error) {
-      this.logger.error(`Connection test failed for project ${projectId}:`, error);
+      this.logger.error(
+        `Connection test failed for project ${projectId}:`,
+        error,
+      );
 
       // Handle specific error types
       if (error instanceof TokenExpiredError) {
@@ -320,8 +344,13 @@ export class RemoteGitService {
         };
       }
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.updateStatus(projectId, RemoteRepositoryStatus.ERROR, errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await this.updateStatus(
+        projectId,
+        RemoteRepositoryStatus.ERROR,
+        errorMessage,
+      );
 
       return {
         success: false,
@@ -374,12 +403,16 @@ export class RemoteGitService {
     const remoteIssues = await adapter.getIssues({ state: 'open' });
 
     // 3. Convert to DTOs
-    const issueDtos = remoteIssues.map(issue => this.mapToRemoteIssueDto(issue));
+    const issueDtos = remoteIssues.map((issue) =>
+      this.mapToRemoteIssueDto(issue),
+    );
 
     // 4. Update last synced timestamp
     await this.updateStatus(projectId, RemoteRepositoryStatus.CONNECTED);
 
-    this.logger.log(`Synced ${issueDtos.length} remote issues for project ${projectId}`);
+    this.logger.log(
+      `Synced ${issueDtos.length} remote issues for project ${projectId}`,
+    );
     return issueDtos;
   }
 
@@ -395,7 +428,9 @@ export class RemoteGitService {
     projectId: string,
     remoteIssueId: string,
   ): Promise<PurfenceIssue> {
-    this.logger.log(`Importing remote issue ${remoteIssueId} for project ${projectId}`);
+    this.logger.log(
+      `Importing remote issue ${remoteIssueId} for project ${projectId}`,
+    );
 
     // 1. Check if already imported
     const existingIssue = await PurfenceIssue.findOne({
@@ -451,7 +486,9 @@ export class RemoteGitService {
 
     await issue.save();
 
-    this.logger.log(`Imported remote issue ${remoteIssueId} as Purfence issue ${issue.id}`);
+    this.logger.log(
+      `Imported remote issue ${remoteIssueId} as Purfence issue ${issue.id}`,
+    );
     return issue;
   }
 
@@ -489,5 +526,4 @@ export class RemoteGitService {
       updatedAt: issue.updatedAt,
     };
   }
-
 }

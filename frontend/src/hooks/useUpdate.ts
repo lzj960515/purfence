@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { invoke } from '@tauri-apps/api/core'
 import {
   check,
   type DownloadEvent,
@@ -11,11 +10,7 @@ export interface UpdateInfo {
   version: string
   currentVersion: string
   releaseNotes?: string
-  downloadUrl?: string
   pubDate?: string
-  // Backend may return snake_case fields
-  current_version?: string
-  pub_date?: string
 }
 
 export interface DownloadProgress {
@@ -33,34 +28,28 @@ export type UpdateStatus =
   | 'error'
 
 interface UseUpdateReturn {
-  // State
   status: UpdateStatus
   updateInfo: UpdateInfo | null
   downloadProgress: DownloadProgress | null
   error: string | null
   currentVersion: string
-
-  // Actions
   checkForUpdates: () => Promise<boolean>
   startDownload: () => Promise<void>
-  cancelDownload: () => void
   installAndRestart: () => Promise<void>
   dismissUpdate: () => void
   skipVersion: (version: string) => void
 }
 
-const CHECK_INTERVAL = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
+const CHECK_INTERVAL = 2 * 60 * 60 * 1000 // 2 hours
 
 function isTauriRuntime(): boolean {
   if (typeof window === 'undefined') {
     return false
   }
-
   const tauriWindow = window as Window & {
     __TAURI__?: unknown
     __TAURI_INTERNALS__?: unknown
   }
-
   return Boolean(tauriWindow.__TAURI__ || tauriWindow.__TAURI_INTERNALS__)
 }
 
@@ -73,37 +62,16 @@ export function useUpdate(): UseUpdateReturn {
   const [currentVersion, setCurrentVersion] = useState<string>('')
   const [updateManifest, setUpdateManifest] = useState<Update | null>(null)
 
-  const abortControllerRef = useRef<AbortController | null>(null)
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const tauriAvailableRef = useRef<boolean>(isTauriRuntime())
 
-  // Get current version on mount
   useEffect(() => {
-    if (!tauriAvailableRef.current) {
-      setCurrentVersion('')
-      return
-    }
+    if (!tauriAvailableRef.current) return
 
-    invoke<string>('get_current_version')
-      .then((version) => {
-        console.log('[useUpdate] Current version:', version)
-        setCurrentVersion(version)
-      })
-      .catch((err) => console.error('[useUpdate] Failed to get current version:', err))
-  }, [])
-
-  // Set up periodic check
-  useEffect(() => {
-    if (!tauriAvailableRef.current) {
-      return
-    }
-
-    // Check on mount (with a small delay to let app initialize)
     const initialCheckTimeout = setTimeout(() => {
       checkForUpdates()
     }, 5000)
 
-    // Set up periodic checks
     checkIntervalRef.current = setInterval(() => {
       checkForUpdates()
     }, CHECK_INTERVAL)
@@ -112,9 +80,6 @@ export function useUpdate(): UseUpdateReturn {
       clearTimeout(initialCheckTimeout)
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current)
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
       }
     }
   }, [])
@@ -134,70 +99,53 @@ export function useUpdate(): UseUpdateReturn {
     setError(null)
 
     try {
-      // First check using our GitHub API
-      const rawInfo = await invoke<UpdateInfo | null>('check_for_updates')
+      const manifest = await check()
 
-      if (rawInfo) {
-        // Normalize field names (backend returns snake_case, frontend uses camelCase)
-        const info: UpdateInfo = {
-          ...rawInfo,
-          currentVersion: rawInfo.currentVersion || rawInfo.current_version || '',
-          pubDate: rawInfo.pubDate || rawInfo.pub_date,
-        }
-
-        console.log('[useUpdate] Update info received:', info)
-
-        // Check if this version has been skipped
-        const skippedVersion = localStorage.getItem('purfence:skippedVersion')
-        if (skippedVersion === info.version) {
-          // This version was skipped, don't show update
-          console.log('[useUpdate] Version skipped:', info.version)
-          setStatus('idle')
-          return false
-        }
-
-        setUpdateInfo(info)
-
-        // Also check using Tauri updater plugin (for actual download)
-        const manifest = await check()
-        if (manifest) {
-          setUpdateManifest(manifest)
-        }
-
-        setStatus('available')
-        return true
-      } else {
+      if (!manifest) {
+        console.log('[useUpdate] No update available')
         setStatus('idle')
         return false
       }
+
+      console.log('[useUpdate] Update available:', manifest.version)
+
+      const skippedVersion = localStorage.getItem('purfence:skippedVersion')
+      if (skippedVersion === manifest.version) {
+        console.log('[useUpdate] Version skipped:', manifest.version)
+        setStatus('idle')
+        return false
+      }
+
+      setUpdateManifest(manifest)
+      setCurrentVersion(manifest.currentVersion)
+
+      setUpdateInfo({
+        version: manifest.version,
+        currentVersion: manifest.currentVersion,
+        releaseNotes: manifest.body || undefined,
+        pubDate: manifest.date || undefined,
+      })
+      setStatus('available')
+      return true
     } catch (err) {
       console.error('[useUpdate] Failed to check for updates:', err)
       const errorMessage = err instanceof Error ? err.message : String(err)
       setError(errorMessage)
       setStatus('error')
-      // Don't return false here, let the error state be handled by the UI
       return false
     }
   }, [status])
 
   const startDownload = useCallback(async () => {
-    if (!tauriAvailableRef.current) {
-      return
-    }
-
-    if (!updateManifest) {
-      console.error('[useUpdate] No update manifest available')
+    if (!tauriAvailableRef.current || !updateManifest) {
       setError('没有可用的更新')
       return
     }
 
     console.log('[useUpdate] Starting download...')
-
     setStatus('downloading')
     setError(null)
     setDownloadProgress({ downloaded: 0, total: null, percentage: 0 })
-
-    abortControllerRef.current = new AbortController()
 
     try {
       await updateManifest.downloadAndInstall((event: DownloadEvent) => {
@@ -228,14 +176,6 @@ export function useUpdate(): UseUpdateReturn {
         }
       })
     } catch (err) {
-      // Check if it was aborted
-      if (abortControllerRef.current?.signal.aborted) {
-        console.log('[useUpdate] Download aborted')
-        setStatus('available')
-        setDownloadProgress(null)
-        return
-      }
-
       console.error('[useUpdate] Failed to download update:', err)
       const errorMessage = err instanceof Error ? err.message : String(err)
       setError(errorMessage)
@@ -244,18 +184,8 @@ export function useUpdate(): UseUpdateReturn {
     }
   }, [updateManifest])
 
-  const cancelDownload = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    setStatus('available')
-    setDownloadProgress(null)
-  }, [])
-
   const installAndRestart = useCallback(async () => {
-    if (!tauriAvailableRef.current) {
-      return
-    }
+    if (!tauriAvailableRef.current) return
 
     try {
       console.log('[useUpdate] Restarting app to install update...')
@@ -270,6 +200,7 @@ export function useUpdate(): UseUpdateReturn {
   const dismissUpdate = useCallback(() => {
     setStatus('idle')
     setUpdateInfo(null)
+    setUpdateManifest(null)
     setDownloadProgress(null)
     setError(null)
   }, [])
@@ -278,6 +209,7 @@ export function useUpdate(): UseUpdateReturn {
     localStorage.setItem('purfence:skippedVersion', version)
     setStatus('idle')
     setUpdateInfo(null)
+    setUpdateManifest(null)
     setDownloadProgress(null)
     setError(null)
   }, [])
@@ -290,7 +222,6 @@ export function useUpdate(): UseUpdateReturn {
     currentVersion,
     checkForUpdates,
     startDownload,
-    cancelDownload,
     installAndRestart,
     dismissUpdate,
     skipVersion,

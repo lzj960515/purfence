@@ -6,7 +6,9 @@ import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-upda
 
 @Resolver()
 export class PurfenceScheduledTaskResolver {
-  constructor(private readonly scheduledTaskService: PurfenceScheduledTaskService) {}
+  constructor(
+    private readonly scheduledTaskService: PurfenceScheduledTaskService,
+  ) {}
 
   @Mutation(() => PurfenceScheduledTaskDto)
   async createPurfenceScheduledTask(
@@ -33,9 +35,7 @@ export class PurfenceScheduledTaskResolver {
   }
 
   @Mutation(() => ID)
-  async runPurfenceScheduledTask(
-    @Args('id', { type: () => ID }) id: string,
-  ) {
+  async runPurfenceScheduledTask(@Args('id', { type: () => ID }) id: string) {
     const threadId = await this.scheduledTaskService.runTaskNow(id);
     return threadId || '';
   }

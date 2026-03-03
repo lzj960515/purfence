@@ -13,9 +13,7 @@ import { PurfenceIssue } from '../purfence/purfence-issue.entity';
 import { PurfenceStatus } from '../purfence/purfence-status.enum';
 import { PurfenceIssueService } from '../purfence/purfence-issue.service';
 import { CompletionStrategyFactory } from './strategies/strategy.factory';
-import {
-  CompletionResult,
-} from './strategies/completion-strategy.interface';
+import { CompletionResult } from './strategies/completion-strategy.interface';
 import {
   IssueStateMachine,
   TransitionContext,
@@ -57,7 +55,9 @@ export class WorkflowService {
     let config = await this.findByProjectId(projectId);
 
     if (!config) {
-      this.logger.log(`Creating default workflow config for project ${projectId}`);
+      this.logger.log(
+        `Creating default workflow config for project ${projectId}`,
+      );
       config = this.workflowConfigRepository.create({
         projectId,
         ...DEFAULT_WORKFLOW_CONFIG,
@@ -223,11 +223,7 @@ export class WorkflowService {
     const context: TransitionContext = { issue, workflowConfig: config };
 
     try {
-      await this.stateMachine.transition(
-        issue,
-        PurfenceStatus.done,
-        context,
-      );
+      await this.stateMachine.transition(issue, PurfenceStatus.done, context);
     } catch (error) {
       // 如果状态机不允许转换，直接设置状态
       this.logger.warn(
@@ -267,7 +263,8 @@ export class WorkflowService {
     }
 
     // 3. 获取项目信息
-    const { PurfenceProject } = await import('../purfence/purfence-project.entity');
+    const { PurfenceProject } =
+      await import('../purfence/purfence-project.entity');
     const project = await PurfenceProject.findOne({
       where: { id: issue.projectId },
     });
@@ -280,10 +277,10 @@ export class WorkflowService {
     const { promisify } = await import('node:util');
     const execFileAsync = promisify(execFile);
 
-    const projectsRoot = process.env.PURFENCE_PROJECTS_ROOT || '/tmp/purfence-projects';
+    const projectsRoot =
+      process.env.PURFENCE_PROJECTS_ROOT || '/tmp/purfence-projects';
     const projectRootPath =
-      project.localRootPath ||
-      `${projectsRoot}/${project.slug || project.id}`;
+      project.localRootPath || `${projectsRoot}/${project.slug || project.id}`;
     const repoPath = `${projectRootPath}/repo`;
 
     const branchName = issue.branchSuffix
@@ -296,7 +293,8 @@ export class WorkflowService {
       });
       this.logger.log(`Pushed branch ${branchName} for issue ${issueId}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to push branch: ${errorMessage}`);
     }
 

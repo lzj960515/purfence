@@ -71,13 +71,17 @@ export class ProviderConfigService {
       case ProviderType.KIMI:
         return {
           apiKey: this.configService.get<string>('KIMI_API_KEY') || '',
-          baseUrl: this.configService.get<string>('KIMI_BASE_URL') || ProviderUtils.getBaseUrl(provider),
+          baseUrl:
+            this.configService.get<string>('KIMI_BASE_URL') ||
+            ProviderUtils.getBaseUrl(provider),
           model: ProviderUtils.getDefaultModel(provider),
         };
       case ProviderType.ZHIPU:
         return {
           apiKey: this.configService.get<string>('ZHIPU_API_KEY') || '',
-          baseUrl: this.configService.get<string>('ZHIPU_BASE_URL') || ProviderUtils.getBaseUrl(provider),
+          baseUrl:
+            this.configService.get<string>('ZHIPU_BASE_URL') ||
+            ProviderUtils.getBaseUrl(provider),
           model: ProviderUtils.getDefaultModel(provider),
         };
       default:

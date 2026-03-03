@@ -176,7 +176,11 @@ export class PurfenceIssueService {
       await execFileAsync('git', ['add', '.'], { cwd: worktreePath });
       await execFileAsync(
         'git',
-        ['commit', '-m', `chore: commit issue ${issue.slug || issue.id} changes`],
+        [
+          'commit',
+          '-m',
+          `chore: commit issue ${issue.slug || issue.id} changes`,
+        ],
         { cwd: worktreePath },
       );
     } catch {
@@ -253,7 +257,9 @@ export class PurfenceIssueService {
     }
 
     try {
-      await execFileAsync('git', ['branch', '-d', branchName], { cwd: repoPath });
+      await execFileAsync('git', ['branch', '-d', branchName], {
+        cwd: repoPath,
+      });
     } catch {
       // 忽略删除失败（分支可能已被删除或还有未合并内容）
     }
@@ -391,11 +397,7 @@ export class PurfenceIssueService {
     worktreePath: string;
   }) {
     const canonicalDir = path.join(opts.projectRootPath, 'attachments');
-    const mirrorDir = path.join(
-      opts.worktreePath,
-      '.purfence',
-      'attachments',
-    );
+    const mirrorDir = path.join(opts.worktreePath, '.purfence', 'attachments');
 
     await ensureDir(canonicalDir);
     await rm(mirrorDir, { recursive: true, force: true });
@@ -542,7 +544,9 @@ ${issueDescription.trim()}
    * - 校验 Issue 存在性
    * - 所有状态的 Issue 都可以被删除（包括 running/needs_user/needs_approval）
    */
-  private async validateIssueForDelete(issueId: string): Promise<PurfenceIssue> {
+  private async validateIssueForDelete(
+    issueId: string,
+  ): Promise<PurfenceIssue> {
     const issue = await PurfenceIssue.findOne({ where: { id: issueId } });
 
     if (!issue) {

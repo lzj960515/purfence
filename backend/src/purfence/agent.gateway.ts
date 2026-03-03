@@ -13,7 +13,11 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Namespace, Socket } from 'socket.io';
-import type { ChatAnyArgs, ChatExecutionArgs, SseSocketArgs } from './agent.args';
+import type {
+  ChatAnyArgs,
+  ChatExecutionArgs,
+  SseSocketArgs,
+} from './agent.args';
 import { PurfenceAgentService } from './agent.service';
 
 @WebSocketGateway({
@@ -92,12 +96,13 @@ export class AgentGateway
   }
 
   private async chatAny(client: Socket, args: ChatAnyArgs) {
-    const { threadId, query, providerName } = args;
+    const { threadId, query, providerName, imageUrl } = args;
 
     await this.purfenceAgentService.streamZiwei({
       threadId,
       query,
       providerName,
+      imageUrl,
     });
   }
 

@@ -23,7 +23,9 @@ export class PurfenceIssueSubscriber implements EntitySubscriberInterface<Purfen
 
   async afterInsert(event: InsertEvent<PurfenceIssue>) {
     const issueId = event.entity.id;
-    this.logger.log(`Issue created: ${issueId}, emitting purfence.issue.created`);
+    this.logger.log(
+      `Issue created: ${issueId}, emitting purfence.issue.created`,
+    );
 
     // Add 1000ms delay using setTimeout to mimic BullMQ behavior
     setTimeout(() => {

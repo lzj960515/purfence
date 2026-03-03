@@ -34,9 +34,7 @@ export class PurfenceTools {
       .object({
         mode: z
           .enum(['create', 'import'])
-          .describe(
-            '创建模式：create=新建项目；import=导入本地已有项目。',
-          ),
+          .describe('创建模式：create=新建项目；import=导入本地已有项目。'),
         name: z
           .string()
           .min(1)
@@ -50,10 +48,7 @@ export class PurfenceTools {
           .regex(/^[a-z0-9-]+$/)
           .describe('项目英文标识（用于目录名，如 my-project）'),
         description: z.string().optional().describe('项目描述（可选）'),
-        externalPath: z
-          .string()
-          .min(1)
-          .optional()
+        externalPath: z.string().min(1).optional()
           .describe(`本地已有项目的绝对路径（import 模式必填）。
 
 ⚠️ 必须使用绝对路径，格式要求：
@@ -554,8 +549,7 @@ Slack 通知配置（可选）：
       args.slackAppConfigId ??
       (options.context.get('slackAppConfigId') as string);
     const slackChannelId =
-      args.slackChannelId ??
-      (options.context.get('slackChannelId') as string);
+      args.slackChannelId ?? (options.context.get('slackChannelId') as string);
 
     if (args.kind === 'one_time') {
       if (!args.runAt?.trim()) {

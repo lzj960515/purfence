@@ -87,7 +87,10 @@ export class GitLabAdapter implements GitAdapter {
   /**
    * Parse GitLab repository URL to extract project ID or path
    */
-  private parseRepositoryUrl(url: string): { projectId: string | number; baseUrl?: string } {
+  private parseRepositoryUrl(url: string): {
+    projectId: string | number;
+    baseUrl?: string;
+  } {
     try {
       // Handle HTTPS URLs: https://gitlab.com/namespace/project
       // Handle SSH URLs: git@gitlab.com:namespace/project.git
@@ -110,7 +113,9 @@ export class GitLabAdapter implements GitAdapter {
         const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
 
         if (pathParts.length < 2) {
-          throw new Error('Invalid repository URL: missing namespace or project');
+          throw new Error(
+            'Invalid repository URL: missing namespace or project',
+          );
         }
 
         // For GitLab, we need the full path (namespace/project)
@@ -126,7 +131,9 @@ export class GitLabAdapter implements GitAdapter {
         throw new Error('Could not parse project path from URL');
       }
 
-      this.logger.debug(`Parsed GitLab project: ${projectPath}, baseUrl: ${baseUrl || 'gitlab.com'}`);
+      this.logger.debug(
+        `Parsed GitLab project: ${projectPath}, baseUrl: ${baseUrl || 'gitlab.com'}`,
+      );
 
       // Try to parse as numeric ID, otherwise use as path
       const numericId = parseInt(projectPath, 10);
@@ -136,14 +143,19 @@ export class GitLabAdapter implements GitAdapter {
       };
     } catch (error) {
       this.logger.error('Failed to parse repository URL:', error);
-      throw new ConnectionError(`Invalid repository URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new ConnectionError(
+        `Invalid repository URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
   /**
    * Execute API call with retry logic
    */
-  private async withRetry<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    operationName: string,
+  ): Promise<T> {
     const maxRetries = 3;
     let lastError: unknown;
 
@@ -154,14 +166,17 @@ export class GitLabAdapter implements GitAdapter {
         lastError = error;
 
         // Don't retry on auth errors or not found
-        const status = (error as { response?: { status?: number } }).response?.status;
+        const status = (error as { response?: { status?: number } }).response
+          ?.status;
         if (status === 401 || status === 403 || status === 404) {
           throw error;
         }
 
         if (attempt < maxRetries) {
           const delay = Math.pow(2, attempt) * 1000;
-          this.logger.debug(`${operationName} failed (attempt ${attempt}), retrying in ${delay}ms`);
+          this.logger.debug(
+            `${operationName} failed (attempt ${attempt}), retrying in ${delay}ms`,
+          );
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
@@ -185,7 +200,11 @@ export class GitLabAdapter implements GitAdapter {
     };
 
     const status = err.response?.status;
-    const message = err.response?.data?.message || err.cause?.description || err.message || 'Unknown error';
+    const message =
+      err.response?.data?.message ||
+      err.cause?.description ||
+      err.message ||
+      'Unknown error';
 
     // Log error with sanitized info (no token)
     this.logger.error('GitLab API error:', {
@@ -201,12 +220,16 @@ export class GitLabAdapter implements GitAdapter {
 
     // Handle authentication errors
     if (status === 401) {
-      throw new TokenExpiredError('GitLab access token has expired or is invalid');
+      throw new TokenExpiredError(
+        'GitLab access token has expired or is invalid',
+      );
     }
 
     // Handle permission errors
     if (status === 403) {
-      throw new PermissionDeniedError('Insufficient permissions for this GitLab operation');
+      throw new PermissionDeniedError(
+        'Insufficient permissions for this GitLab operation',
+      );
     }
 
     // Handle not found errors
@@ -238,7 +261,9 @@ export class GitLabAdapter implements GitAdapter {
 
       // Determine permissions based on access level
       const permissions: string[] = [];
-      const projectPermissions = project.permissions as GitLabPermissions | undefined;
+      const projectPermissions = project.permissions as
+        | GitLabPermissions
+        | undefined;
       if (projectPermissions?.project_access) {
         const accessLevel = projectPermissions.project_access.access_level;
         if (accessLevel >= 40) {
@@ -293,7 +318,9 @@ export class GitLabAdapter implements GitAdapter {
         page = 1,
       } = options;
 
-      this.logger.debug(`Fetching issues: state=${state}, page=${page}, perPage=${perPage}`);
+      this.logger.debug(
+        `Fetching issues: state=${state}, page=${page}, perPage=${perPage}`,
+      );
 
       const issues = await this.withRetry(
         () =>
@@ -310,7 +337,9 @@ export class GitLabAdapter implements GitAdapter {
 
       this.logger.debug(`Fetched ${issues.length} issues`);
 
-      return issues.map((issue) => this.mapGitLabIssueToRemoteIssue(issue as GitLabIssue));
+      return issues.map((issue) =>
+        this.mapGitLabIssueToRemoteIssue(issue as GitLabIssue),
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -342,9 +371,13 @@ export class GitLabAdapter implements GitAdapter {
   /**
    * Create a Merge Request
    */
-  async createMergeRequest(params: CreateMRParams): Promise<MergeRequestResult> {
+  async createMergeRequest(
+    params: CreateMRParams,
+  ): Promise<MergeRequestResult> {
     try {
-      this.logger.debug(`Creating MR: ${params.sourceBranch} → ${params.targetBranch}`);
+      this.logger.debug(
+        `Creating MR: ${params.sourceBranch} → ${params.targetBranch}`,
+      );
 
       const mr = await this.withRetry(
         () =>
@@ -447,9 +480,20 @@ export class GitLabAdapter implements GitAdapter {
       );
 
       // Handle both snake_case and camelCase responses
-      const defaultBranch = (project as unknown as { default_branch?: string; defaultBranch?: string }).default_branch
-        || (project as unknown as { default_branch?: string; defaultBranch?: string }).defaultBranch
-        || 'main';
+      const defaultBranch =
+        (
+          project as unknown as {
+            default_branch?: string;
+            defaultBranch?: string;
+          }
+        ).default_branch ||
+        (
+          project as unknown as {
+            default_branch?: string;
+            defaultBranch?: string;
+          }
+        ).defaultBranch ||
+        'main';
       return defaultBranch;
     } catch (error) {
       this.handleError(error);
@@ -484,7 +528,9 @@ export class GitLabAdapter implements GitAdapter {
       description: gitlabIssue.description || '',
       state: gitlabIssue.state,
       labels: gitlabIssue.labels || [],
-      assignees: (gitlabIssue.assignees || []).map((a) => a.username || '').filter(Boolean),
+      assignees: (gitlabIssue.assignees || [])
+        .map((a) => a.username || '')
+        .filter(Boolean),
       url: gitlabIssue.web_url,
       createdAt: new Date(gitlabIssue.created_at),
       updatedAt: new Date(gitlabIssue.updated_at),

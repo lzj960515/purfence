@@ -12,9 +12,7 @@ import { CommonService } from '../../common/common.service';
 import { PurfenceAppConfig } from './purfence-app-config.entity';
 
 @EventSubscriber()
-export class PurfenceAppConfigSubscriber
-  implements EntitySubscriberInterface<PurfenceAppConfig>
-{
+export class PurfenceAppConfigSubscriber implements EntitySubscriberInterface<PurfenceAppConfig> {
   @Log() logger: Logger;
 
   constructor(ds: DataSource) {

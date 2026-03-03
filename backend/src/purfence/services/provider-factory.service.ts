@@ -75,9 +75,6 @@ export class ProviderFactoryService {
    * @returns AI model instance
    */
   async createZhipu(modelId?: string) {
-    return this.createOpenAICompatible(
-      ProviderType.ZHIPU,
-      modelId || 'glm-4',
-    );
+    return this.createOpenAICompatible(ProviderType.ZHIPU, modelId || 'glm-4');
   }
 }

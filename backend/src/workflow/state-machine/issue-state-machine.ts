@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PurfenceIssue } from '../../purfence/purfence-issue.entity';
 import { PurfenceStatus } from '../../purfence/purfence-status.enum';
-import { WorkflowConfig, WorkflowMode } from '../entities/workflow-config.entity';
+import {
+  WorkflowConfig,
+  WorkflowMode,
+} from '../entities/workflow-config.entity';
 
 export interface TransitionContext {
   issue: PurfenceIssue;
@@ -29,7 +32,8 @@ export class IssueStateMachine {
     this.registerTransition({
       from: PurfenceStatus.running,
       to: PurfenceStatus.needs_approval,
-      condition: (ctx) => ctx.workflowConfig.mode === WorkflowMode.COLLABORATIVE,
+      condition: (ctx) =>
+        ctx.workflowConfig.mode === WorkflowMode.COLLABORATIVE,
     });
 
     // running -> done（单机模式）
@@ -105,9 +109,7 @@ export class IssueStateMachine {
       (t) => t.from === from && t.to === to,
     );
     if (!transition) {
-      this.logger.debug(
-        `No transition found from ${from} to ${to}`,
-      );
+      this.logger.debug(`No transition found from ${from} to ${to}`);
       return false;
     }
     const result = await transition.condition(context);

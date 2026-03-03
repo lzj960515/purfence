@@ -40,8 +40,22 @@ function resolveSdkEntries(): string[] {
     envEntry,
     envDir ? path.join(envDir, 'sdk.mjs') : undefined,
     path.join(execDir, 'claude-agent-sdk', 'sdk.mjs'),
-    path.resolve(execDir, '..', 'Resources', 'binaries', 'claude-agent-sdk', 'sdk.mjs'),
-    path.resolve(execDir, '..', 'resources', 'binaries', 'claude-agent-sdk', 'sdk.mjs'),
+    path.resolve(
+      execDir,
+      '..',
+      'Resources',
+      'binaries',
+      'claude-agent-sdk',
+      'sdk.mjs',
+    ),
+    path.resolve(
+      execDir,
+      '..',
+      'resources',
+      'binaries',
+      'claude-agent-sdk',
+      'sdk.mjs',
+    ),
     path.resolve(cwd, 'src-tauri', 'binaries', 'claude-agent-sdk', 'sdk.mjs'),
   ].filter((value): value is string => Boolean(value));
 }
@@ -132,7 +146,7 @@ export class ClaudeAgentSdkService {
       }
       // 记录结果消息
       if (message.type === 'result') {
-        finalResult = message as SDKResultMessage;
+        finalResult = message;
       }
     }
 
@@ -149,8 +163,7 @@ export class ClaudeAgentSdkService {
     }
     if (message.type === 'assistant') {
       const contents = [];
-      for (const content of (message as SDKAssistantMessage).message?.content ??
-        []) {
+      for (const content of message.message?.content ?? []) {
         if (content.type === 'tool_use') {
           contents.push(
             `[${content.type}] ${content.name}(${JSON.stringify(content.input).slice(0, 50)}...)`,

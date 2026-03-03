@@ -61,8 +61,10 @@ export class GitHubAdapter implements GitAdapter {
         },
         retryCondition: (error) => {
           // Retry on network errors or 5xx server errors
-          return axiosRetry.isNetworkOrIdempotentRequestError(error) ||
-            (error.response?.status && error.response.status >= 500);
+          return (
+            axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+            (error.response?.status && error.response.status >= 500)
+          );
         },
       });
     }
@@ -71,7 +73,11 @@ export class GitHubAdapter implements GitAdapter {
   /**
    * Parse GitHub repository URL to extract owner and repo
    */
-  private parseRepositoryUrl(url: string): { owner: string; repo: string; baseUrl?: string } {
+  private parseRepositoryUrl(url: string): {
+    owner: string;
+    repo: string;
+    baseUrl?: string;
+  } {
     try {
       // Handle HTTPS URLs: https://github.com/owner/repo
       // Handle SSH URLs: git@github.com:owner/repo.git
@@ -103,7 +109,10 @@ export class GitHubAdapter implements GitAdapter {
         repo = pathParts[1].replace(/\.git$/, '');
 
         // Handle GitHub Enterprise
-        if (!parsedUrl.hostname.includes('github.com') || parsedUrl.hostname !== 'github.com') {
+        if (
+          !parsedUrl.hostname.includes('github.com') ||
+          parsedUrl.hostname !== 'github.com'
+        ) {
           baseUrl = `${parsedUrl.protocol}//${parsedUrl.hostname}/api/v3`;
         }
       }
@@ -116,7 +125,9 @@ export class GitHubAdapter implements GitAdapter {
       return { owner, repo, baseUrl };
     } catch (error) {
       this.logger.error('Failed to parse repository URL:', error);
-      throw new ConnectionError(`Invalid repository URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new ConnectionError(
+        `Invalid repository URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -128,7 +139,14 @@ export class GitHubAdapter implements GitAdapter {
       throw error;
     }
 
-    const err = error as { status?: number; message?: string; response?: { data?: GitHubErrorResponse; headers?: Record<string, string> } };
+    const err = error as {
+      status?: number;
+      message?: string;
+      response?: {
+        data?: GitHubErrorResponse;
+        headers?: Record<string, string>;
+      };
+    };
 
     // Log error with sanitized info (no token)
     this.logger.error('GitHub API error:', {
@@ -139,7 +157,10 @@ export class GitHubAdapter implements GitAdapter {
     });
 
     // Handle rate limiting
-    if (err.status === 403 && err.response?.headers?.['x-ratelimit-remaining'] === '0') {
+    if (
+      err.status === 403 &&
+      err.response?.headers?.['x-ratelimit-remaining'] === '0'
+    ) {
       const retryAfter = err.response.headers['retry-after'];
       throw new RateLimitError(
         'GitHub API rate limit exceeded',
@@ -149,22 +170,30 @@ export class GitHubAdapter implements GitAdapter {
 
     // Handle authentication errors
     if (err.status === 401) {
-      throw new TokenExpiredError('GitHub access token has expired or is invalid');
+      throw new TokenExpiredError(
+        'GitHub access token has expired or is invalid',
+      );
     }
 
     // Handle permission errors
     if (err.status === 403) {
-      throw new PermissionDeniedError('Insufficient permissions for this GitHub operation');
+      throw new PermissionDeniedError(
+        'Insufficient permissions for this GitHub operation',
+      );
     }
 
     // Handle not found errors
     if (err.status === 404) {
-      throw new RepositoryNotFoundError(`Repository ${this.owner}/${this.repo} not found`);
+      throw new RepositoryNotFoundError(
+        `Repository ${this.owner}/${this.repo} not found`,
+      );
     }
 
     // Handle server errors with retry
     if (err.status && err.status >= 500) {
-      throw new ConnectionError(`GitHub server error: ${err.message || 'Unknown error'}`);
+      throw new ConnectionError(
+        `GitHub server error: ${err.message || 'Unknown error'}`,
+      );
     }
 
     // Generic error
@@ -179,7 +208,9 @@ export class GitHubAdapter implements GitAdapter {
    */
   async testConnection(): Promise<ConnectionTestResult> {
     try {
-      this.logger.debug(`Testing connection to GitHub: ${this.owner}/${this.repo}`);
+      this.logger.debug(
+        `Testing connection to GitHub: ${this.owner}/${this.repo}`,
+      );
 
       // Get repository info to verify access
       const { data: repo } = await this.octokit.rest.repos.get({
@@ -188,11 +219,13 @@ export class GitHubAdapter implements GitAdapter {
       });
 
       // Get authenticated user permissions
-      const { data: permissions } = await this.octokit.rest.repos.getCollaboratorPermissionLevel({
-        owner: this.owner,
-        repo: this.repo,
-        username: (await this.octokit.rest.users.getAuthenticated()).data.login,
-      });
+      const { data: permissions } =
+        await this.octokit.rest.repos.getCollaboratorPermissionLevel({
+          owner: this.owner,
+          repo: this.repo,
+          username: (await this.octokit.rest.users.getAuthenticated()).data
+            .login,
+        });
 
       const permissionList: string[] = [];
       if (repo.permissions?.admin) permissionList.push('admin');
@@ -201,7 +234,9 @@ export class GitHubAdapter implements GitAdapter {
       if (repo.permissions?.maintain) permissionList.push('maintain');
       if (repo.permissions?.triage) permissionList.push('triage');
 
-      this.logger.log(`Successfully connected to GitHub: ${this.owner}/${this.repo}`);
+      this.logger.log(
+        `Successfully connected to GitHub: ${this.owner}/${this.repo}`,
+      );
 
       return {
         success: true,
@@ -229,7 +264,9 @@ export class GitHubAdapter implements GitAdapter {
         page = 1,
       } = options;
 
-      this.logger.debug(`Fetching issues: state=${state}, page=${page}, perPage=${perPage}`);
+      this.logger.debug(
+        `Fetching issues: state=${state}, page=${page}, perPage=${perPage}`,
+      );
 
       const { data: issues } = await this.octokit.rest.issues.listForRepo({
         owner: this.owner,
@@ -242,22 +279,28 @@ export class GitHubAdapter implements GitAdapter {
       });
 
       // Filter out pull requests (GitHub returns PRs as issues)
-      const filteredIssues = issues.filter((issue) => !('pull_request' in issue));
+      const filteredIssues = issues.filter(
+        (issue) => !('pull_request' in issue),
+      );
 
       this.logger.debug(`Fetched ${filteredIssues.length} issues`);
 
-      return filteredIssues.map((issue) => this.mapGitHubIssueToRemoteIssue(issue as unknown as {
-        id: number;
-        number: number;
-        title: string;
-        body?: string | null;
-        state: string;
-        labels: (string | { name?: string })[];
-        assignees: { login?: string }[];
-        html_url: string;
-        created_at: string;
-        updated_at: string;
-      }));
+      return filteredIssues.map((issue) =>
+        this.mapGitHubIssueToRemoteIssue(
+          issue as unknown as {
+            id: number;
+            number: number;
+            title: string;
+            body?: string | null;
+            state: string;
+            labels: (string | { name?: string })[];
+            assignees: { login?: string }[];
+            html_url: string;
+            created_at: string;
+            updated_at: string;
+          },
+        ),
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -281,18 +324,20 @@ export class GitHubAdapter implements GitAdapter {
         issue_number: issueNumber,
       });
 
-      return this.mapGitHubIssueToRemoteIssue(issue as unknown as {
-        id: number;
-        number: number;
-        title: string;
-        body?: string | null;
-        state: string;
-        labels: (string | { name?: string })[];
-        assignees: { login?: string }[];
-        html_url: string;
-        created_at: string;
-        updated_at: string;
-      });
+      return this.mapGitHubIssueToRemoteIssue(
+        issue as unknown as {
+          id: number;
+          number: number;
+          title: string;
+          body?: string | null;
+          state: string;
+          labels: (string | { name?: string })[];
+          assignees: { login?: string }[];
+          html_url: string;
+          created_at: string;
+          updated_at: string;
+        },
+      );
     } catch (error) {
       this.handleError(error);
     }
@@ -301,9 +346,13 @@ export class GitHubAdapter implements GitAdapter {
   /**
    * Create a Pull Request
    */
-  async createMergeRequest(params: CreateMRParams): Promise<MergeRequestResult> {
+  async createMergeRequest(
+    params: CreateMRParams,
+  ): Promise<MergeRequestResult> {
     try {
-      this.logger.debug(`Creating PR: ${params.sourceBranch} → ${params.targetBranch}`);
+      this.logger.debug(
+        `Creating PR: ${params.sourceBranch} → ${params.targetBranch}`,
+      );
 
       const { data: pr } = await this.octokit.rest.pulls.create({
         owner: this.owner,
@@ -344,7 +393,7 @@ export class GitHubAdapter implements GitAdapter {
         pull_number: prNumber,
       });
 
-      let state: 'open' | 'merged' | 'closed' | 'unknown' = pr.state as 'open' | 'closed';
+      let state: 'open' | 'merged' | 'closed' | 'unknown' = pr.state;
 
       // Check if PR is merged
       if (pr.merged) {
@@ -384,11 +433,12 @@ export class GitHubAdapter implements GitAdapter {
       // Get branch protection rules (this requires admin access, so we catch errors)
       const protectedBranches = new Set<string>();
       try {
-        const { data: protectionRules } = await this.octokit.rest.repos.listBranches({
-          owner: this.owner,
-          repo: this.repo,
-          protected: true,
-        });
+        const { data: protectionRules } =
+          await this.octokit.rest.repos.listBranches({
+            owner: this.owner,
+            repo: this.repo,
+            protected: true,
+          });
         protectionRules.forEach((b) => protectedBranches.add(b.name));
       } catch {
         // If we can't get protection rules, assume no branches are protected
@@ -444,10 +494,12 @@ export class GitHubAdapter implements GitAdapter {
       title: githubIssue.title,
       description: githubIssue.body || '',
       state: githubIssue.state,
-      labels: githubIssue.labels.map((label) =>
-        typeof label === 'string' ? label : label.name || '',
-      ).filter(Boolean),
-      assignees: githubIssue.assignees.map((a) => a.login || '').filter(Boolean),
+      labels: githubIssue.labels
+        .map((label) => (typeof label === 'string' ? label : label.name || ''))
+        .filter(Boolean),
+      assignees: githubIssue.assignees
+        .map((a) => a.login || '')
+        .filter(Boolean),
       url: githubIssue.html_url,
       createdAt: new Date(githubIssue.created_at),
       updatedAt: new Date(githubIssue.updated_at),

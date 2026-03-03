@@ -62,7 +62,11 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     await entity.save();
   }
 
-  async addMessages(messages: UIMessage[], userId: string, conversationId: string) {
+  async addMessages(
+    messages: UIMessage[],
+    userId: string,
+    conversationId: string,
+  ) {
     for (const message of messages) {
       await this.addMessage(message, userId, conversationId);
     }
@@ -72,8 +76,7 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     userId: string,
     conversationId: string,
     options?: GetMessagesOptions,
-  ): Promise<UIMessage<{ createdAt: Date }>[]>
-  {
+  ): Promise<UIMessage<{ createdAt: Date }>[]> {
     const { limit, before, after, roles } = options || {};
     const qb = AgentMemoryMessage.createQueryBuilder('m')
       .where('m.userId = :userId', { userId })
@@ -116,7 +119,11 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     await AgentMemoryMessage.delete({ userId });
   }
 
-  async deleteMessages(messageIds: string[], userId: string, conversationId: string) {
+  async deleteMessages(
+    messageIds: string[],
+    userId: string,
+    conversationId: string,
+  ) {
     if (!messageIds.length) return;
     await AgentMemoryMessage.delete({
       userId,
@@ -128,7 +135,9 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
   // =========================================================================
   // Conversation Operations
   // =========================================================================
-  async createConversation(input: CreateConversationInput): Promise<Conversation> {
+  async createConversation(
+    input: CreateConversationInput,
+  ): Promise<Conversation> {
     const existing = await AgentMemoryConversation.findOne({
       where: { id: input.id },
     });
@@ -168,11 +177,16 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     return this.queryConversations({ ...options, userId });
   }
 
-  async queryConversations(options: ConversationQueryOptions): Promise<Conversation[]> {
+  async queryConversations(
+    options: ConversationQueryOptions,
+  ): Promise<Conversation[]> {
     const qb = AgentMemoryConversation.createQueryBuilder('c');
-    if (options.userId) qb.andWhere('c.userId = :userId', { userId: options.userId });
+    if (options.userId)
+      qb.andWhere('c.userId = :userId', { userId: options.userId });
     if (options.resourceId)
-      qb.andWhere('c.resourceId = :resourceId', { resourceId: options.resourceId });
+      qb.andWhere('c.resourceId = :resourceId', {
+        resourceId: options.resourceId,
+      });
 
     const orderDirection = options.orderDirection ?? 'DESC';
     const orderBy = options.orderBy ?? 'updated_at';
@@ -193,9 +207,12 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
 
   async countConversations(options: ConversationQueryOptions): Promise<number> {
     const qb = AgentMemoryConversation.createQueryBuilder('c');
-    if (options.userId) qb.andWhere('c.userId = :userId', { userId: options.userId });
+    if (options.userId)
+      qb.andWhere('c.userId = :userId', { userId: options.userId });
     if (options.resourceId)
-      qb.andWhere('c.resourceId = :resourceId', { resourceId: options.resourceId });
+      qb.andWhere('c.resourceId = :resourceId', {
+        resourceId: options.resourceId,
+      });
     return qb.getCount();
   }
 
@@ -211,7 +228,7 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
         resourceId: String(updates.resourceId ?? ''),
         userId: String(updates.userId ?? ''),
         title: String(updates.title ?? ''),
-        metadata: (updates.metadata ?? {}) as Record<string, unknown>,
+        metadata: updates.metadata ?? {},
       });
       await created.save();
       return toConversation(created);
@@ -219,20 +236,24 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
 
     if (updates.title !== undefined) entity.title = updates.title;
     if (updates.metadata !== undefined)
-      entity.metadata = (updates.metadata ?? {}) as Record<string, unknown>;
+      entity.metadata = updates.metadata ?? {};
 
     await entity.save();
     return toConversation(entity);
   }
 
   async deleteConversation(id: string): Promise<void> {
-    const conversation = await AgentMemoryConversation.findOne({ where: { id } });
+    const conversation = await AgentMemoryConversation.findOne({
+      where: { id },
+    });
     if (conversation) {
       await AgentMemoryMessage.delete({
         userId: conversation.userId,
         conversationId: String(conversation.id),
       });
-      await AgentWorkingMemory.delete({ conversationId: String(conversation.id) });
+      await AgentWorkingMemory.delete({
+        conversationId: String(conversation.id),
+      });
     }
     await AgentMemoryConversation.delete({ id });
   }
@@ -302,16 +323,26 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
   // =========================================================================
   // Workflow state
   // =========================================================================
-  async getWorkflowState(executionId: string): Promise<WorkflowStateEntry | null> {
-    const entity = await AgentWorkflowState.findOne({ where: { id: executionId } });
+  async getWorkflowState(
+    executionId: string,
+  ): Promise<WorkflowStateEntry | null> {
+    const entity = await AgentWorkflowState.findOne({
+      where: { id: executionId },
+    });
     if (!entity) return null;
     return this.toWorkflowState(entity);
   }
 
-  async queryWorkflowRuns(query: WorkflowRunQuery): Promise<WorkflowStateEntry[]> {
+  async queryWorkflowRuns(
+    query: WorkflowRunQuery,
+  ): Promise<WorkflowStateEntry[]> {
     const qb = AgentWorkflowState.createQueryBuilder('w');
-    if (query.workflowId) qb.andWhere('w.workflowId = :workflowId', { workflowId: query.workflowId });
-    if (query.status) qb.andWhere('w.status = :status', { status: query.status });
+    if (query.workflowId)
+      qb.andWhere('w.workflowId = :workflowId', {
+        workflowId: query.workflowId,
+      });
+    if (query.status)
+      qb.andWhere('w.status = :status', { status: query.status });
     if (query.from) qb.andWhere('w.createdAt >= :from', { from: query.from });
     if (query.to) qb.andWhere('w.createdAt <= :to', { to: query.to });
     qb.orderBy('w.createdAt', 'DESC');
@@ -321,7 +352,10 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     return entities.map((e) => this.toWorkflowState(e));
   }
 
-  async setWorkflowState(executionId: string, state: WorkflowStateEntry): Promise<void> {
+  async setWorkflowState(
+    executionId: string,
+    state: WorkflowStateEntry,
+  ): Promise<void> {
     const entity = AgentWorkflowState.create({
       id: executionId,
       workflowId: state.workflowId,
@@ -345,7 +379,9 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     executionId: string,
     updates: Partial<WorkflowStateEntry>,
   ): Promise<void> {
-    const entity = await AgentWorkflowState.findOne({ where: { id: executionId } });
+    const entity = await AgentWorkflowState.findOne({
+      where: { id: executionId },
+    });
     if (!entity) {
       const state = updates as WorkflowStateEntry;
       await this.setWorkflowState(executionId, {
@@ -410,7 +446,9 @@ export class TypeOrmMemoryStorageAdapter implements StorageAdapter {
     await entity.save();
   }
 
-  async getSuspendedWorkflowStates(workflowId: string): Promise<WorkflowStateEntry[]> {
+  async getSuspendedWorkflowStates(
+    workflowId: string,
+  ): Promise<WorkflowStateEntry[]> {
     const entities = await AgentWorkflowState.find({
       where: { workflowId, status: 'suspended' },
       order: { createdAt: 'DESC' },

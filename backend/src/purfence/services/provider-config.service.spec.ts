@@ -49,16 +49,22 @@ describe('ProviderConfigService', () => {
         model: 'gpt-4',
       };
 
-      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(dbConfig);
+      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(
+        dbConfig,
+      );
 
       const result = await service.getActiveConfig(ProviderType.OPENAI);
 
       expect(result).toEqual(dbConfig);
-      expect(modelProviderConfigService.getActiveProviderConfig).toHaveBeenCalledWith(ProviderType.OPENAI);
+      expect(
+        modelProviderConfigService.getActiveProviderConfig,
+      ).toHaveBeenCalledWith(ProviderType.OPENAI);
     });
 
     it('should fallback to environment variables when no database config exists', async () => {
-      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(null);
+      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(
+        null,
+      );
 
       configService.get.mockImplementation((key: string) => {
         const envVars: Record<string, string> = {
@@ -78,7 +84,9 @@ describe('ProviderConfigService', () => {
     });
 
     it('should use default base URL when not in environment variables', async () => {
-      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(null);
+      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(
+        null,
+      );
 
       configService.get.mockImplementation((key: string) => {
         const envVars: Record<string, string> = {
@@ -94,7 +102,9 @@ describe('ProviderConfigService', () => {
     });
 
     it('should use Zhipu default values', async () => {
-      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(null);
+      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(
+        null,
+      );
 
       configService.get.mockImplementation((key: string) => {
         const envVars: Record<string, string> = {
@@ -110,11 +120,15 @@ describe('ProviderConfigService', () => {
     });
 
     it('should throw error for unknown provider', async () => {
-      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(null);
+      modelProviderConfigService.getActiveProviderConfig.mockResolvedValue(
+        null,
+      );
 
       configService.get.mockReturnValue('');
 
-      await expect(service.getActiveConfig('unknown' as ProviderType)).rejects.toThrow('Unknown provider');
+      await expect(
+        service.getActiveConfig('unknown' as ProviderType),
+      ).rejects.toThrow('Unknown provider');
     });
   });
 });

@@ -12,9 +12,7 @@ import { ModelProviderConfigDto } from './model-provider-config.dto';
  */
 @Resolver(() => ModelProviderConfigDto)
 export class ModelProviderConfigResolver {
-  constructor(
-    private readonly service: ModelProviderConfigService,
-  ) {}
+  constructor(private readonly service: ModelProviderConfigService) {}
 
   /**
    * Toggle the active status of a model provider configuration

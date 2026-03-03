@@ -1,5 +1,12 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsBoolean, IsInt, IsNotEmpty, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 @InputType()
 export class MyQueueCreateInput {

@@ -3,12 +3,7 @@ import { createVertexAnthropic } from '@ai-sdk/google-vertex/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { Injectable } from '@nestjs/common';
 import { HttpsProxyAgent } from 'hpagent';
-import {
-  CodexModel,
-  KimiModel,
-  MyModel,
-  OpenAIModel,
-} from './model';
+import { CodexModel, KimiModel, MyModel, OpenAIModel } from './model';
 import { ZhipuModel } from './model/zhipu.model';
 import { ModelOptions, Providers } from './types';
 
