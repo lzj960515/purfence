@@ -98,6 +98,13 @@ export function PurfenceConfigPage() {
     const hasUpdate = await checkForUpdates()
     if (hasUpdate) {
       setUpdateDialogOpen(true)
+    } else if (updateError) {
+      // Show error message if check failed
+      toast({
+        title: '检查失败',
+        description: updateError,
+        variant: 'destructive',
+      })
     } else {
       toast({
         title: '检查完成',
