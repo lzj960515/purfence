@@ -1,9 +1,7 @@
 import {
   Package,
-  Bot,
   SlidersHorizontal,
   PanelLeft,
-  MonitorCog,
   AlarmClock,
   AppWindow,
   Blocks,
@@ -21,8 +19,6 @@ import { cn } from '@/lib/utils'
 type SettingsTab =
   | 'base'
   | 'providers'
-  | 'claude-code'
-  | 'environment'
   | 'scheduled-tasks'
   | 'app'
   | 'skills'
@@ -131,20 +127,6 @@ export function SettingsSidebar({ activeTab, onTabChange, onCollapseChange, coll
           label="模型提供商"
           active={activeTab === 'providers'}
           onClick={() => onTabChange('providers')}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Bot className="h-4 w-4" />}
-          label="Claude Code"
-          active={activeTab === 'claude-code'}
-          onClick={() => onTabChange('claude-code')}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<MonitorCog className="h-4 w-4" />}
-          label="环境检查"
-          active={activeTab === 'environment'}
-          onClick={() => onTabChange('environment')}
           collapsed={collapsed}
         />
         <SidebarItem

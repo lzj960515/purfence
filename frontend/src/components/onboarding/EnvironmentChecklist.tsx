@@ -1,20 +1,21 @@
-import { Check, Circle, CircleDashed, Sparkles } from 'lucide-react'
+import { Check, Circle, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { EnvironmentReadiness } from '@/hooks/useEnvironmentReadiness'
 
-export type EnvironmentKey = 'workspace' | 'provider' | 'node' | 'git' | 'claudeCode' | 'agents'
+export type EnvironmentKey = 'workspace' | 'provider'
+
+interface ChecklistStatus {
+  installed: boolean
+  detail?: string
+}
 
 interface EnvironmentChecklistProps {
-  readiness: EnvironmentReadiness
+  workspace: ChecklistStatus
+  provider: ChecklistStatus
   busy?: boolean
-  installingClaudeCode?: boolean
-  claudeInstallLogs?: string[]
-  onInstallProvider: () => void
-  onInstallWorkspace: () => void
-  onInstallClaudeCode: () => void
-  onInstallAgents: () => void
+  onConfigureProvider: () => void
+  onConfigureWorkspace: () => void
   onLater?: () => void
   onDone?: () => void
   compact?: boolean
@@ -49,14 +50,11 @@ function StatusIcon({ installed }: { installed: boolean }) {
 }
 
 export function EnvironmentChecklist({
-  readiness,
+  workspace,
+  provider,
   busy = false,
-  installingClaudeCode = false,
-  claudeInstallLogs = [],
-  onInstallProvider,
-  onInstallWorkspace,
-  onInstallClaudeCode,
-  onInstallAgents,
+  onConfigureProvider,
+  onConfigureWorkspace,
   onLater,
   onDone,
   compact = false,
@@ -66,68 +64,24 @@ export function EnvironmentChecklist({
     {
       key: 'workspace',
       title: '工作目录',
-      detail: readiness.workspace.detail || '',
-      installed: readiness.workspace.installed,
-      actionable: !readiness.workspace.installed,
+      detail: workspace.detail || '',
+      installed: workspace.installed,
+      actionable: !workspace.installed,
       disabled: busy,
       actionLabel: '立即配置',
-      action: onInstallWorkspace,
+      action: onConfigureWorkspace,
       helperText: '项目与工作区的存储根目录',
     },
     {
       key: 'provider',
       title: '模型提供商',
-      detail: readiness.provider.detail || '',
-      installed: readiness.provider.installed,
-      actionable: !readiness.provider.installed,
+      detail: provider.detail || '',
+      installed: provider.installed,
+      actionable: !provider.installed,
       disabled: busy,
       actionLabel: '立即配置',
-      action: onInstallProvider,
+      action: onConfigureProvider,
       helperText: '用于 AI 对话与安装辅助',
-    },
-    {
-      key: 'node',
-      title: 'Node.js',
-      detail: readiness.node.detail || '',
-      installed: readiness.node.installed,
-      actionable: !readiness.node.installed,
-      disabled: busy,
-      actionLabel: '一键安装',
-      action: onInstallClaudeCode,
-      helperText: 'Claude Code 运行时环境',
-    },
-    {
-      key: 'claudeCode',
-      title: 'Claude Code',
-      detail: readiness.claudeCode.detail || '',
-      installed: readiness.claudeCode.installed,
-      actionable: !readiness.claudeCode.installed,
-      disabled: busy,
-      actionLabel: '一键安装',
-      action: onInstallClaudeCode,
-      helperText: '核心执行引擎',
-    },
-    {
-      key: 'git',
-      title: 'Git',
-      detail: readiness.git.detail || '',
-      installed: readiness.git.installed,
-      actionable: !readiness.git.installed,
-      disabled: busy,
-      actionLabel: '一键安装',
-      action: onInstallClaudeCode,
-      helperText: '用于 issue 与分支工作流',
-    },
-    {
-      key: 'agents',
-      title: '内置 Agents',
-      detail: readiness.agents.detail || '',
-      installed: readiness.agents.installed,
-      actionable: !readiness.agents.installed && readiness.claudeCode.installed,
-      disabled: busy || !readiness.claudeCode.installed,
-      actionLabel: readiness.claudeCode.installed ? '安装' : '等待 Claude Code',
-      action: onInstallAgents,
-      helperText: '提供预置角色与能力',
     },
   ]
 
@@ -189,25 +143,13 @@ export function EnvironmentChecklist({
               )}
             </div>
 
-            {item.key === 'claudeCode' && claudeInstallLogs.length > 0 ? (
-              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-950/95 p-3">
-                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-300">
-                  安装日志 {installingClaudeCode ? '(进行中...)' : ''}
-                </div>
-                <div className="max-h-40 overflow-auto space-y-1 font-mono text-[11px] leading-5 text-slate-100">
-                  {claudeInstallLogs.map((line, index) => (
-                    <div key={`${index}-${line}`}>{line}</div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </div>
         ))}
       </div>
 
       {!compact && (
         <div className="flex justify-end gap-2 pt-2">
-          {readiness.allInstalled ? (
+          {workspace.installed && provider.installed ? (
             <Button
               onClick={onDone}
               disabled={busy}
@@ -228,7 +170,7 @@ export function EnvironmentChecklist({
                 onClick={() => nextItem?.action()}
                 disabled={busy || !nextItem}
               >
-                {busy ? <CircleDashed className="h-4 w-4 animate-spin" /> : '安装'}
+                开始配置
               </Button>
             </>
           )}

@@ -16,7 +16,6 @@ import {
   safeReaddir,
   writeText,
 } from '../common/utils/file.util';
-import { IssueNotFoundError } from './errors/issue-delete.error';
 import { PurfenceConfigService } from './purfence-config/purfence-config.service';
 import { PurfenceExecutionService } from './purfence-execution.service';
 import { IssueOrigin } from './purfence-status.enum';
@@ -550,7 +549,7 @@ ${issueDescription.trim()}
     const issue = await PurfenceIssue.findOne({ where: { id: issueId } });
 
     if (!issue) {
-      throw new IssueNotFoundError(issueId);
+      throw new Error(issueId);
     }
 
     return issue;
@@ -657,7 +656,7 @@ ${issueDescription.trim()}
     const result = await PurfenceIssue.delete({ id: issueId });
 
     if (result.affected === 0) {
-      throw new IssueNotFoundError(issueId);
+      throw new Error(issueId);
     }
   }
 }

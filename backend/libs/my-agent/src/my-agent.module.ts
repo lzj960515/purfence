@@ -3,7 +3,6 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DiscoveryModule } from '@nestjs/core';
 import { Memory } from '@voltagent/core';
-import { ClaudeAgentSdkService } from './claude-agent-sdk.service';
 import { LlmService } from './llm.service';
 import { MessageService } from './message.service';
 import { MyAgentHooks } from './my-agent-hooks';
@@ -24,7 +23,6 @@ async function createMemoryAdapter(config: ConfigService) {
     MyAgentHooks,
     LlmService,
     MessageService,
-    ClaudeAgentSdkService,
     {
       provide: Memory,
       inject: [ConfigService],
@@ -36,12 +34,6 @@ async function createMemoryAdapter(config: ConfigService) {
       },
     },
   ],
-  exports: [
-    MyAgentService,
-    LlmService,
-    MessageService,
-    ToolsService,
-    ClaudeAgentSdkService,
-  ],
+  exports: [MyAgentService, LlmService, MessageService, ToolsService],
 })
 export class MyAgentModule {}

@@ -29,16 +29,15 @@ import { PurfenceProjectSubscriber } from './purfence-project.subscriber';
 import { PurfenceExecutionSubscriber } from './purfence-execution.subscriber';
 import { ToolsModule } from './tools/tools.module';
 import { ModelProviderConfigModule } from './model-provider-config/model-provider-config.module';
-import { OAuthModule } from './oauth/oauth.module';
+import { OAuthModule } from './codex/codex-oauth.module';
 import { PurfenceConfigModule } from './purfence-config/purfence-config.module';
-import { ClaudeCodeConfigModule } from './claude-code-config/claude-code-config.module';
 import { ProviderModelService } from './provider-model.service';
 import { AgentArtifact } from './artifact/agent-artifact.ai.entity';
 import { AgentArtifactDto } from './artifact/agent-artifact.dto';
 import { AgentArtifactUpdateInput } from './artifact/agent-artifact-update.input';
 import { PurfenceScheduledTaskModule } from './scheduled-task/purfence-scheduled-task.module';
 import { PurfenceAgentService } from './agent.service';
-import { PurfenceAppConfigModule } from './app-config/purfence-app-config.module';
+import { PurfenceAppConfigModule } from './app-config/app-config.module';
 import { MyQueue, MyQueueJob, MyQueueModule } from '@app/my-queue';
 import { MyQueueDto } from './my-queue/my-queue.dto';
 import { MyQueueCreateInput } from './my-queue/my-queue-create.input';
@@ -60,7 +59,6 @@ import { MyQueueJobUpdateInput } from './my-queue/my-queue-job-update.input';
     ToolsModule,
     ModelProviderConfigModule,
     PurfenceConfigModule,
-    ClaudeCodeConfigModule,
     PurfenceScheduledTaskModule,
     PurfenceAppConfigModule,
     MyQueueModule,

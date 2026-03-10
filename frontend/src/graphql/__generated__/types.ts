@@ -130,82 +130,6 @@ export type BooleanFieldComparison = {
   isNot: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-export type ClaudeCodeConfig = {
-  __typename?: 'ClaudeCodeConfig';
-  createdAt: Scalars['DateTime']['output'];
-  env: Maybe<Array<ClaudeCodeEnvItem>>;
-  /** ID */
-  id: Scalars['ID']['output'];
-  modelProviderId: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-  useDefaultConfig: Scalars['Boolean']['output'];
-};
-
-export type ClaudeCodeConfigConnection = {
-  __typename?: 'ClaudeCodeConfigConnection';
-  /** Array of nodes. */
-  nodes: Array<ClaudeCodeConfig>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type ClaudeCodeConfigCreateInput = {
-  env: InputMaybe<Array<ClaudeCodeEnvItemInput>>;
-  modelProviderId: InputMaybe<Scalars['String']['input']>;
-  useDefaultConfig: Scalars['Boolean']['input'];
-};
-
-export type ClaudeCodeConfigDeleteResponse = {
-  __typename?: 'ClaudeCodeConfigDeleteResponse';
-  createdAt: Maybe<Scalars['DateTime']['output']>;
-  env: Maybe<Array<ClaudeCodeEnvItem>>;
-  /** ID */
-  id: Maybe<Scalars['ID']['output']>;
-  modelProviderId: Maybe<Scalars['String']['output']>;
-  updatedAt: Maybe<Scalars['DateTime']['output']>;
-  useDefaultConfig: Maybe<Scalars['Boolean']['output']>;
-};
-
-export type ClaudeCodeConfigFilter = {
-  and: InputMaybe<Array<ClaudeCodeConfigFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  modelProviderId: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<ClaudeCodeConfigFilter>>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type ClaudeCodeConfigSort = {
-  direction: SortDirection;
-  field: ClaudeCodeConfigSortFields;
-  nulls: InputMaybe<SortNulls>;
-};
-
-export type ClaudeCodeConfigSortFields =
-  | 'createdAt'
-  | 'id'
-  | 'modelProviderId'
-  | 'updatedAt';
-
-export type ClaudeCodeConfigUpdateInput = {
-  env: InputMaybe<Array<ClaudeCodeEnvItemInput>>;
-  modelProviderId: InputMaybe<Scalars['String']['input']>;
-  useDefaultConfig: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type ClaudeCodeEnvItem = {
-  __typename?: 'ClaudeCodeEnvItem';
-  key: Scalars['String']['output'];
-  value: Scalars['String']['output'];
-};
-
-export type ClaudeCodeEnvItemInput = {
-  key: Scalars['String']['input'];
-  value: Scalars['String']['input'];
-};
-
 export type CodexOAuthInfoObject = {
   __typename?: 'CodexOAuthInfoObject';
   accessToken: Scalars['String']['output'];
@@ -217,24 +141,9 @@ export type CodexOAuthInfoObject = {
   tokenType: Scalars['String']['output'];
 };
 
-export type ConfigureRemoteRepositoryArgs = {
-  config: RemoteRepositoryConfigInput;
-  projectId: Scalars['ID']['input'];
-};
-
-export type ConfigureWorkflowArgs = {
-  config: WorkflowConfigInput;
-  projectId: Scalars['ID']['input'];
-};
-
 export type CreateManyPurfenceIssuesInput = {
   /** Array of records to create */
   purfenceIssues: Array<PurfenceIssueCreateInput>;
-};
-
-export type CreateOneClaudeCodeConfigInput = {
-  /** The record to create */
-  claudeCodeConfig: ClaudeCodeConfigCreateInput;
 };
 
 export type CreateOneModelProviderConfigDtoInput = {
@@ -306,11 +215,6 @@ export type DeleteManyResponse = {
   __typename?: 'DeleteManyResponse';
   /** The number of records deleted. */
   deletedCount: Scalars['Int']['output'];
-};
-
-export type DeleteOneClaudeCodeConfigInput = {
-  /** The id of the record to delete. */
-  id: Scalars['ID']['input'];
 };
 
 export type DeleteOneModelProviderConfigDtoInput = {
@@ -388,11 +292,6 @@ export type IdFilterComparison = {
   notILike: InputMaybe<Scalars['ID']['input']>;
   notIn: InputMaybe<Array<Scalars['ID']['input']>>;
   notLike: InputMaybe<Scalars['ID']['input']>;
-};
-
-export type ImportRemoteIssueInput = {
-  projectId: Scalars['String']['input'];
-  remoteIssueId: Scalars['String']['input'];
 };
 
 export type IntFieldComparison = {
@@ -513,11 +412,7 @@ export type ModelProviderConfigUpdateInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeIssue: PurfenceIssue;
-  configureRemoteRepository: RemoteRepositoryConfig;
-  configureWorkflow: WorkflowConfig;
   createManyPurfenceIssues: Array<PurfenceIssue>;
-  createOneClaudeCodeConfig: ClaudeCodeConfig;
   createOneModelProviderConfigDto: ModelProviderConfigDto;
   createOneMyQueue: MyQueue;
   createOneMyQueueJob: MyQueueJob;
@@ -528,7 +423,6 @@ export type Mutation = {
   createPurfenceScheduledTask: PurfenceScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
-  deleteOneClaudeCodeConfig: ClaudeCodeConfigDeleteResponse;
   deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
   deleteOneMyQueue: MyQueueDeleteResponse;
   deleteOneMyQueueJob: MyQueueJobDeleteResponse;
@@ -538,24 +432,17 @@ export type Mutation = {
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
   deletePurfenceScheduledTask: Scalars['ID']['output'];
-  deleteRemoteRepository: Scalars['Boolean']['output'];
-  deleteWorkflowConfig: Scalars['Boolean']['output'];
   handleCodexOAuthCallback: OAuthCallbackResponse;
-  importRemoteIssue: PurfenceIssue;
   initiateCodexOAuth: OAuthAuthorization;
-  manualMergeIssue: PurfenceIssue;
-  manualPushIssue: PurfenceIssue;
   refreshCodexToken: ModelProviderConfigDto;
   runPurfenceScheduledTask: Scalars['ID']['output'];
   startIssue: Scalars['ID']['output'];
   startRemoteIssue: PurfenceIssue;
-  testRemoteRepositoryConnection: RemoteRepositoryConnectionTestResult;
   toggleModelProviderConfig: ModelProviderConfigDto;
   updateManyPurfenceExecutions: UpdateManyResponse;
   updateManyPurfenceIssues: UpdateManyResponse;
   updateManyPurfenceProjects: UpdateManyResponse;
   updateOneAgentArtifact: AgentArtifact;
-  updateOneClaudeCodeConfig: ClaudeCodeConfig;
   updateOneModelProviderConfigDto: ModelProviderConfigDto;
   updateOneMyQueue: MyQueue;
   updateOneMyQueueJob: MyQueueJob;
@@ -565,33 +452,11 @@ export type Mutation = {
   updateOnePurfenceIssue: PurfenceIssue;
   updateOnePurfenceProject: PurfenceProject;
   updatePurfenceScheduledTask: PurfenceScheduledTask;
-  updateRemoteRepository: RemoteRepositoryConfig;
-  updateWorkflowConfig: WorkflowConfig;
-};
-
-
-export type MutationCompleteIssueArgs = {
-  issueId: Scalars['ID']['input'];
-};
-
-
-export type MutationConfigureRemoteRepositoryArgs = {
-  input: ConfigureRemoteRepositoryArgs;
-};
-
-
-export type MutationConfigureWorkflowArgs = {
-  input: ConfigureWorkflowArgs;
 };
 
 
 export type MutationCreateManyPurfenceIssuesArgs = {
   input: CreateManyPurfenceIssuesInput;
-};
-
-
-export type MutationCreateOneClaudeCodeConfigArgs = {
-  input: CreateOneClaudeCodeConfigInput;
 };
 
 
@@ -645,11 +510,6 @@ export type MutationDeleteManyPurfenceProjectsArgs = {
 };
 
 
-export type MutationDeleteOneClaudeCodeConfigArgs = {
-  input: DeleteOneClaudeCodeConfigInput;
-};
-
-
 export type MutationDeleteOneModelProviderConfigDtoArgs = {
   input: DeleteOneModelProviderConfigDtoInput;
 };
@@ -695,16 +555,6 @@ export type MutationDeletePurfenceScheduledTaskArgs = {
 };
 
 
-export type MutationDeleteRemoteRepositoryArgs = {
-  projectId: Scalars['String']['input'];
-};
-
-
-export type MutationDeleteWorkflowConfigArgs = {
-  projectId: Scalars['String']['input'];
-};
-
-
 export type MutationHandleCodexOAuthCallbackArgs = {
   code: Scalars['String']['input'];
   redirectUri: Scalars['String']['input'];
@@ -712,23 +562,8 @@ export type MutationHandleCodexOAuthCallbackArgs = {
 };
 
 
-export type MutationImportRemoteIssueArgs = {
-  input: ImportRemoteIssueInput;
-};
-
-
 export type MutationInitiateCodexOAuthArgs = {
   redirectUri: Scalars['String']['input'];
-};
-
-
-export type MutationManualMergeIssueArgs = {
-  issueId: Scalars['ID']['input'];
-};
-
-
-export type MutationManualPushIssueArgs = {
-  issueId: Scalars['ID']['input'];
 };
 
 
@@ -749,11 +584,6 @@ export type MutationStartIssueArgs = {
 
 export type MutationStartRemoteIssueArgs = {
   issueId: Scalars['ID']['input'];
-};
-
-
-export type MutationTestRemoteRepositoryConnectionArgs = {
-  input: TestRemoteRepositoryConnectionArgs;
 };
 
 
@@ -780,11 +610,6 @@ export type MutationUpdateManyPurfenceProjectsArgs = {
 
 export type MutationUpdateOneAgentArtifactArgs = {
   input: UpdateOneAgentArtifactInput;
-};
-
-
-export type MutationUpdateOneClaudeCodeConfigArgs = {
-  input: UpdateOneClaudeCodeConfigInput;
 };
 
 
@@ -831,18 +656,6 @@ export type MutationUpdateOnePurfenceProjectArgs = {
 export type MutationUpdatePurfenceScheduledTaskArgs = {
   id: Scalars['ID']['input'];
   update: PurfenceScheduledTaskUpdateInput;
-};
-
-
-export type MutationUpdateRemoteRepositoryArgs = {
-  input: UpdateRemoteRepositoryInput;
-  projectId: Scalars['String']['input'];
-};
-
-
-export type MutationUpdateWorkflowConfigArgs = {
-  input: UpdateWorkflowConfigInput;
-  projectId: Scalars['String']['input'];
 };
 
 export type MyQueue = {
@@ -1649,13 +1462,8 @@ export type Query = {
   _service: _Service;
   agentArtifact: AgentArtifact;
   agentArtifacts: AgentArtifactConnection;
-  canCompleteIssue: Scalars['Boolean']['output'];
-  claudeCodeConfig: ClaudeCodeConfig;
-  claudeCodeConfigs: ClaudeCodeConfigConnection;
-  getAvailableIssueTransitions: Array<PurfenceStatus>;
   /** ping test */
   hello: Maybe<Scalars['JSON']['output']>;
-  importedRemoteIssues: Array<PurfenceIssue>;
   modelProviderConfigDto: ModelProviderConfigDto;
   modelProviderConfigDtos: ModelProviderConfigDtoConnection;
   myQueue: MyQueue;
@@ -1676,10 +1484,6 @@ export type Query = {
   purfenceReadIssueArtifactFile: Scalars['String']['output'];
   purfenceScheduledTask: PurfenceScheduledTask;
   purfenceScheduledTasks: PurfenceScheduledTaskConnection;
-  remoteIssues: Array<RemoteIssueDto>;
-  remoteRepositoryConfig: Maybe<RemoteRepositoryConfig>;
-  workflowConfig: Maybe<WorkflowConfig>;
-  workflowConfigOrDefault: WorkflowConfig;
 };
 
 
@@ -1692,33 +1496,6 @@ export type QueryAgentArtifactsArgs = {
   filter?: AgentArtifactFilter;
   paging?: OffsetPaging;
   sorting?: Array<AgentArtifactSort>;
-};
-
-
-export type QueryCanCompleteIssueArgs = {
-  issueId: Scalars['ID']['input'];
-};
-
-
-export type QueryClaudeCodeConfigArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryClaudeCodeConfigsArgs = {
-  filter?: ClaudeCodeConfigFilter;
-  paging?: OffsetPaging;
-  sorting?: Array<ClaudeCodeConfigSort>;
-};
-
-
-export type QueryGetAvailableIssueTransitionsArgs = {
-  issueId: Scalars['ID']['input'];
-};
-
-
-export type QueryImportedRemoteIssuesArgs = {
-  projectId: Scalars['String']['input'];
 };
 
 
@@ -1840,86 +1617,12 @@ export type QueryPurfenceScheduledTasksArgs = {
   sorting?: Array<PurfenceScheduledTaskSort>;
 };
 
-
-export type QueryRemoteIssuesArgs = {
-  projectId: Scalars['String']['input'];
-};
-
-
-export type QueryRemoteRepositoryConfigArgs = {
-  projectId: Scalars['String']['input'];
-};
-
-
-export type QueryWorkflowConfigArgs = {
-  projectId: Scalars['String']['input'];
-};
-
-
-export type QueryWorkflowConfigOrDefaultArgs = {
-  projectId: Scalars['String']['input'];
-};
-
 export type QuotaInfo = {
   __typename?: 'QuotaInfo';
   remaining: Scalars['Int']['output'];
   total: Scalars['Int']['output'];
   used: Scalars['Int']['output'];
 };
-
-export type RemoteIssueDto = {
-  __typename?: 'RemoteIssueDto';
-  assignees: Array<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  description: Maybe<Scalars['String']['output']>;
-  labels: Array<Scalars['String']['output']>;
-  remoteIssueId: Scalars['String']['output'];
-  remoteIssueNumber: Scalars['Int']['output'];
-  remoteUrl: Scalars['String']['output'];
-  state: Scalars['String']['output'];
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type RemoteRepositoryConfig = {
-  __typename?: 'RemoteRepositoryConfig';
-  createdAt: Scalars['DateTime']['output'];
-  defaultBranch: Scalars['String']['output'];
-  errorMessage: Maybe<Scalars['String']['output']>;
-  /** ID */
-  id: Scalars['ID']['output'];
-  lastSyncedAt: Maybe<Scalars['DateTime']['output']>;
-  projectId: Scalars['String']['output'];
-  status: RemoteRepositoryStatus;
-  type: RemoteRepositoryType;
-  updatedAt: Scalars['DateTime']['output'];
-  url: Scalars['String']['output'];
-};
-
-export type RemoteRepositoryConfigInput = {
-  defaultBranch: InputMaybe<Scalars['String']['input']>;
-  token: Scalars['String']['input'];
-  type: RemoteRepositoryType;
-  url: Scalars['String']['input'];
-};
-
-export type RemoteRepositoryConnectionTestResult = {
-  __typename?: 'RemoteRepositoryConnectionTestResult';
-  error: Maybe<Scalars['String']['output']>;
-  permissions: Maybe<Array<Scalars['String']['output']>>;
-  success: Scalars['Boolean']['output'];
-};
-
-/** Remote repository connection status */
-export type RemoteRepositoryStatus =
-  | 'CONNECTED'
-  | 'ERROR'
-  | 'EXPIRED';
-
-/** Remote repository type: gitlab or github */
-export type RemoteRepositoryType =
-  | 'GITHUB'
-  | 'GITLAB';
 
 /** Sort Directions */
 export type SortDirection =
@@ -1946,12 +1649,6 @@ export type StringFieldComparison = {
   notILike: InputMaybe<Scalars['String']['input']>;
   notIn: InputMaybe<Array<Scalars['String']['input']>>;
   notLike: InputMaybe<Scalars['String']['input']>;
-};
-
-export type TestRemoteRepositoryConnectionArgs = {
-  token: Scalars['String']['input'];
-  type: RemoteRepositoryType;
-  url: Scalars['String']['input'];
 };
 
 export type UpdateManyPurfenceExecutionsInput = {
@@ -1986,13 +1683,6 @@ export type UpdateOneAgentArtifactInput = {
   id: Scalars['ID']['input'];
   /** The update to apply. */
   update: AgentArtifactUpdateInput;
-};
-
-export type UpdateOneClaudeCodeConfigInput = {
-  /** The id of the record to update */
-  id: Scalars['ID']['input'];
-  /** The update to apply. */
-  update: ClaudeCodeConfigUpdateInput;
 };
 
 export type UpdateOneModelProviderConfigDtoInput = {
@@ -2051,48 +1741,6 @@ export type UpdateOnePurfenceProjectInput = {
   update: PurfenceProjectUpdateInput;
 };
 
-export type UpdateRemoteRepositoryInput = {
-  defaultBranch: InputMaybe<Scalars['String']['input']>;
-  token: InputMaybe<Scalars['String']['input']>;
-  type: InputMaybe<RemoteRepositoryType>;
-  url: InputMaybe<Scalars['String']['input']>;
-};
-
-export type UpdateWorkflowConfigInput = {
-  autoCreateIssue: InputMaybe<Scalars['Boolean']['input']>;
-  autoMerge: InputMaybe<Scalars['Boolean']['input']>;
-  autoPush: InputMaybe<Scalars['Boolean']['input']>;
-  mode: InputMaybe<WorkflowMode>;
-  requireManualApproval: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type WorkflowConfig = {
-  __typename?: 'WorkflowConfig';
-  autoCreateIssue: Scalars['Boolean']['output'];
-  autoMerge: Scalars['Boolean']['output'];
-  autoPush: Scalars['Boolean']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  /** ID */
-  id: Scalars['ID']['output'];
-  mode: WorkflowMode;
-  projectId: Scalars['String']['output'];
-  requireManualApproval: Scalars['Boolean']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type WorkflowConfigInput = {
-  autoCreateIssue: InputMaybe<Scalars['Boolean']['input']>;
-  autoMerge: InputMaybe<Scalars['Boolean']['input']>;
-  autoPush: InputMaybe<Scalars['Boolean']['input']>;
-  mode: WorkflowMode;
-  requireManualApproval: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-/** Workflow mode: standalone or collaborative */
-export type WorkflowMode =
-  | 'COLLABORATIVE'
-  | 'STANDALONE';
-
 export type _Service = {
   __typename?: '_Service';
   sdl: Maybe<Scalars['String']['output']>;
@@ -2129,30 +1777,6 @@ export type DeleteAppConfigMutationVariables = Exact<{
 
 
 export type DeleteAppConfigMutation = { __typename?: 'Mutation', deleteOnePurfenceAppConfig: { __typename?: 'PurfenceAppConfigDeleteResponse', id: string | null } };
-
-export type GetClaudeCodeConfigsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetClaudeCodeConfigsQuery = { __typename?: 'Query', claudeCodeConfigs: { __typename?: 'ClaudeCodeConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId: string | null, createdAt: any, updatedAt: any, env: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null }> } };
-
-export type CreateClaudeCodeConfigMutationVariables = Exact<{
-  input: CreateOneClaudeCodeConfigInput;
-}>;
-
-
-export type CreateClaudeCodeConfigMutation = { __typename?: 'Mutation', createOneClaudeCodeConfig: { __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId: string | null, createdAt: any, updatedAt: any, env: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null } };
-
-export type UpdateClaudeCodeConfigMutationVariables = Exact<{
-  input: UpdateOneClaudeCodeConfigInput;
-}>;
-
-
-export type UpdateClaudeCodeConfigMutation = { __typename?: 'Mutation', updateOneClaudeCodeConfig: { __typename?: 'ClaudeCodeConfig', id: string, useDefaultConfig: boolean, modelProviderId: string | null, createdAt: any, updatedAt: any, env: Array<{ __typename?: 'ClaudeCodeEnvItem', key: string, value: string }> | null } };
-
-export type GetProviderOptionsForClaudeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetProviderOptionsForClaudeQuery = { __typename?: 'Query', modelProviderConfigDtos: { __typename?: 'ModelProviderConfigDtoConnection', nodes: Array<{ __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean }> } };
 
 export type InitiateCodexOAuthMutationVariables = Exact<{
   redirectUri: Scalars['String']['input'];

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { usePurfenceExecutionsQuery, usePurfenceIssueQuery } from '@/graphql/__generated__/hooks'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Calendar, FileText, FolderOpen, Play, RotateCcw, MessageSquare, ExternalLink, Tag } from 'lucide-react'
+import { ArrowLeft, Calendar, FileText, FolderOpen, Play, RotateCcw, MessageSquare } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -18,22 +18,6 @@ import type { PurfenceStatus } from '@/graphql/__generated__/types'
 import { START_ISSUE_MUTATION } from '@/api/purfence.graphql'
 import { useToast } from '@/hooks/use-toast'
 import type { AgentType } from '@/lib/socket-agent'
-import { CollaborationActions } from '@/components/remote-git/CollaborationActions'
-
-/** Remote issue data type from API response */
-interface RemoteIssueData {
-  remoteIssueId?: string
-  remoteIssueNumber?: number
-  remoteUrl?: string
-  remoteState?: string
-  lastSyncedAt?: string
-  syncedData?: {
-    title?: string
-    description?: string
-    labels?: string[]
-    assignees?: string[]
-  }
-}
 
 /** Execution 执行阶段（前端定义，后端可能还未同步到 GraphQL 类型） */
 type ExecutionStage = 'tianji' | 'tianfu'
@@ -233,79 +217,6 @@ export function IssueDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Remote Issue Info */}
-        {(issue as unknown as { remoteIssueData?: RemoteIssueData }).remoteIssueData && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <ExternalLink className="h-4 w-4" />
-                远程 Issue
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {(() => {
-                const remoteData = (issue as unknown as { remoteIssueData?: RemoteIssueData }).remoteIssueData
-                if (!remoteData) return null
-                return (
-                  <>
-                    {remoteData.remoteUrl && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="text-muted-foreground">远程链接：</span>
-                        <a
-                          href={remoteData.remoteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline flex items-center gap-1"
-                        >
-                          #{remoteData.remoteIssueNumber}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
-                    )}
-                    {remoteData.remoteState && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="text-muted-foreground">远程状态：</span>
-                        <Badge variant={remoteData.remoteState.toLowerCase() === 'open' ? 'default' : 'secondary'}>
-                          {remoteData.remoteState}
-                        </Badge>
-                      </div>
-                    )}
-                    {remoteData.syncedData?.labels && remoteData.syncedData.labels.length > 0 && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Tag className="h-4 w-4 text-muted-foreground" />
-                        <div className="flex flex-wrap gap-1">
-                          {remoteData.syncedData.labels.map((label) => (
-                            <Badge key={label} variant="outline" className="text-xs">
-                              {label}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {remoteData.lastSyncedAt && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="text-muted-foreground">最后同步：</span>
-                        <span>{formatDistanceToNow(new Date(remoteData.lastSyncedAt), { addSuffix: true, locale: zhCN })}</span>
-                      </div>
-                    )}
-                  </>
-                )
-              })()}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Collaboration Actions - Only show in collaborative mode */}
-        <CollaborationActions
-          issueId={issue.id}
-          projectId={issue.projectId}
-          issueStatus={issue.status}
-          remoteIssueData={(issue as unknown as { remoteIssueData?: RemoteIssueData }).remoteIssueData}
-          onActionComplete={() => {
-            refetchIssue()
-            refetchExecutions()
-          }}
-        />
       </div>
 
       {/* Executions List */}

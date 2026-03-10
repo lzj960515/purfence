@@ -3,7 +3,7 @@ import { ModelOptions } from '@app/my-agent/types';
 import { ModelProviderConfigService } from './model-provider-config/model-provider-config.service';
 import { PurfenceConfigService } from './purfence-config/purfence-config.service';
 import { ProviderType } from './types/provider-type.enum';
-import { CodexTokenService } from './codex-token.service';
+import { CodexTokenService } from './codex/codex-token.service';
 
 @Injectable()
 export class ProviderModelService {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CircleDashed, RefreshCw, Sparkles, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -52,11 +52,11 @@ export function SkillsSettingsPage() {
   const [installed, setInstalled] = useState<DesktopSkillItem[]>([])
   const [recommended, setRecommended] = useState<DesktopSkillItem[]>([])
 
-  const fetchCatalog = async () => {
+  const fetchCatalog = useCallback(async () => {
     const catalog = await getDesktopSkillsCatalog()
     setInstalled(catalog.installed)
     setRecommended(catalog.recommended)
-  }
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -73,7 +73,7 @@ export function SkillsSettingsPage() {
     return () => {
       mounted = false
     }
-  }, [])
+  }, [fetchCatalog])
 
   const dedupedRecommended = useMemo(() => {
     const installedSet = new Set(installed.map((item) => item.name.toLowerCase()))
@@ -121,7 +121,7 @@ export function SkillsSettingsPage() {
       <div className="border-b pb-6">
         <h1 className="text-2xl font-medium tracking-tight">Skills</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          管理 Claude Code Skills。上方已安装，下方推荐可一键安装，安装后自动从推荐移除。
+          管理桌面端 Skills。上方已安装，下方推荐可一键安装，安装后自动从推荐移除。
         </p>
       </div>
 

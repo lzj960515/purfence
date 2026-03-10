@@ -7,8 +7,6 @@ import { cn } from '@/lib/utils'
 type SettingsTab =
   | 'base'
   | 'providers'
-  | 'claude-code'
-  | 'environment'
   | 'scheduled-tasks'
   | 'app'
   | 'skills'

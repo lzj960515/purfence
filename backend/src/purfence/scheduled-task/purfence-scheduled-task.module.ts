@@ -13,7 +13,7 @@ import { PurfenceScheduledTaskService } from './purfence-scheduled-task.service'
 import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-update.input';
 import { ModelProviderConfigModule } from '../model-provider-config/model-provider-config.module';
 import { PurfenceConfigModule } from '../purfence-config/purfence-config.module';
-import { OAuthModule } from '../oauth/oauth.module';
+import { OAuthModule } from '../codex/codex-oauth.module';
 import { ProviderModelService } from '../provider-model.service';
 import { PurfenceAgentService } from '../agent.service';
 

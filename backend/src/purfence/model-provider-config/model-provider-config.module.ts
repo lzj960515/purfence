@@ -11,8 +11,6 @@ import { ModelProviderConfigCreateInput } from './model-provider-config-create.i
 import { ModelProviderConfigUpdateInput } from './model-provider-config-update.input';
 import { ModelProviderConfigService } from './model-provider-config.service';
 import { ModelProviderConfigResolver } from './model-provider-config.resolver';
-import { ProviderConfigService } from '../services/provider-config.service';
-import { ProviderFactoryService } from '../services/provider-factory.service';
 
 @Global()
 @Module({
@@ -35,16 +33,7 @@ import { ProviderFactoryService } from '../services/provider-factory.service';
       ],
     }),
   ],
-  providers: [
-    ModelProviderConfigService,
-    ModelProviderConfigResolver,
-    ProviderConfigService,
-    ProviderFactoryService,
-  ],
-  exports: [
-    ModelProviderConfigService,
-    ProviderConfigService,
-    ProviderFactoryService,
-  ],
+  providers: [ModelProviderConfigService, ModelProviderConfigResolver],
+  exports: [ModelProviderConfigService],
 })
 export class ModelProviderConfigModule {}

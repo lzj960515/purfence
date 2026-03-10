@@ -11,13 +11,12 @@ test.describe('设置页面 E2E 测试', () => {
   })
 
   test('侧边栏导航正常工作', async ({ page }) => {
-    // 点击"即将推出"的菜单项
-    await page.click('text=Claude Code 配置')
-    await expect(page).toHaveURL(/\/settings\/claude-code/)
-    await expect(page.locator('h2')).toContainText('即将推出')
+    await page.click('text=定时任务')
+    await expect(page).toHaveURL(/\/settings\/scheduled-tasks/)
+    await expect(page.locator('h1')).toContainText('定时任务')
 
     // 返回模型提供商配置
-    await page.click('text=模型提供商配置')
+    await page.click('text=模型提供商')
     await expect(page).toHaveURL(/\/settings\/providers/)
   })
 

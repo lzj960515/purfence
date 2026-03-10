@@ -12,7 +12,7 @@ import { App } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
 import { AgentArtifactContent } from '../artifact/agent-artifact-content.dto';
 import { PurfenceAgentService } from '../agent.service';
-import { PurfenceAppConfigService } from './purfence-app-config.service';
+import { PurfenceAppConfigService } from './app-config.service';
 import { PurfenceSlackService } from './purfence-slack.service';
 
 function isRecord(value: unknown): value is Record<string, unknown> {

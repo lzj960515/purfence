@@ -6,8 +6,6 @@ import process from 'node:process';
 import { AppController } from './app.controller';
 import { CommonModule } from './common/common.module';
 import { PurfenceModule } from './purfence/purfence.module';
-import { WorkflowModule } from './workflow/workflow.module';
-import { RemoteGitModule } from './remote-git/remote-git.module';
 
 @Module({
   imports: [
@@ -22,8 +20,6 @@ import { RemoteGitModule } from './remote-git/remote-git.module';
     }),
     CommonModule,
     PurfenceModule,
-    WorkflowModule,
-    RemoteGitModule,
   ],
   controllers: [AppController],
 })
