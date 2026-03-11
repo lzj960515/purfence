@@ -14,7 +14,6 @@ const ZIWEI_TOOLS = [
   'searchProjects',
   'searchIssues',
   'getCurrentTime',
-  'Task',
   'updateProject',
   'renderArtifacts',
   'createScheduledTask',
