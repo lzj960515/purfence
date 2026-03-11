@@ -36,31 +36,10 @@ export class ToolsService implements OnModuleInit {
   private tools = new Map<string, Tool>();
   private toolKits = new Map<string, Toolkit>();
   private toolsInKitsMap = new Map<string, string[]>();
-  private readonly defaultServerTools = {
-    webSearch: {
-      openai: this.llmService.createOpenaiTool(({ webSearch }) => webSearch()),
-      anthropic: this.llmService.createAnthropicTool(({ webSearch_20250305 }) =>
-        webSearch_20250305({ maxUses: 5 }),
-      ),
-      gemini: this.llmService.createGeminiTool(({ googleSearch }) =>
-        googleSearch({}),
-      ),
-    },
-  } satisfies Record<
-    string,
-    Partial<Record<Providers, { description?: string }>>
-  >;
 
   getTools(tools: string[], model?: ModelOptions['model']): any {
     return _.chain(tools)
       .map((toolName) => {
-        const provider = this.llmService.getProviderByModel(model);
-        const serverTool = this.getServerTool(
-          toolName as keyof typeof this.defaultServerTools,
-          provider,
-        );
-        if (serverTool) return serverTool;
-
         const tool = this.getLocalTools([toolName])[0];
         if (tool) return tool;
 
@@ -75,10 +54,8 @@ export class ToolsService implements OnModuleInit {
   getAllTools() {
     const tools = Array.from(this.tools.values());
     const toolKits = Array.from(this.toolKits.values());
-    const toolNames = _.keys(this.defaultServerTools);
     return _.chain(tools)
       .map(({ name, description, tags }) => ({ name, description, tags }))
-      .concat(toolNames.map((name) => ({ name, description: name, tags: [] })))
       .concat(
         toolKits.map((kit) => ({
           name: kit.name,
@@ -99,13 +76,6 @@ export class ToolsService implements OnModuleInit {
 
   getToolKit(name: string) {
     return this.toolKits.get(name);
-  }
-
-  private getServerTool<
-    N extends keyof typeof this.defaultServerTools,
-    P extends keyof (typeof this.defaultServerTools)[N],
-  >(toolName: N, provider: P) {
-    return this.defaultServerTools?.[toolName]?.[provider];
   }
 
   private getLocalTools(tools: string[]) {

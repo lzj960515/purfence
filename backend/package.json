@@ -35,12 +35,8 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.6",
-    "@ai-sdk/google-vertex": "^4.0.6",
     "@ai-sdk/openai": "^3.0.25",
     "@ai-sdk/openai-compatible": "^2.0.26",
-    "@anthropic-ai/claude-agent-sdk": "^0.1.74",
-    "@anthropic-ai/sdk": "^0.71.2",
-    "@anthropic-ai/vertex-sdk": "^0.14.0",
     "@apollo/server": "^4.12.2",
     "@apollo/subgraph": "^2.11.2",
     "@elastic/ecs-pino-format": "^1.5.0",
