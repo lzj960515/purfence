@@ -30,39 +30,35 @@ export interface IndexedKnowledgeBaseOptions {
   publicKb?: IndexedKnowledgeBaseOptions;
 }
 
-export const SUPPORTED_MODELS = [
-  'claude-sonnet-4-5',
-  'openai',
-  'codex',
-  'gpt-5',
-  'gpt-5-mini',
-  'gemini',
-  'gemini-3-pro-preview',
-  'kimi',
-  'glm-4.7',
-] as const;
-
-export type SupportedModel = (typeof SUPPORTED_MODELS)[number];
-
-export interface ModelOptions {
-  model?: SupportedModel;
-  thinking?: boolean;
-  configurationName?: string;
-  apiKey?: string;
-  baseUrl?: string;
-  accessToken?: string;
-  accountId?: string;
-  proxyUrl?: string;
-  provider?: string;
+export interface ModelVariantOptions {
+  thinking?: {
+    type: 'enabled' | 'disabled' | 'adaptive';
+    budgetTokens?: number;
+  };
+  reasoningSummary?: string;
+  reasoningEffort?: string;
+  [key: string]: any;
 }
 
+export interface ModelOptions {
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+  provider: Providers;
+  proxyUrl?: string;
+  variants?: ModelVariantOptions;
+}
+
+export interface AgentModelOptions {
+  default: ModelOptions;
+  fallbacks: ModelOptions[];
+}
 export interface AgentOptions {
   name: string;
-  model?: ModelOptions['model'];
-  modelOptions?: ModelOptions;
+  description?: string;
+  agentModelOptions?: AgentModelOptions;
   prompt?: string;
   tools?: (string | { description?: string })[];
-  subAgentsOptions?: AgentOptions[];
   memory?: false | 'in-memory';
 }
 
@@ -71,7 +67,7 @@ export interface ChatOptions {
   userId?: string;
   conversationId?: string;
   context?: Record<string, any>;
-  modelOptions?: ModelOptions;
+  agentModelOptions?: AgentModelOptions;
 }
 
 export interface GenerateTextOutputOptions<T extends z.ZodType> {
@@ -79,81 +75,4 @@ export interface GenerateTextOutputOptions<T extends z.ZodType> {
   schema: T;
 }
 
-export type Providers = 'openai' | 'anthropic' | 'gemini';
-
-export const WorkflowParamSchema = z.union([
-  z.object({
-    type: z.literal('literal'),
-    value: z.unknown(),
-  }),
-  z.object({
-    type: z.literal('node'),
-    nodeId: z.string(),
-    value: z.string().optional(),
-  }),
-]);
-
-export type WorkflowParam = z.infer<typeof WorkflowParamSchema>;
-
-export const ToolNodeSchema = z.object({
-  id: z.string(),
-  type: z.literal('tool'),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  toolName: z.string(),
-  params: z.record(z.string(), WorkflowParamSchema).optional(),
-});
-
-export type ToolNode = z.infer<typeof ToolNodeSchema>;
-
-export const AgentNodeSchema = z.object({
-  id: z.string(),
-  type: z.literal('agent'),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  agent: z.object({
-    name: z.string().optional(),
-    model: z
-      .enum(SUPPORTED_MODELS)
-      .default('claude-sonnet-4-5')
-      .describe(
-        'Model identifier. Defaults to "claude-sonnet-4-5" when omitted.',
-      ),
-    prompt: z.string(),
-  }),
-  params: z.record(z.string(), WorkflowParamSchema).optional(),
-  // When persisted as config, schema will typically be a JSON description,
-  // not a live Zod schema instance.
-  schema: z.unknown(),
-});
-
-export type AgentNode = z.infer<typeof AgentNodeSchema> & {
-  agent: {
-    name?: string;
-    model?: ModelOptions['model'];
-    prompt: string;
-  };
-};
-
-export const WorkflowNodeSchema = z.object({
-  preId: z.string().nullable().optional(),
-  type: z.union([z.literal('start'), z.literal('end'), z.literal('normal')]),
-  nextId: z.string().nullable().optional(),
-  node: z.union([ToolNodeSchema, AgentNodeSchema]),
-});
-
-export type WorkflowNode = z.infer<typeof WorkflowNodeSchema>;
-
-export const WorkflowConfigSchema = z.object({
-  name: z.string(),
-  nodes: z.array(WorkflowNodeSchema),
-});
-
-export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
-
-export interface WorkflowState {
-  userId?: string;
-  conversationId?: string;
-  executionId?: string;
-  context?: Map<string, unknown>;
-}
+export type Providers = 'openai' | 'anthropic' | 'google' | 'openai-compatible';

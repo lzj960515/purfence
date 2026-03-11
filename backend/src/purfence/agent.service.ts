@@ -114,7 +114,10 @@ export class PurfenceAgentService {
       tools: [...params.tools],
       name: params.agentName,
       prompt: params.prompt,
-      modelOptions,
+      agentModelOptions: {
+        default: modelOptions,
+        fallbacks: [],
+      },
     });
 
     // 构建消息 parts，支持图片

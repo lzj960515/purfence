@@ -47,6 +47,7 @@ import { summarizationSystemPrompt, summarizationUserPrompt } from './prompt';
 import { SocketService } from './socket.service';
 import { ToolsService } from './tools.service';
 import {
+  AgentModelOptions,
   AgentOptions,
   ChatOptions,
   GenerateTextOutputOptions,
@@ -83,17 +84,20 @@ export class MyAgentService {
   }
 
   stream(myAgent: MyAgent, chatOptions: ChatOptions) {
-    const { conversationId } = chatOptions;
+    const { conversationId, context, agentModelOptions } = chatOptions;
     const abortCtrl = new AbortController();
     this.conversationAbortCtrls.set(conversationId, abortCtrl);
+    context.set('modelOptions', agentModelOptions?.default);
+    const myModel = this.llmService.get(agentModelOptions?.default);
     const generationOptions = this.generationOptions(
-      myAgent.getMyModel(),
+      myModel,
       chatOptions,
       abortCtrl.signal,
     );
 
     let compress = false;
-
+    const fallbacks = agentModelOptions?.fallbacks || [];
+    const count = fallbacks.length;
     const ob = defer(async () => {
       return this.createStream(
         generationOptions,
@@ -104,21 +108,27 @@ export class MyAgentService {
     }).pipe(
       concatMap((it) => from(it)),
       retry({
-        count: 5,
+        count,
         resetOnSuccess: true,
         delay: (error, retryCount) => {
           this.logger.error(
-            `Stream error: ${error.message} (${retryCount}/${5})`,
+            `Stream error: ${error.message} (${retryCount}/${count})`,
           );
           chatOptions.message = 'continue';
-          // 重试时间依次为 5s, 10s, 5s, 10s, 5s
-          const retryDelays = [5000, 10000, 5000, 10000, 5000];
-
           compress = error?.statusCode === 413;
-
-          return compress || shouldRetryError(error.message)
-            ? timer(retryDelays[retryCount - 1])
-            : throwError(() => error);
+          // 触发压缩
+          if (compress) {
+            return timer(1000);
+          }
+          if (retryCount <= count) {
+            const fallback = fallbacks[retryCount - 1];
+            generationOptions.context = {
+              ...chatOptions.context,
+              modelOptions: fallback,
+            };
+            return timer(1000);
+          }
+          return throwError(() => error);
         },
       }),
       finalize(() => {
@@ -127,12 +137,6 @@ export class MyAgentService {
       }),
       catchError((e) => {
         const actionType = getErrorActionType(e.message);
-        if (actionType === AgentSseErrorActionType.RETRY) {
-          CommonService.emit('agent.error', {
-            thread_id: conversationId,
-            message: e.message,
-          });
-        }
         throw new Error(
           JSON.stringify({
             actionType,
@@ -143,55 +147,6 @@ export class MyAgentService {
     );
 
     return this.formatObservable(ob, generationOptions);
-  }
-
-  async invoke(
-    myAgent: MyAgent,
-    options: { chatOptions: ChatOptions },
-  ): Promise<string>;
-  async invoke<T extends z.ZodType>(
-    myAgent: MyAgent,
-    options: {
-      chatOptions: ChatOptions;
-      generateTextOutputOptions?: GenerateTextOutputOptions<T>;
-    },
-  ): Promise<z.infer<T>>;
-  async invoke<T extends z.ZodType>(
-    myAgent: MyAgent,
-    options: {
-      chatOptions: ChatOptions;
-      generateTextOutputOptions?: GenerateTextOutputOptions<T>;
-    },
-  ) {
-    const { chatOptions, generateTextOutputOptions } = options;
-
-    const generationOptions = this.generationOptions(
-      myAgent.getMyModel(),
-      chatOptions,
-    );
-
-    const response = await myAgent
-      .getAgent()
-      .generateText(chatOptions.message, generationOptions);
-
-    if (!generateTextOutputOptions) {
-      return response.text;
-    }
-    const summarizeAgent = this.createAgent({
-      name: myAgent.getAgent().name,
-      model: myAgent.getAgent().getModelName() as any,
-      prompt: `You are a helpful assistant that summarizes the conversation.`,
-    });
-
-    const output = Output.object({ schema: generateTextOutputOptions.schema });
-    const result = await summarizeAgent.generateText(
-      generateTextOutputOptions.prompt,
-      {
-        ...(chatOptions as any),
-        output,
-      },
-    );
-    return result.output as z.infer<T>;
   }
 
   private generationOptions(
@@ -211,33 +166,21 @@ export class MyAgentService {
   }
 
   createAgent(options: AgentOptions): MyAgent {
-    const { name, model, modelOptions, prompt, tools, subAgentsOptions } =
-      options;
-
-    const subAgents = _.map(subAgentsOptions, (op) =>
-      this.createAgent(op).getAgent(),
-    );
-    const resolvedModelOptions: ModelOptions = modelOptions || { model };
-    const myModel = this.llmService.get(resolvedModelOptions);
-    const resolvedModel = resolvedModelOptions.model;
+    const { name, prompt, tools } = options;
 
     const agent: Agent = new Agent({
       name,
       instructions: prompt,
-      model: myModel.model(),
-      tools: this.getAgentTools(tools, resolvedModel),
+      model: ({ context }) => {
+        const modelOptions = context?.get('modelOptions') as ModelOptions;
+        return this.llmService.get(modelOptions) as any;
+      },
+      tools: this.getAgentTools(tools),
       memory: this.getMemory(options.memory),
       hooks: this.myHooks.getHooks(),
       maxSteps: 300,
-      subAgents,
-      supervisorConfig: {
-        throwOnStreamError: true,
-        fullStreamEventForwarding: {
-          types: ['tool-input-start', 'tool-result'],
-        },
-      },
     });
-    return new MyAgent(agent, this, myModel);
+    return new MyAgent(agent, this);
   }
 
   registerAgent(agent: Agent) {
@@ -248,14 +191,11 @@ export class MyAgentService {
     this.voltAgent?.registerWorkflow(workflow);
   }
 
-  private getAgentTools(
-    tools: AgentOptions['tools'],
-    model: ModelOptions['model'],
-  ) {
+  private getAgentTools(tools: AgentOptions['tools']) {
     return _.chain(tools)
       .map((tool) => {
         if (_.isString(tool)) {
-          return this.toolsService.getTools([tool], model);
+          return this.toolsService.getTools([tool]);
         }
         return tool;
       })
@@ -280,8 +220,11 @@ export class MyAgentService {
     message: ChatOptions['message'],
     compress: boolean,
   ) {
+    const modelOptions = generationOptions.context?.[
+      'modelOptions'
+    ] as ModelOptions;
     const { session, message: _message } = await this.prepareSession(
-      myAgent,
+      modelOptions,
       message,
       generationOptions.userId,
       generationOptions.conversationId,
@@ -416,7 +359,7 @@ export class MyAgentService {
    * 2) 判断是否超过阈值，超过则总结旧会话，创建新会话并构造桥接消息
    */
   private async prepareSession(
-    myAgent: MyAgent,
+    modelOptions: ModelOptions,
     message: ChatOptions['message'],
     userId: string,
     conversationId: string,
@@ -424,20 +367,20 @@ export class MyAgentService {
   ) {
     if (compress) {
       return this.compressSessionForPromptTooLong({
-        myAgent,
+        modelOptions,
         userId,
         conversationId,
       });
     }
 
     const session = await this.findCurrentSession(userId, conversationId);
-
-    const full = await this.messageService.isSessionFull(session, myAgent);
+    const myModel = this.llmService.get(modelOptions);
+    const full = await this.messageService.isSessionFull(session, myModel);
     if (!full) {
       return { session, message };
     }
     return this.rolloverSessionWithSummary({
-      myAgent,
+      modelOptions,
       userId,
       conversationId,
       session,
@@ -446,18 +389,18 @@ export class MyAgentService {
   }
 
   private async compressSessionForPromptTooLong({
-    myAgent,
+    modelOptions,
     userId,
     conversationId,
   }: {
-    myAgent: MyAgent;
+    modelOptions: ModelOptions;
     userId?: string;
     conversationId: string;
   }) {
     const session = await this.findCurrentSession(userId, conversationId);
 
     return await this.rolloverSessionWithSummary({
-      myAgent,
+      modelOptions,
       userId,
       conversationId,
       session,
@@ -465,13 +408,13 @@ export class MyAgentService {
   }
 
   private async rolloverSessionWithSummary({
-    myAgent,
+    modelOptions,
     userId,
     conversationId,
     session,
     currentMessage,
   }: {
-    myAgent: MyAgent;
+    modelOptions: ModelOptions;
     userId: string;
     conversationId: string;
     session: AgentConversationSession;
@@ -488,7 +431,7 @@ export class MyAgentService {
     });
 
     const summary = await this.summarizeConversation(
-      myAgent,
+      modelOptions,
       userId,
       session.id,
       currentMessage,
@@ -516,16 +459,13 @@ export class MyAgentService {
   }
 
   private async findCurrentSession(userId: string, conversationId: string) {
-    // 1) 查找/创建当前子会话
     const session = await AgentConversationSession.findOne({
       where: { conversationId, isCurrent: true },
     });
     if (session) {
       return session;
     }
-    // 第一次创建，为兼容旧数据， id设置为conversationId
     return await AgentConversationSession.create({
-      id: conversationId,
       userId,
       conversationId,
       isCurrent: true,
@@ -533,14 +473,13 @@ export class MyAgentService {
   }
 
   private async summarizeConversation(
-    myAgent: MyAgent,
+    modelOptions: ModelOptions,
     userId: string,
     conversationId: string,
     currentMessages?: ChatOptions['message'],
   ) {
     const summarizer = this.createAgent({
       name: 'summarize-conversation',
-      model: myAgent.getAgent().getModelName() as any,
       prompt: summarizationSystemPrompt,
       memory: false,
     });
@@ -560,7 +499,11 @@ export class MyAgentService {
         },
       ],
     });
-    const res = await summarizer.generateText(messages);
+    const res = await summarizer.generateText(messages, {
+      context: {
+        modelOptions,
+      },
+    });
     return res.text;
   }
 
@@ -570,41 +513,6 @@ export class MyAgentService {
 
   getToolkit(name: string) {
     return this.toolsService.getToolKit(name);
-  }
-
-  getModel(name: AgentOptions['model']) {
-    return this.llmService.getModel(name);
-  }
-
-  async generateText<T extends z.ZodType>({
-    input,
-    prompt,
-    schema,
-    model,
-    name,
-    options,
-  }: {
-    input: Parameters<Agent['generateText']>[0];
-    prompt?: string;
-    schema: T;
-    model?: AgentOptions['model'];
-    name?: string;
-    options?: Parameters<Agent['generateText']>[1];
-  }): Promise<z.infer<T>> {
-    const agent = this.createAgent({
-      name: name || 'generate-text',
-      model: model || 'gpt-5-mini',
-      prompt:
-        prompt || `You are a helpful assistant that generates structured data.`,
-      memory: false,
-    });
-
-    const output = Output.object({ schema });
-    const resp = await agent.generateText(input, {
-      ...options,
-      output,
-    });
-    return resp.output as z.infer<T>;
   }
 
   private get config() {

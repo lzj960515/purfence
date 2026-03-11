@@ -2,9 +2,8 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum ProviderType {
   OPENAI = 'openai',
-  KIMI = 'kimi',
-  ZHIPU = 'zhipu',
-  CODEX = 'codex',
+  ANTHROPIC = 'anthropic',
+  OPENAI_COMPATIBLE = 'openai-compatible',
 }
 
 registerEnumType(ProviderType, {

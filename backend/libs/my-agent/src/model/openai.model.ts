@@ -4,6 +4,7 @@ import { LanguageModelV3 } from '@ai-sdk/provider';
 import { fetch as undiciFetch, ProxyAgent } from 'undici';
 import { ModelOptions } from '../types';
 import { MyModel } from './my.model';
+import _ from 'lodash';
 
 function createProxyFetch(proxyUrl?: string): typeof fetch | undefined {
   if (!proxyUrl) {
@@ -19,38 +20,34 @@ function createProxyFetch(proxyUrl?: string): typeof fetch | undefined {
 }
 
 export class OpenAIModel extends MyModel {
-  constructor(modelOptions: ModelOptions = {}) {
+  constructor(modelOptions: ModelOptions) {
     super(modelOptions);
   }
 
-  protected providerModel(): LanguageModelV3 {
-    const provider = createOpenAI({
+  model(): LanguageModelV3 {
+    const openai = createOpenAI({
       apiKey: this.modelOptions.apiKey,
       baseURL: this.modelOptions.baseUrl,
       fetch: createProxyFetch(this.modelOptions.proxyUrl),
     });
 
-    switch (this.modelOptions.model) {
-      case 'gpt-5-mini':
-        return provider('gpt-5-mini');
-      case 'openai':
-      case 'gpt-5':
-      default:
-        return provider('gpt-5');
-    }
+    return openai(this.modelOptions.model);
   }
 
   tokenLimit() {
-    const baseToken = 80_000;
-    return 400_000 - baseToken;
+    const baseToken = 20_000;
+    return 100_0000 - baseToken;
   }
 
   providerOptions() {
+    const variants = _.defaults(this.modelOptions.variants, {
+      reasoningSummary: 'auto',
+      reasoningEffort: 'medium',
+      store: false,
+    });
     return {
       openai: {
-        reasoningSummary: 'auto',
-        store: false,
-        include: ['reasoning.encrypted_content'],
+        ...variants,
       } satisfies OpenAIResponsesProviderOptions,
     };
   }

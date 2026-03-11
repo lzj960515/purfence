@@ -17,9 +17,8 @@ import {
   ToolOptions,
 } from '@voltagent/core';
 import _ from 'lodash';
-import { LlmService } from './llm.service';
 import { ToolOpt, ToolWatermark } from './tool.decorator';
-import type { ModelOptions, MyAgentModuleOptions, Providers } from './types';
+import type { MyAgentModuleOptions } from './types';
 
 @Injectable()
 export class ToolsService implements OnModuleInit {
@@ -29,7 +28,6 @@ export class ToolsService implements OnModuleInit {
     private metadataScanner: MetadataScanner,
     private discoveryService: DiscoveryService,
     private configService: ConfigService,
-    private llmService: LlmService,
   ) {}
 
   @Log() private logger: Logger;
@@ -37,7 +35,7 @@ export class ToolsService implements OnModuleInit {
   private toolKits = new Map<string, Toolkit>();
   private toolsInKitsMap = new Map<string, string[]>();
 
-  getTools(tools: string[], model?: ModelOptions['model']): any {
+  getTools(tools: string[]): any {
     return _.chain(tools)
       .map((toolName) => {
         const tool = this.getLocalTools([toolName])[0];

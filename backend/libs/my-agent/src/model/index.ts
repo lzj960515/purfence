@@ -1,4 +1,4 @@
 export * from './my.model';
 export * from './openai.model';
-export * from './codex.model';
-export * from './kimi.model';
+export * from './openai-compatible.model';
+export * from './anthropic.model';

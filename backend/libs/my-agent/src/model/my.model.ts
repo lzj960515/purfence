@@ -1,27 +1,24 @@
 import { AgentOptions, BaseGenerationOptions, Tool } from '@voltagent/core';
-import {
-  LanguageModelV3,
-  LanguageModelV3Middleware,
-  LanguageModelV3Prompt,
-} from '@ai-sdk/provider';
-import { wrapLanguageModel } from 'ai';
-import { ModelOptions } from '../types';
-import {
-  formatAgentsList,
-  loadPrimaryAgents,
-} from '../utils/agent-loader.util';
+import { LanguageModelV3Prompt } from '@ai-sdk/provider';
+import { AgentModelOptions, ModelOptions } from '../types';
+import { Providers } from '../types';
 
 export abstract class MyModel {
-  constructor(protected readonly modelOptions: ModelOptions = {}) {}
+  constructor(protected readonly modelOptions: ModelOptions) {}
 
-  model(): LanguageModelV3 {
-    return wrapLanguageModel({
-      model: this.providerModel(),
-      middleware: [this.delegateTaskMiddleware()],
-    });
+  getModelOptions(): ModelOptions {
+    return this.modelOptions;
   }
 
-  protected abstract providerModel(): LanguageModelV3;
+  provider(): Providers {
+    return this.modelOptions.provider;
+  }
+
+  modelName(): string {
+    return this.modelOptions.model;
+  }
+
+  abstract model(): AgentOptions['model'];
 
   abstract tokenLimit(): number;
 
@@ -36,30 +33,5 @@ export abstract class MyModel {
     tools: Tool[],
   ): Promise<number> {
     return Promise.resolve(-1);
-  }
-
-  protected delegateTaskMiddleware(): LanguageModelV3Middleware {
-    return {
-      specificationVersion: 'v3',
-      transformParams: async ({ params }) => {
-        const tools = params.tools ?? [];
-        for (let i = tools.length - 1; i >= 0; i--) {
-          const tool = tools[i];
-          if (tool.name !== 'delegateTask' && tool.name !== 'Task') {
-            continue;
-          }
-
-          if ('description' in tool) {
-            tool.description = tool.description.replace(
-              '{{AGENTS}}',
-              formatAgentsList(loadPrimaryAgents()),
-            );
-          }
-          break;
-        }
-
-        return params;
-      },
-    };
   }
 }

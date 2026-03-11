@@ -1,14 +1,13 @@
 import { MyUtil } from '@app/shared';
 import { Injectable } from '@nestjs/common';
+import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
 import { extractText, GetMessagesOptions, Memory } from '@voltagent/core';
-import { convertToModelMessages, type ToolUIPart, type UIMessage } from 'ai';
+import { type ToolUIPart, type UIMessage } from 'ai';
 import _ from 'lodash';
 import { AgentConversationSession } from './agent-conversation-sessions.ai.entity';
+import { MyModel } from './model';
 import { bridgePrompt } from './prompt';
 import type { ChatOptions } from './types';
-import { MyAgent } from './my-agent';
-import { convertToLanguageModelPrompt } from 'ai/internal';
-import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
 
 interface MessageFormatOptions {
   includeToolResults?: boolean;
@@ -93,43 +92,10 @@ export class MessageService {
       .value();
   }
 
-  async isSessionFull(session: AgentConversationSession, myAgent: MyAgent) {
-    const myModel = myAgent.getMyModel();
+  async isSessionFull(session: AgentConversationSession, myModel: MyModel) {
     const threshold = 0.8;
     const limit = myModel.tokenLimit();
     return session?.totalTokens >= limit * threshold;
-  }
-
-  async countTokens(session: AgentConversationSession, myAgent: MyAgent) {
-    const uiMessages = await this.memory.getMessages(
-      session.userId,
-      session.id,
-    );
-    if (_.isEmpty(uiMessages)) {
-      return false;
-    }
-    const systemMessage = myAgent.getAgent().instructions;
-    if (systemMessage && typeof systemMessage === 'string') {
-      uiMessages.unshift({
-        id: MyUtil.uuid(),
-        role: 'system',
-        parts: [{ type: 'text', text: systemMessage }],
-      });
-    }
-
-    const messages = await convertToModelMessages(uiMessages);
-
-    const prompt = await convertToLanguageModelPrompt({
-      prompt: {
-        messages,
-      },
-      supportedUrls: {},
-      download: undefined,
-    });
-
-    return await myAgent
-      .getMyModel()
-      .countTokens(prompt, myAgent.getAgent().getTools());
   }
 
   async buildBridgeMessage(
