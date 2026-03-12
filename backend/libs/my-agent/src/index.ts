@@ -14,10 +14,7 @@ export type {
   AgentOptions,
   IndexedKnowledgeBaseOptions,
   KnowledgeBaseAttachment,
-  WorkflowConfig,
-  WorkflowState,
 } from './types';
-export { WorkflowConfigSchema } from './types';
 export { ToolsService } from './tools.service';
 export {
   loadPrimaryAgents,

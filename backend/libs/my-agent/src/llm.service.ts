@@ -19,6 +19,8 @@ export class LlmService {
         return new AnthropicModel(modelOptions);
       case 'openai-compatible':
         return new OpenAICompatibleModel(modelOptions);
+      default:
+        throw new Error(`Unsupported provider: ${modelOptions.provider}`);
     }
   }
 }

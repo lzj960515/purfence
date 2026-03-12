@@ -11,18 +11,14 @@ import { PurfenceScheduledTask } from './purfence-scheduled-task.entity';
 import { PurfenceScheduledTaskResolver } from './purfence-scheduled-task.resolver';
 import { PurfenceScheduledTaskService } from './purfence-scheduled-task.service';
 import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-update.input';
-import { ModelProviderConfigModule } from '../model-provider-config/model-provider-config.module';
 import { PurfenceConfigModule } from '../purfence-config/purfence-config.module';
-import { OAuthModule } from '../codex/codex-oauth.module';
 import { ProviderModelService } from '../provider-model.service';
 import { PurfenceAgentService } from '../agent.service';
 
 @Global()
 @Module({
   imports: [
-    ModelProviderConfigModule,
     PurfenceConfigModule,
-    OAuthModule,
     TypeOrmModule.forFeature([PurfenceScheduledTask]),
     NestjsQueryGraphQLModule.forFeature({
       imports: [NestjsQueryTypeOrmModule.forFeature([PurfenceScheduledTask])],

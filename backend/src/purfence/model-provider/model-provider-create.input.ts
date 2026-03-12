@@ -1,17 +1,16 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
-  IsString,
   IsOptional,
-  IsBoolean,
+  IsString,
   MaxLength,
-  ValidateIf,
 } from 'class-validator';
 import { ProviderType } from '../types/provider-type.enum';
 
 @InputType()
-export class ModelProviderConfigCreateInput {
+export class ModelProviderCreateInput {
   @Field(() => ProviderType)
   @IsEnum(ProviderType)
   @IsNotEmpty()
@@ -26,19 +25,7 @@ export class ModelProviderConfigCreateInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  email?: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  @ValidateIf((o) => o.provider !== ProviderType.CODEX, {
-    message: 'API Key is required when provider is not Codex',
-  })
   apiKey?: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  refreshToken?: string;
 
   @Field({ nullable: true })
   @IsString()
@@ -47,9 +34,6 @@ export class ModelProviderConfigCreateInput {
 
   @Field({ defaultValue: true })
   @IsBoolean()
+  @IsOptional()
   isActive: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  isDefault: boolean;
 }

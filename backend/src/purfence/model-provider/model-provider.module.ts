@@ -5,23 +5,23 @@ import {
   PagingStrategies,
 } from '@ptc-org/nestjs-query-graphql';
 import { NestjsQueryTypeOrmModule } from '@ptc-org/nestjs-query-typeorm';
-import { PurfenceConfigCreateInput } from './purfence-config-create.input';
-import { PurfenceConfigDto } from './purfence-config.dto';
-import { PurfenceConfig } from './purfence-config.entity';
-import { PurfenceConfigUpdateInput } from './purfence-config-update.input';
+import { ModelProvider } from './model-provider.entity';
+import { ModelProviderDto } from './model-provider.dto';
+import { ModelProviderCreateInput } from './model-provider-create.input';
+import { ModelProviderUpdateInput } from './model-provider-update.input';
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PurfenceConfig]),
+    TypeOrmModule.forFeature([ModelProvider]),
     NestjsQueryGraphQLModule.forFeature({
-      imports: [NestjsQueryTypeOrmModule.forFeature([PurfenceConfig])],
+      imports: [NestjsQueryTypeOrmModule.forFeature([ModelProvider])],
       resolvers: [
         {
-          EntityClass: PurfenceConfig,
-          DTOClass: PurfenceConfigDto,
-          CreateDTOClass: PurfenceConfigCreateInput,
-          UpdateDTOClass: PurfenceConfigUpdateInput,
+          EntityClass: ModelProvider,
+          DTOClass: ModelProviderDto,
+          CreateDTOClass: ModelProviderCreateInput,
+          UpdateDTOClass: ModelProviderUpdateInput,
           read: { pagingStrategy: PagingStrategies.OFFSET },
           create: { many: { disabled: true } },
           update: { many: { disabled: true } },
@@ -32,4 +32,4 @@ import { PurfenceConfigUpdateInput } from './purfence-config-update.input';
     }),
   ],
 })
-export class PurfenceConfigModule {}
+export class ModelProviderModule {}

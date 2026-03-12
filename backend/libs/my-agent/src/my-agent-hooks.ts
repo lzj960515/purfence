@@ -31,7 +31,7 @@ export class MyAgentHooks {
           return;
         }
 
-        if (!error && context.context.get('provider') === ProviderType.CODEX) {
+        if (!error && context.context.get('provider') === ProviderType.OPENAI) {
           const title = this.messageService.extractRawText(
             context.input as UIMessage[],
           );
@@ -42,9 +42,7 @@ export class MyAgentHooks {
           );
         }
 
-        const model = agent.getModelName();
-        const provider = this.llmService.getProviderByModel(model);
-        await this.updateSessionUsage({ output, context, provider });
+        await this.updateSessionUsage({ output, context });
 
         await this.handleEvent({ context, error });
       },
@@ -82,11 +80,9 @@ export class MyAgentHooks {
   private async updateSessionUsage({
     output,
     context,
-    provider,
   }: {
     output: OnEndHookArgs['output'];
     context: OperationContext;
-    provider: Providers;
   }) {
     await AgentConversationSession.update(
       { id: context.conversationId },

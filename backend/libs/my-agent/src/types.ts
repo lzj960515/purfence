@@ -56,7 +56,6 @@ export interface AgentModelOptions {
 export interface AgentOptions {
   name: string;
   description?: string;
-  agentModelOptions?: AgentModelOptions;
   prompt?: string;
   tools?: (string | { description?: string })[];
   memory?: false | 'in-memory';

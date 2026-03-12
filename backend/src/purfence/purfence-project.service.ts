@@ -5,13 +5,24 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { PurfenceProject } from './purfence-project.entity';
 import { ensureDir, writeText } from '../common/utils/file.util';
-import { PurfenceConfigService } from './purfence-config/purfence-config.service';
+import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
 
 const execFileAsync = promisify(execFile);
 
 @Injectable()
 export class PurfenceProjectService {
-  constructor(private readonly purfenceConfigService: PurfenceConfigService) {}
+  private async getProjectsRootPathOrThrow(): Promise<string> {
+    const config = await PurfenceConfig.findOne({
+      where: { key: ConfigKey.PROJECTS_ROOT_PATH },
+    });
+    const value = (config?.value as string | undefined)?.trim();
+    if (!value) {
+      throw new Error(
+        'PROJECTS_ROOT_PATH is required. Please configure it in 基础配置.',
+      );
+    }
+    return value;
+  }
 
   async initProjectFilesystem(projectId: string) {
     const project = await PurfenceProject.findOne({ where: { id: projectId } });
@@ -27,8 +38,7 @@ export class PurfenceProjectService {
       throw new Error('Project slug is required');
     }
 
-    const projectsRoot =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRoot = await this.getProjectsRootPathOrThrow();
     const projectRootPath = path.join(projectsRoot, project.slug);
 
     const worktreesPath = path.join(projectRootPath, 'worktrees');

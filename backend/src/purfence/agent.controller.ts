@@ -15,7 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MyAgentService, MessageService } from '@app/my-agent';
 import { Memory } from '@voltagent/core';
 import type { Response } from 'express';
-import { PurfenceConfigService } from './purfence-config/purfence-config.service';
+import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
 import { ensureDir } from '@src/common/utils/file.util';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -37,7 +37,6 @@ export class AgentController {
   constructor(
     private readonly myAgentService: MyAgentService,
     private readonly messageService: MessageService,
-    private readonly purfenceConfigService: PurfenceConfigService,
   ) {}
 
   private get memory(): Memory {
@@ -117,8 +116,7 @@ export class AgentController {
       throw new BadRequestException('conversationId is required');
     }
 
-    const projectsRootPath =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRootPath = await this.getProjectsRootPathOrThrow();
 
     // Build save path: ~/purfence/projects/images/<conversation-id>/
     const imagesDir = path.join(
@@ -149,5 +147,18 @@ export class AgentController {
       success: true,
       path: filePath,
     };
+  }
+
+  private async getProjectsRootPathOrThrow(): Promise<string> {
+    const config = await PurfenceConfig.findOne({
+      where: { key: ConfigKey.PROJECTS_ROOT_PATH },
+    });
+    const value = (config?.value as string | undefined)?.trim();
+    if (!value) {
+      throw new BadRequestException(
+        'PROJECTS_ROOT_PATH is required. Please configure it in 基础配置.',
+      );
+    }
+    return value;
   }
 }

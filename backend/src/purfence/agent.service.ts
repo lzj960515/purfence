@@ -106,28 +106,21 @@ export class PurfenceAgentService {
     userId?: string;
     imageUrl?: string;
   }) {
-    const modelOptions = await this.providerModelService.resolveModelOptions(
-      params.providerName,
-    );
+    const agentModelOptions =
+      await this.providerModelService.findAgentModelOptions();
 
     const agent = this.myAgentService.createAgent({
       tools: [...params.tools],
       name: params.agentName,
       prompt: params.prompt,
-      agentModelOptions: {
-        default: modelOptions,
-        fallbacks: [],
-      },
     });
 
-    // 构建消息 parts，支持图片
     const parts: Array<
       | { type: 'text'; text: string }
       | { type: 'file'; url: string; mediaType: string }
     > = [{ type: 'text', text: params.query }];
 
     if (params.imageUrl) {
-      // 读取文件转 base64
       const buffer = await readFile(params.imageUrl);
       const base64 = buffer.toString('base64');
       const mediaType = this.inferMediaType(params.imageUrl);
@@ -138,7 +131,6 @@ export class PurfenceAgentService {
       });
     }
 
-    console.log('parts', parts);
     await SocketService.warpSocket(params.threadId, () =>
       agent.stream({
         message: [
@@ -150,9 +142,8 @@ export class PurfenceAgentService {
         ],
         conversationId: params.threadId,
         userId: params.userId || 'purfence',
-        modelOptions,
+        agentModelOptions,
         context: {
-          provider: modelOptions.provider,
           ...(params.context || {}),
         },
       }),

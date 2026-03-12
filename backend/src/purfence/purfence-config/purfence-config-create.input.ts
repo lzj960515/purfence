@@ -1,21 +1,16 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-scalars';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class PurfenceConfigCreateInput {
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field()
   @IsString()
-  @MaxLength(1024)
-  projectsRootPath?: string;
+  @IsNotEmpty()
+  @MaxLength(100)
+  key: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
-  @IsString()
-  proxyUrl?: string;
-
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt()
-  maxIssueConcurrency?: number;
+  value?: unknown;
 }

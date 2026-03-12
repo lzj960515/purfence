@@ -5,8 +5,6 @@ import {
   PagingStrategies,
 } from '@ptc-org/nestjs-query-graphql';
 import { NestjsQueryTypeOrmModule } from '@ptc-org/nestjs-query-typeorm';
-import { ModelProviderConfigModule } from '../model-provider-config/model-provider-config.module';
-import { OAuthModule } from '../codex/codex-oauth.module';
 import { ProviderModelService } from '../provider-model.service';
 import { PurfenceConfigModule } from '../purfence-config/purfence-config.module';
 import { PurfenceAppConfigCreateInput } from './app-config-create.input';
@@ -22,9 +20,7 @@ import { SlackRuntimeService } from './slack-runtime.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PurfenceAppConfig]),
-    ModelProviderConfigModule,
     PurfenceConfigModule,
-    OAuthModule,
     NestjsQueryGraphQLModule.forFeature({
       imports: [NestjsQueryTypeOrmModule.forFeature([PurfenceAppConfig])],
       resolvers: [

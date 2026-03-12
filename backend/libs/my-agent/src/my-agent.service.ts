@@ -84,10 +84,11 @@ export class MyAgentService {
   }
 
   stream(myAgent: MyAgent, chatOptions: ChatOptions) {
-    const { conversationId, context, agentModelOptions } = chatOptions;
+    const { conversationId, agentModelOptions } = chatOptions;
     const abortCtrl = new AbortController();
     this.conversationAbortCtrls.set(conversationId, abortCtrl);
-    context.set('modelOptions', agentModelOptions?.default);
+
+    chatOptions.context['modelOptions'] = agentModelOptions?.default;
     const myModel = this.llmService.get(agentModelOptions?.default);
     const generationOptions = this.generationOptions(
       myModel,

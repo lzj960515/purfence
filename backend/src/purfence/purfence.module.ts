@@ -28,8 +28,7 @@ import { PurfenceIssueSubscriber } from './purfence-issue.subscriber';
 import { PurfenceProjectSubscriber } from './purfence-project.subscriber';
 import { PurfenceExecutionSubscriber } from './purfence-execution.subscriber';
 import { ToolsModule } from './tools/tools.module';
-import { ModelProviderConfigModule } from './model-provider-config/model-provider-config.module';
-import { OAuthModule } from './codex/codex-oauth.module';
+import { ModelProviderModule } from './model-provider/model-provider.module';
 import { PurfenceConfigModule } from './purfence-config/purfence-config.module';
 import { ProviderModelService } from './provider-model.service';
 import { AgentArtifact } from './artifact/agent-artifact.ai.entity';
@@ -57,12 +56,11 @@ import { MyQueueJobUpdateInput } from './my-queue/my-queue-job-update.input';
       MyQueueJob,
     ]),
     ToolsModule,
-    ModelProviderConfigModule,
+    ModelProviderModule,
     PurfenceConfigModule,
     PurfenceScheduledTaskModule,
     PurfenceAppConfigModule,
     MyQueueModule,
-    OAuthModule,
     NestjsQueryGraphQLModule.forFeature({
       imports: [
         NestjsQueryTypeOrmModule.forFeature([

@@ -1,33 +1,52 @@
-import { ModelOptions } from '@app/my-agent/types';
+import { AgentModelOptions } from '@app/my-agent/types';
 import { Injectable } from '@nestjs/common';
-import { CodexTokenService } from './codex/codex-token.service';
-import { ModelProviderConfigService } from './model-provider-config/model-provider-config.service';
-import { PurfenceConfigService } from './purfence-config/purfence-config.service';
+import { ModelProvider } from './model-provider/model-provider.entity';
+import {
+  ConfigKey,
+  PurfenceConfig,
+} from './purfence-config/purfence-config.entity';
+import { ModelConfig } from './type';
 
 @Injectable()
 export class ProviderModelService {
-  constructor(
-    private readonly modelProviderConfigService: ModelProviderConfigService,
-    private readonly purfenceConfigService: PurfenceConfigService,
-    private readonly codexTokenService: CodexTokenService,
-  ) {}
-
-  async resolveModelOptions(configurationName?: string): Promise<ModelOptions> {
-    const config =
-      await this.modelProviderConfigService.resolveByNameOrDefaultWithSensitive(
-        configurationName,
-      );
-
-    const proxyUrl = await this.purfenceConfigService.getProxyUrl();
-
-    const modelOptions: ModelOptions = {
-      model: 'gpt-5.4',
-      apiKey: config.apiKey || undefined,
-      baseUrl: config.baseUrl || undefined,
-      proxyUrl,
-      provider: config.provider,
+  async findAgentModelOptions(): Promise<AgentModelOptions> {
+    const config = await PurfenceConfig.findOne({
+      where: { key: ConfigKey.MODEL_CONFIG },
+    });
+    const modelConfig = config?.value as ModelConfig;
+    const defaultModel = modelConfig.default;
+    const fallbacks = modelConfig.fallbacks;
+    const modelProvider = await ModelProvider.findOneOrFail({
+      where: {
+        id: defaultModel.id,
+      },
+    });
+    const defaultModelOptions = {
+      baseUrl: modelProvider.baseUrl,
+      apiKey: modelProvider.apiKey,
+      model: defaultModel.model,
+      provider: modelProvider.provider,
     };
 
-    return modelOptions as ModelOptions;
+    const fallbacksModelOptions = await Promise.all(
+      fallbacks.map(async (fallback) => {
+        const modelProvider = await ModelProvider.findOneOrFail({
+          where: {
+            id: fallback.id,
+          },
+        });
+        return {
+          baseUrl: modelProvider.baseUrl,
+          apiKey: modelProvider.apiKey,
+          model: fallback.model,
+          provider: modelProvider.provider,
+        };
+      }),
+    );
+
+    return {
+      default: defaultModelOptions,
+      fallbacks: fallbacksModelOptions,
+    };
   }
 }

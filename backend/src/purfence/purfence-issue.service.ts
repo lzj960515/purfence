@@ -16,7 +16,7 @@ import {
   safeReaddir,
   writeText,
 } from '../common/utils/file.util';
-import { PurfenceConfigService } from './purfence-config/purfence-config.service';
+import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
 import { PurfenceExecutionService } from './purfence-execution.service';
 import { IssueOrigin } from './purfence-status.enum';
 
@@ -28,9 +28,21 @@ export class PurfenceIssueService {
 
   constructor(
     private readonly messageService: MessageService,
-    private readonly purfenceConfigService: PurfenceConfigService,
     private readonly executionService: PurfenceExecutionService,
   ) {}
+
+  private async getProjectsRootPathOrThrow(): Promise<string> {
+    const config = await PurfenceConfig.findOne({
+      where: { key: ConfigKey.PROJECTS_ROOT_PATH },
+    });
+    const value = (config?.value as string | undefined)?.trim();
+    if (!value) {
+      throw new Error(
+        'PROJECTS_ROOT_PATH is required. Please configure it in 基础配置.',
+      );
+    }
+    return value;
+  }
 
   async createIssue(input: PurfenceIssueCreateInput) {
     const project = await PurfenceProject.findOne({
@@ -83,8 +95,7 @@ export class PurfenceIssueService {
       where: { id: issue.projectId },
     });
 
-    const projectsRoot =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRoot = await this.getProjectsRootPathOrThrow();
     const projectRootPath =
       project.localRootPath ||
       path.join(projectsRoot, project.slug || project.id);
@@ -150,8 +161,7 @@ export class PurfenceIssueService {
       where: { id: issue.projectId },
     });
 
-    const projectsRoot =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRoot = await this.getProjectsRootPathOrThrow();
     const projectRootPath =
       project.localRootPath ||
       path.join(projectsRoot, project.slug || project.id);
@@ -349,8 +359,7 @@ export class PurfenceIssueService {
       where: { id: issue.projectId },
     });
 
-    const projectsRoot =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRoot = await this.getProjectsRootPathOrThrow();
     const projectRootPath =
       project.localRootPath ||
       path.join(projectsRoot, project.slug || project.id);
@@ -593,8 +602,7 @@ ${issueDescription.trim()}
       where: { id: issue.projectId },
     });
 
-    const projectsRoot =
-      await this.purfenceConfigService.getProjectsRootPathOrThrow();
+    const projectsRoot = await this.getProjectsRootPathOrThrow();
     const projectRootPath =
       project.localRootPath ||
       path.join(projectsRoot, project.slug || project.id);
