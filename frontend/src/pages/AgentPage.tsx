@@ -24,7 +24,7 @@ export function AgentPage() {
   const [pendingImage, setPendingImage] = useState<File | null>(null);
 
   const activeProviderOptions = configs
-    .filter((config) => config.isEnabled)
+    .filter((config) => config.isActive)
     .map((config) => ({ name: config.name }));
 
   const {
@@ -180,9 +180,7 @@ export function AgentPage() {
       return;
     }
 
-    const defaultProvider =
-      configs.find((config) => config.isEnabled && config.isDefault) ||
-      configs.find((config) => config.isEnabled);
+    const defaultProvider = configs.find((config) => config.isActive);
 
     setSelectedProviderName(defaultProvider?.name || activeProviderOptions[0].name);
   }, [activeProviderOptions, configs, selectedProviderName]);

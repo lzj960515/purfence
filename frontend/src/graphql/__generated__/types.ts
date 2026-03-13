@@ -130,25 +130,14 @@ export type BooleanFieldComparison = {
   isNot: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-export type CodexOAuthInfoObject = {
-  __typename?: 'CodexOAuthInfoObject';
-  accessToken: Scalars['String']['output'];
-  accountId: Maybe<Scalars['String']['output']>;
-  expiresAt: Scalars['Int']['output'];
-  idToken: Maybe<Scalars['String']['output']>;
-  refreshToken: Scalars['String']['output'];
-  scope: Maybe<Scalars['String']['output']>;
-  tokenType: Scalars['String']['output'];
-};
-
 export type CreateManyPurfenceIssuesInput = {
   /** Array of records to create */
   purfenceIssues: Array<PurfenceIssueCreateInput>;
 };
 
-export type CreateOneModelProviderConfigDtoInput = {
+export type CreateOneModelProviderInput = {
   /** The record to create */
-  modelProviderConfigDto: ModelProviderConfigCreateInput;
+  modelProvider: ModelProviderCreateInput;
 };
 
 export type CreateOneMyQueueInput = {
@@ -217,7 +206,7 @@ export type DeleteManyResponse = {
   deletedCount: Scalars['Int']['output'];
 };
 
-export type DeleteOneModelProviderConfigDtoInput = {
+export type DeleteOneModelProviderInput = {
   /** The id of the record to delete. */
   id: Scalars['ID']['input'];
 };
@@ -319,101 +308,85 @@ export type IssueOrigin =
   | 'remote'
   | 'user';
 
-export type ModelProviderConfigCreateInput = {
-  apiKey: InputMaybe<Scalars['String']['input']>;
-  baseUrl: InputMaybe<Scalars['String']['input']>;
-  email: InputMaybe<Scalars['String']['input']>;
-  isActive: Scalars['Boolean']['input'];
-  isDefault: Scalars['Boolean']['input'];
-  name: Scalars['String']['input'];
-  provider: ProviderType;
-  refreshToken: InputMaybe<Scalars['String']['input']>;
-};
-
-/**
- * ModelProviderConfig DTO
- *
- * GraphQL output type for ModelProviderConfig.
- * Excludes sensitive data (apiKey, refreshToken) for security.
- */
-export type ModelProviderConfigDto = {
-  __typename?: 'ModelProviderConfigDto';
+export type ModelProvider = {
+  __typename?: 'ModelProvider';
   baseUrl: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
-  deletedAt: Maybe<Scalars['DateTime']['output']>;
-  email: Maybe<Scalars['String']['output']>;
   /** ID */
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
-  isDefault: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   provider: ProviderType;
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type ModelProviderConfigDtoConnection = {
-  __typename?: 'ModelProviderConfigDtoConnection';
+export type ModelProviderConnection = {
+  __typename?: 'ModelProviderConnection';
   /** Array of nodes. */
-  nodes: Array<ModelProviderConfigDto>;
+  nodes: Array<ModelProvider>;
   /** Paging information */
   pageInfo: OffsetPageInfo;
   /** Fetch total count of records */
   totalCount: Scalars['Int']['output'];
 };
 
-export type ModelProviderConfigDtoDeleteResponse = {
-  __typename?: 'ModelProviderConfigDtoDeleteResponse';
+export type ModelProviderCreateInput = {
+  apiKey: InputMaybe<Scalars['String']['input']>;
+  baseUrl: InputMaybe<Scalars['String']['input']>;
+  isActive: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  provider: ProviderType;
+};
+
+export type ModelProviderDeleteResponse = {
+  __typename?: 'ModelProviderDeleteResponse';
   baseUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
-  deletedAt: Maybe<Scalars['DateTime']['output']>;
-  email: Maybe<Scalars['String']['output']>;
   /** ID */
   id: Maybe<Scalars['ID']['output']>;
   isActive: Maybe<Scalars['Boolean']['output']>;
-  isDefault: Maybe<Scalars['Boolean']['output']>;
   name: Maybe<Scalars['String']['output']>;
   provider: Maybe<ProviderType>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
-export type ModelProviderConfigDtoFilter = {
-  and: InputMaybe<Array<ModelProviderConfigDtoFilter>>;
+export type ModelProviderFilter = {
+  and: InputMaybe<Array<ModelProviderFilter>>;
   createdAt: InputMaybe<DateFieldComparison>;
   id: InputMaybe<IdFilterComparison>;
+  isActive: InputMaybe<BooleanFieldComparison>;
   name: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<ModelProviderConfigDtoFilter>>;
+  or: InputMaybe<Array<ModelProviderFilter>>;
   provider: InputMaybe<ProviderTypeFilterComparison>;
   updatedAt: InputMaybe<DateFieldComparison>;
 };
 
-export type ModelProviderConfigDtoSort = {
+export type ModelProviderSort = {
   direction: SortDirection;
-  field: ModelProviderConfigDtoSortFields;
+  field: ModelProviderSortFields;
   nulls: InputMaybe<SortNulls>;
 };
 
-export type ModelProviderConfigDtoSortFields =
+export type ModelProviderSortFields =
   | 'createdAt'
   | 'id'
+  | 'isActive'
   | 'name'
   | 'provider'
   | 'updatedAt';
 
-export type ModelProviderConfigUpdateInput = {
+export type ModelProviderUpdateInput = {
   apiKey: InputMaybe<Scalars['String']['input']>;
   baseUrl: InputMaybe<Scalars['String']['input']>;
-  email: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
-  isDefault: InputMaybe<Scalars['Boolean']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
   provider: InputMaybe<ProviderType>;
-  refreshToken: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   createManyPurfenceIssues: Array<PurfenceIssue>;
-  createOneModelProviderConfigDto: ModelProviderConfigDto;
+  createOneModelProvider: ModelProvider;
   createOneMyQueue: MyQueue;
   createOneMyQueueJob: MyQueueJob;
   createOnePurfenceAppConfig: PurfenceAppConfig;
@@ -423,7 +396,7 @@ export type Mutation = {
   createPurfenceScheduledTask: PurfenceScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
-  deleteOneModelProviderConfigDto: ModelProviderConfigDtoDeleteResponse;
+  deleteOneModelProvider: ModelProviderDeleteResponse;
   deleteOneMyQueue: MyQueueDeleteResponse;
   deleteOneMyQueueJob: MyQueueJobDeleteResponse;
   deleteOnePurfenceAppConfig: PurfenceAppConfigDeleteResponse;
@@ -432,18 +405,14 @@ export type Mutation = {
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
   deletePurfenceScheduledTask: Scalars['ID']['output'];
-  handleCodexOAuthCallback: OAuthCallbackResponse;
-  initiateCodexOAuth: OAuthAuthorization;
-  refreshCodexToken: ModelProviderConfigDto;
   runPurfenceScheduledTask: Scalars['ID']['output'];
   startIssue: Scalars['ID']['output'];
   startRemoteIssue: PurfenceIssue;
-  toggleModelProviderConfig: ModelProviderConfigDto;
   updateManyPurfenceExecutions: UpdateManyResponse;
   updateManyPurfenceIssues: UpdateManyResponse;
   updateManyPurfenceProjects: UpdateManyResponse;
   updateOneAgentArtifact: AgentArtifact;
-  updateOneModelProviderConfigDto: ModelProviderConfigDto;
+  updateOneModelProvider: ModelProvider;
   updateOneMyQueue: MyQueue;
   updateOneMyQueueJob: MyQueueJob;
   updateOnePurfenceAppConfig: PurfenceAppConfig;
@@ -460,8 +429,8 @@ export type MutationCreateManyPurfenceIssuesArgs = {
 };
 
 
-export type MutationCreateOneModelProviderConfigDtoArgs = {
-  input: CreateOneModelProviderConfigDtoInput;
+export type MutationCreateOneModelProviderArgs = {
+  input: CreateOneModelProviderInput;
 };
 
 
@@ -510,8 +479,8 @@ export type MutationDeleteManyPurfenceProjectsArgs = {
 };
 
 
-export type MutationDeleteOneModelProviderConfigDtoArgs = {
-  input: DeleteOneModelProviderConfigDtoInput;
+export type MutationDeleteOneModelProviderArgs = {
+  input: DeleteOneModelProviderInput;
 };
 
 
@@ -555,23 +524,6 @@ export type MutationDeletePurfenceScheduledTaskArgs = {
 };
 
 
-export type MutationHandleCodexOAuthCallbackArgs = {
-  code: Scalars['String']['input'];
-  redirectUri: Scalars['String']['input'];
-  state: Scalars['String']['input'];
-};
-
-
-export type MutationInitiateCodexOAuthArgs = {
-  redirectUri: Scalars['String']['input'];
-};
-
-
-export type MutationRefreshCodexTokenArgs = {
-  configId: Scalars['ID']['input'];
-};
-
-
 export type MutationRunPurfenceScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
@@ -584,12 +536,6 @@ export type MutationStartIssueArgs = {
 
 export type MutationStartRemoteIssueArgs = {
   issueId: Scalars['ID']['input'];
-};
-
-
-export type MutationToggleModelProviderConfigArgs = {
-  id: Scalars['ID']['input'];
-  isActive: Scalars['Boolean']['input'];
 };
 
 
@@ -613,8 +559,8 @@ export type MutationUpdateOneAgentArtifactArgs = {
 };
 
 
-export type MutationUpdateOneModelProviderConfigDtoArgs = {
-  input: UpdateOneModelProviderConfigDtoInput;
+export type MutationUpdateOneModelProviderArgs = {
+  input: UpdateOneModelProviderInput;
 };
 
 
@@ -843,19 +789,6 @@ export type MyQueueUpdateInput = {
   name: InputMaybe<Scalars['String']['input']>;
 };
 
-export type OAuthAuthorization = {
-  __typename?: 'OAuthAuthorization';
-  authorizationUrl: Scalars['String']['output'];
-  state: Scalars['String']['output'];
-};
-
-export type OAuthCallbackResponse = {
-  __typename?: 'OAuthCallbackResponse';
-  email: Scalars['String']['output'];
-  oauthInfo: CodexOAuthInfoObject;
-  quota: QuotaInfo;
-};
-
 export type OffsetPageInfo = {
   __typename?: 'OffsetPageInfo';
   /** true if paging forward and there are more records. */
@@ -873,10 +806,9 @@ export type OffsetPaging = {
 
 /** AI model provider type */
 export type ProviderType =
-  | 'CODEX'
-  | 'KIMI'
+  | 'ANTHROPIC'
   | 'OPENAI'
-  | 'ZHIPU';
+  | 'OPENAI_COMPATIBLE';
 
 export type ProviderTypeFilterComparison = {
   eq: InputMaybe<ProviderType>;
@@ -971,10 +903,9 @@ export type PurfenceConfig = {
   createdAt: Scalars['DateTime']['output'];
   /** ID */
   id: Scalars['ID']['output'];
-  maxIssueConcurrency: Maybe<Scalars['Int']['output']>;
-  projectsRootPath: Maybe<Scalars['String']['output']>;
-  proxyUrl: Maybe<Scalars['String']['output']>;
+  key: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  value: Maybe<Scalars['JSON']['output']>;
 };
 
 export type PurfenceConfigConnection = {
@@ -988,9 +919,8 @@ export type PurfenceConfigConnection = {
 };
 
 export type PurfenceConfigCreateInput = {
-  maxIssueConcurrency: InputMaybe<Scalars['Int']['input']>;
-  projectsRootPath: InputMaybe<Scalars['String']['input']>;
-  proxyUrl: InputMaybe<Scalars['String']['input']>;
+  key: Scalars['String']['input'];
+  value: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type PurfenceConfigDeleteResponse = {
@@ -998,10 +928,9 @@ export type PurfenceConfigDeleteResponse = {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   /** ID */
   id: Maybe<Scalars['ID']['output']>;
-  maxIssueConcurrency: Maybe<Scalars['Int']['output']>;
-  projectsRootPath: Maybe<Scalars['String']['output']>;
-  proxyUrl: Maybe<Scalars['String']['output']>;
+  key: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
+  value: Maybe<Scalars['JSON']['output']>;
 };
 
 export type PurfenceConfigFilter = {
@@ -1024,9 +953,8 @@ export type PurfenceConfigSortFields =
   | 'updatedAt';
 
 export type PurfenceConfigUpdateInput = {
-  maxIssueConcurrency: InputMaybe<Scalars['Int']['input']>;
-  projectsRootPath: InputMaybe<Scalars['String']['input']>;
-  proxyUrl: InputMaybe<Scalars['String']['input']>;
+  key: InputMaybe<Scalars['String']['input']>;
+  value: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type PurfenceExecution = {
@@ -1464,8 +1392,8 @@ export type Query = {
   agentArtifacts: AgentArtifactConnection;
   /** ping test */
   hello: Maybe<Scalars['JSON']['output']>;
-  modelProviderConfigDto: ModelProviderConfigDto;
-  modelProviderConfigDtos: ModelProviderConfigDtoConnection;
+  modelProvider: ModelProvider;
+  modelProviders: ModelProviderConnection;
   myQueue: MyQueue;
   myQueueJob: MyQueueJob;
   myQueueJobs: MyQueueJobConnection;
@@ -1499,15 +1427,15 @@ export type QueryAgentArtifactsArgs = {
 };
 
 
-export type QueryModelProviderConfigDtoArgs = {
+export type QueryModelProviderArgs = {
   id: Scalars['ID']['input'];
 };
 
 
-export type QueryModelProviderConfigDtosArgs = {
-  filter?: ModelProviderConfigDtoFilter;
+export type QueryModelProvidersArgs = {
+  filter?: ModelProviderFilter;
   paging?: OffsetPaging;
-  sorting?: Array<ModelProviderConfigDtoSort>;
+  sorting?: Array<ModelProviderSort>;
 };
 
 
@@ -1617,13 +1545,6 @@ export type QueryPurfenceScheduledTasksArgs = {
   sorting?: Array<PurfenceScheduledTaskSort>;
 };
 
-export type QuotaInfo = {
-  __typename?: 'QuotaInfo';
-  remaining: Scalars['Int']['output'];
-  total: Scalars['Int']['output'];
-  used: Scalars['Int']['output'];
-};
-
 /** Sort Directions */
 export type SortDirection =
   | 'ASC'
@@ -1685,11 +1606,11 @@ export type UpdateOneAgentArtifactInput = {
   update: AgentArtifactUpdateInput;
 };
 
-export type UpdateOneModelProviderConfigDtoInput = {
+export type UpdateOneModelProviderInput = {
   /** The id of the record to update */
   id: Scalars['ID']['input'];
   /** The update to apply. */
-  update: ModelProviderConfigUpdateInput;
+  update: ModelProviderUpdateInput;
 };
 
 export type UpdateOneMyQueueInput = {
@@ -1778,88 +1699,57 @@ export type DeleteAppConfigMutationVariables = Exact<{
 
 export type DeleteAppConfigMutation = { __typename?: 'Mutation', deleteOnePurfenceAppConfig: { __typename?: 'PurfenceAppConfigDeleteResponse', id: string | null } };
 
-export type InitiateCodexOAuthMutationVariables = Exact<{
-  redirectUri: Scalars['String']['input'];
-}>;
-
-
-export type InitiateCodexOAuthMutation = { __typename?: 'Mutation', initiateCodexOAuth: { __typename?: 'OAuthAuthorization', authorizationUrl: string, state: string } };
-
-export type HandleCodexOAuthCallbackMutationVariables = Exact<{
-  code: Scalars['String']['input'];
-  state: Scalars['String']['input'];
-  redirectUri: Scalars['String']['input'];
-}>;
-
-
-export type HandleCodexOAuthCallbackMutation = { __typename?: 'Mutation', handleCodexOAuthCallback: { __typename?: 'OAuthCallbackResponse', email: string, quota: { __typename?: 'QuotaInfo', total: number, used: number, remaining: number }, oauthInfo: { __typename?: 'CodexOAuthInfoObject', accessToken: string, refreshToken: string, idToken: string | null, tokenType: string, scope: string | null, expiresAt: number, accountId: string | null } } };
-
-export type RefreshCodexTokenMutationVariables = Exact<{
-  configId: Scalars['ID']['input'];
-}>;
-
-
-export type RefreshCodexTokenMutation = { __typename?: 'Mutation', refreshCodexToken: { __typename?: 'ModelProviderConfigDto', id: string, name: string, provider: ProviderType, isActive: boolean, createdAt: any, updatedAt: any } };
-
 export type GetProviderConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProviderConfigsQuery = { __typename?: 'Query', modelProviderConfigDtos: { __typename?: 'ModelProviderConfigDtoConnection', totalCount: number, nodes: Array<{ __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email: string | null, baseUrl: string | null, isActive: boolean, isDefault: boolean, createdAt: any, updatedAt: any }> } };
+export type GetProviderConfigsQuery = { __typename?: 'Query', modelProviders: { __typename?: 'ModelProviderConnection', totalCount: number, nodes: Array<{ __typename?: 'ModelProvider', id: string, provider: ProviderType, name: string, baseUrl: string | null, isActive: boolean, createdAt: any, updatedAt: any }> } };
 
 export type GetProviderConfigQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetProviderConfigQuery = { __typename?: 'Query', modelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email: string | null, baseUrl: string | null, isActive: boolean, isDefault: boolean, createdAt: any, updatedAt: any } };
+export type GetProviderConfigQuery = { __typename?: 'Query', modelProvider: { __typename?: 'ModelProvider', id: string, provider: ProviderType, name: string, baseUrl: string | null, isActive: boolean, createdAt: any, updatedAt: any } };
 
 export type CreateProviderConfigMutationVariables = Exact<{
-  input: CreateOneModelProviderConfigDtoInput;
+  input: CreateOneModelProviderInput;
 }>;
 
 
-export type CreateProviderConfigMutation = { __typename?: 'Mutation', createOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email: string | null, baseUrl: string | null, isActive: boolean, isDefault: boolean, createdAt: any } };
+export type CreateProviderConfigMutation = { __typename?: 'Mutation', createOneModelProvider: { __typename?: 'ModelProvider', id: string, provider: ProviderType, name: string, baseUrl: string | null, isActive: boolean, createdAt: any } };
 
 export type UpdateProviderConfigMutationVariables = Exact<{
-  input: UpdateOneModelProviderConfigDtoInput;
+  input: UpdateOneModelProviderInput;
 }>;
 
 
-export type UpdateProviderConfigMutation = { __typename?: 'Mutation', updateOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDto', id: string, provider: ProviderType, name: string, email: string | null, baseUrl: string | null, isActive: boolean, isDefault: boolean, updatedAt: any } };
+export type UpdateProviderConfigMutation = { __typename?: 'Mutation', updateOneModelProvider: { __typename?: 'ModelProvider', id: string, provider: ProviderType, name: string, baseUrl: string | null, isActive: boolean, updatedAt: any } };
 
 export type DeleteProviderConfigMutationVariables = Exact<{
-  input: DeleteOneModelProviderConfigDtoInput;
+  input: DeleteOneModelProviderInput;
 }>;
 
 
-export type DeleteProviderConfigMutation = { __typename?: 'Mutation', deleteOneModelProviderConfigDto: { __typename?: 'ModelProviderConfigDtoDeleteResponse', id: string | null } };
+export type DeleteProviderConfigMutation = { __typename?: 'Mutation', deleteOneModelProvider: { __typename?: 'ModelProviderDeleteResponse', id: string | null } };
 
-export type ToggleProviderEnabledMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  isActive: Scalars['Boolean']['input'];
-}>;
+export type GetAllPurfenceConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ToggleProviderEnabledMutation = { __typename?: 'Mutation', toggleModelProviderConfig: { __typename?: 'ModelProviderConfigDto', id: string, isActive: boolean } };
-
-export type GetPurfenceConfigsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetPurfenceConfigsQuery = { __typename?: 'Query', purfenceConfigs: { __typename?: 'PurfenceConfigConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any }> } };
+export type GetAllPurfenceConfigsQuery = { __typename?: 'Query', purfenceConfigs: { __typename?: 'PurfenceConfigConnection', nodes: Array<{ __typename?: 'PurfenceConfig', id: string, key: string, value: any | null, createdAt: any, updatedAt: any }> } };
 
 export type CreatePurfenceConfigMutationVariables = Exact<{
   input: CreateOnePurfenceConfigInput;
 }>;
 
 
-export type CreatePurfenceConfigMutation = { __typename?: 'Mutation', createOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any } };
+export type CreatePurfenceConfigMutation = { __typename?: 'Mutation', createOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, key: string, value: any | null, createdAt: any, updatedAt: any } };
 
 export type UpdatePurfenceConfigMutationVariables = Exact<{
   input: UpdateOnePurfenceConfigInput;
 }>;
 
 
-export type UpdatePurfenceConfigMutation = { __typename?: 'Mutation', updateOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, projectsRootPath: string | null, proxyUrl: string | null, maxIssueConcurrency: number | null, createdAt: any, updatedAt: any } };
+export type UpdatePurfenceConfigMutation = { __typename?: 'Mutation', updateOnePurfenceConfig: { __typename?: 'PurfenceConfig', id: string, key: string, value: any | null, createdAt: any, updatedAt: any } };
 
 export type CreateOnePurfenceProjectMutationVariables = Exact<{
   input: CreateOnePurfenceProjectInput;

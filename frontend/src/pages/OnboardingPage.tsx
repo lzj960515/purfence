@@ -46,8 +46,8 @@ export function OnboardingPage() {
 
   const providerReady = useMemo(
     () => ({
-      installed: configs.some((config) => config.isEnabled),
-      detail: configs.some((config) => config.isEnabled) ? '已配置' : '请先配置模型提供商',
+      installed: configs.some((config) => config.isActive),
+      detail: configs.some((config) => config.isActive) ? '已配置' : '请先配置模型提供商',
     }),
     [configs],
   )
