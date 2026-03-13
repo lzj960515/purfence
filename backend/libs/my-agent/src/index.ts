@@ -22,4 +22,5 @@ export {
   getAgentFrontmatter,
   formatAgentsList,
 } from './utils/agent-loader.util';
+export { loadSkills, loadSkill } from './utils/skill-loader.util';
 export type { AgentFrontmatter } from './utils/agent-loader.util';

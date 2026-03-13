@@ -12,10 +12,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MyAgentService, MessageService } from '@app/my-agent';
+import { MyAgentService, MessageService, loadSkills } from '@app/my-agent';
 import { Memory } from '@voltagent/core';
 import type { Response } from 'express';
-import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
+import {
+  PurfenceConfig,
+  ConfigKey,
+} from './purfence-config/purfence-config.entity';
 import { ensureDir } from '@src/common/utils/file.util';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -49,6 +52,14 @@ export class AgentController {
     return tools.map((tool) => ({
       name: tool.name,
       description: tool.description,
+    }));
+  }
+
+  @Get('skills')
+  getSkills() {
+    return loadSkills().map((skill) => ({
+      name: skill.name,
+      description: skill.description,
     }));
   }
 
