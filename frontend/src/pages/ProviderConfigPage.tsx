@@ -7,13 +7,11 @@ import { DeleteConfirmDialog } from '@/components/settings/DeleteConfirmDialog'
 import { EmptyState } from '@/components/settings/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
-import { useRefreshCodexTokenMutation } from '@/api/gen/graphql'
 
 export function ProviderConfigPage() {
   const { toast } = useToast()
   const { configs, loading, error, addConfig, updateConfig, deleteConfig } =
     useProviderConfigs()
-  const [refreshCodexTokenMutation] = useRefreshCodexTokenMutation()
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingConfig, setEditingConfig] = useState<ProviderConfig | null>(
@@ -35,14 +33,7 @@ export function ProviderConfigPage() {
           description: '配置已更新',
         })
       } else {
-        const created = await addConfig(data)
-
-        if (data.provider.toUpperCase() === 'CODEX') {
-          await refreshCodexTokenMutation({
-            variables: { configId: created.id },
-          })
-        }
-
+        await addConfig(data)
         toast({
           title: '成功',
           description: '配置已添加',
@@ -80,31 +71,12 @@ export function ProviderConfigPage() {
   }
 
   // 处理切换启用状态
-  const handleToggleEnabled = async (id: string, enabled: boolean) => {
+  const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
-      await updateConfig(id, { isEnabled: enabled })
+      await updateConfig(id, { isActive })
       toast({
         title: '成功',
-        description: enabled ? '配置已启用' : '配置已禁用',
-      })
-    } catch (err) {
-      toast({
-        title: '错误',
-        description: err instanceof Error ? err.message : '操作失败，请重试',
-        variant: 'destructive',
-      })
-    }
-  }
-
-  const handleToggleDefault = async (id: string, isDefault: boolean) => {
-    try {
-      await updateConfig(id, {
-        isDefault,
-        ...(isDefault ? { isEnabled: true } : {}),
-      })
-      toast({
-        title: '成功',
-        description: isDefault ? '已设置为默认配置' : '已取消默认配置',
+        description: isActive ? '配置已启用' : '配置已禁用',
       })
     } catch (err) {
       toast({
@@ -163,8 +135,7 @@ export function ProviderConfigPage() {
               config={config}
               onEdit={setEditingConfig}
               onDelete={setDeletingConfig}
-              onToggleEnabled={handleToggleEnabled}
-              onToggleDefault={handleToggleDefault}
+              onToggleActive={handleToggleActive}
             />
           ))}
         </div>

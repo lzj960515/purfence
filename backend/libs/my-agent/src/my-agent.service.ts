@@ -174,7 +174,7 @@ export class MyAgentService {
       instructions: prompt,
       model: ({ context }) => {
         const modelOptions = context?.get('modelOptions') as ModelOptions;
-        return this.llmService.get(modelOptions) as any;
+        return this.llmService.get(modelOptions).model() as any;
       },
       tools: this.getAgentTools(tools),
       memory: this.getMemory(options.memory),

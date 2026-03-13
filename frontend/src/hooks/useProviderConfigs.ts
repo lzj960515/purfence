@@ -7,7 +7,6 @@ import {
   DELETE_PROVIDER_CONFIG,
 } from '@/api/provider-config.graphql'
 
-// Use generated GraphQL types
 import type { ProviderType } from '@/api/gen/graphql'
 
 export interface ProviderConfig {
@@ -15,11 +14,8 @@ export interface ProviderConfig {
   provider: ProviderType
   name: string
   apiKey?: string
-  email?: string
-  refreshToken?: string
   baseUrl?: string
-  isEnabled: boolean
-  isDefault: boolean
+  isActive: boolean
   createdAt: string
   updatedAt: string
 }
@@ -28,64 +24,44 @@ export interface CreateProviderConfigInput {
   provider: ProviderType
   name: string
   apiKey?: string
-  email?: string
-  refreshToken?: string
   baseUrl?: string
-  isEnabled: boolean
-  isDefault?: boolean
+  isActive: boolean
 }
 
-// Map GraphQL type to local type
 const mapFromGraphQL = (data: any): ProviderConfig => ({
   id: data.id,
   provider: data.provider,
   name: data.name,
   apiKey: data.apiKey || undefined,
-  email: data.email || undefined,
-  refreshToken: data.refreshToken || undefined,
   baseUrl: data.baseUrl || undefined,
-  isEnabled: data.isActive ?? false, // GraphQL uses isActive
-  isDefault: data.isDefault ?? false,
+  isActive: data.isActive ?? false,
   createdAt: data.createdAt,
   updatedAt: data.updatedAt,
 })
 
-// Map local type to GraphQL create input
 const mapToGraphQLCreateInput = (input: CreateProviderConfigInput) => {
   const result: any = {
-    provider: input.provider,
+    provider: input.provider.toUpperCase(),
     name: input.name,
     baseUrl: input.baseUrl || null,
-    isActive: input.isEnabled,
-    isDefault: input.isDefault ?? false,
+    isActive: input.isActive,
   }
 
-  if (input.provider.toUpperCase() !== 'CODEX' && input.apiKey) {
+  if (input.apiKey) {
     result.apiKey = input.apiKey
-  }
-
-  if (input.email) {
-    result.email = input.email
-  }
-
-  if (input.refreshToken) {
-    result.refreshToken = input.refreshToken
   }
 
   return result
 }
 
-// Map local type to GraphQL update input
 const mapToGraphQLUpdateInput = (updates: Partial<CreateProviderConfigInput>) => {
   const update: any = {}
 
   if (updates.name !== undefined) update.name = updates.name
   if (updates.apiKey !== undefined) update.apiKey = updates.apiKey
-  if (updates.email !== undefined) update.email = updates.email
-  if (updates.refreshToken !== undefined) update.refreshToken = updates.refreshToken
   if (updates.baseUrl !== undefined) update.baseUrl = updates.baseUrl
-  if (updates.isEnabled !== undefined) update.isActive = updates.isEnabled
-  if (updates.isDefault !== undefined) update.isDefault = updates.isDefault
+  if (updates.isActive !== undefined) update.isActive = updates.isActive
+  if (updates.provider !== undefined) update.provider = updates.provider.toUpperCase()
 
   return update
 }
@@ -95,7 +71,6 @@ export const useProviderConfigs = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  // GraphQL queries and mutations
   const { data, refetch } = useQuery(GET_PROVIDER_CONFIGS, {
     fetchPolicy: 'network-only',
   })
@@ -104,10 +79,9 @@ export const useProviderConfigs = () => {
   const [updateMutation] = useMutation(UPDATE_PROVIDER_CONFIG)
   const [deleteMutation] = useMutation(DELETE_PROVIDER_CONFIG)
 
-  // Load configs from GraphQL
   useEffect(() => {
-    if (data?.modelProviderConfigDtos) {
-      const mappedConfigs = data.modelProviderConfigDtos.nodes.map(mapFromGraphQL)
+    if (data?.modelProviders) {
+      const mappedConfigs = data.modelProviders.nodes.map(mapFromGraphQL)
       setConfigs(mappedConfigs)
       setLoading(false)
     }
@@ -122,13 +96,13 @@ export const useProviderConfigs = () => {
       const { data: result } = await createMutation({
         variables: {
           input: {
-            modelProviderConfigDto: mapToGraphQLCreateInput(input),
+            modelProvider: mapToGraphQLCreateInput(input),
           },
         },
       })
 
-      if (result?.createOneModelProviderConfigDto) {
-        const newConfig = mapFromGraphQL(result.createOneModelProviderConfigDto)
+      if (result?.createOneModelProvider) {
+        const newConfig = mapFromGraphQL(result.createOneModelProvider)
         setConfigs([...configs, newConfig])
         return newConfig
       }
@@ -157,8 +131,8 @@ export const useProviderConfigs = () => {
         },
       })
 
-      if (result?.updateOneModelProviderConfigDto) {
-        const updatedConfig = mapFromGraphQL(result.updateOneModelProviderConfigDto)
+      if (result?.updateOneModelProvider) {
+        const updatedConfig = mapFromGraphQL(result.updateOneModelProvider)
         setConfigs(
           configs.map((c) => (c.id === id ? updatedConfig : c))
         )

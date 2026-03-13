@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Edit2, Trash2 } from 'lucide-react'
@@ -8,14 +7,14 @@ interface ProviderCardProps {
   config: ProviderConfig
   onEdit: (config: ProviderConfig) => void
   onDelete: (config: ProviderConfig) => void
-  onToggleEnabled: (id: string, isEnabled: boolean) => void
-  onToggleDefault: (id: string, isDefault: boolean) => void
+  onToggleActive: (id: string, isActive: boolean) => void
 }
 
 const PROVIDER_NAMES: Record<string, string> = {
   KIMI: 'Kimi',
   ZHIPU: 'Zhipu',
   OPENAI: 'OpenAI',
+  OPENAI_COMPATIBLE: 'OpenAI Compatible',
   CODEX: 'Codex',
 }
 
@@ -35,8 +34,7 @@ export function ProviderCard({
   config,
   onEdit,
   onDelete,
-  onToggleEnabled,
-  onToggleDefault,
+  onToggleActive,
 }: ProviderCardProps) {
   const providerDisplayName = getProviderLabel(config.provider)
 
@@ -48,40 +46,21 @@ export function ProviderCard({
             <h3 className="font-semibold leading-none tracking-tight truncate">
               {config.name}
             </h3>
-            {config.isDefault && (
-              <Badge variant="secondary" className="text-xs font-normal shrink-0">
-                Default
-              </Badge>
-            )}
           </div>
           <p className="text-sm text-muted-foreground truncate">
             {providerDisplayName} {config.baseUrl ? `• ${config.baseUrl}` : ''}
           </p>
-          {config.email && (
-            <p className="text-xs text-muted-foreground/80 truncate">
-              {config.email}
-            </p>
-          )}
         </div>
 
         <div className="flex items-center justify-between md:justify-end gap-4 flex-wrap">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>默认</span>
-              <Switch
-                checked={config.isDefault}
-                onCheckedChange={(checked) => onToggleDefault(config.id, checked)}
-              />
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>启用</span>
-              <Switch
-                checked={config.isEnabled}
-                onCheckedChange={(checked) => onToggleEnabled(config.id, checked)}
-              />
-            </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>启用</span>
+            <Switch
+              checked={config.isActive}
+              onCheckedChange={(checked) => onToggleActive(config.id, checked)}
+            />
           </div>
-          
+
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
