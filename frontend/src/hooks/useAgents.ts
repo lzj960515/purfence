@@ -1,0 +1,241 @@
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
+import {
+  CREATE_AGENT,
+  DELETE_AGENT,
+  GET_AGENTS,
+  UPDATE_AGENT,
+} from '@/api/agent.graphql'
+
+export type AgentModelRoute = {
+  id: string
+  model: string
+}
+
+export type AgentModelConfig = {
+  default: AgentModelRoute
+  fallbacks: AgentModelRoute[]
+}
+
+export interface AgentItem {
+  id: string
+  name: string
+  instructions?: string
+  description?: string
+  tags?: string[]
+  tools?: string[]
+  skills?: string[]
+  modelConfig?: AgentModelConfig
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AgentInput {
+  name: string
+  instructions?: string
+  description?: string
+  tags?: string[]
+  tools?: string[]
+  skills?: string[]
+  modelConfig?: AgentModelConfig
+}
+
+type AgentNode = {
+  id: string
+  name?: string | null
+  instructions?: string | null
+  description?: string | null
+  tags?: unknown
+  tools?: unknown
+  skills?: unknown
+  modelConfig?: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+function toStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined
+  }
+
+  const normalized = value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  return normalized.length > 0 ? normalized : undefined
+}
+
+function isModelRoute(value: unknown): value is AgentModelRoute {
+  return !!value && typeof value === 'object' && 'id' in value && 'model' in value
+}
+
+function toModelConfig(value: unknown): AgentModelConfig | undefined {
+  if (!value || typeof value !== 'object') {
+    return undefined
+  }
+
+  const candidate = value as {
+    default?: unknown
+    fallbacks?: unknown
+  }
+
+  if (!isModelRoute(candidate.default)) {
+    return undefined
+  }
+
+  const fallbacks = Array.isArray(candidate.fallbacks)
+    ? candidate.fallbacks.filter(isModelRoute)
+    : []
+
+  return {
+    default: {
+      id: candidate.default.id,
+      model: candidate.default.model,
+    },
+    fallbacks: fallbacks.map((item) => ({ id: item.id, model: item.model })),
+  }
+}
+
+function mapFromGraphQL(node: AgentNode): AgentItem {
+  return {
+    id: node.id,
+    name: String(node.name || ''),
+    instructions: node.instructions || undefined,
+    description: node.description || undefined,
+    tags: toStringArray(node.tags),
+    tools: toStringArray(node.tools),
+    skills: toStringArray(node.skills),
+    modelConfig: toModelConfig(node.modelConfig),
+    createdAt: node.createdAt,
+    updatedAt: node.updatedAt,
+  }
+}
+
+function normalizeInput(input: AgentInput): AgentInput {
+  const normalizeList = (items?: string[]) => {
+    const next = items?.map((item) => item.trim()).filter(Boolean)
+    return next && next.length > 0 ? next : undefined
+  }
+
+  const normalizedModelConfig = input.modelConfig?.default.id
+    ? {
+        default: {
+          id: input.modelConfig.default.id,
+          model: input.modelConfig.default.model.trim(),
+        },
+        fallbacks: (input.modelConfig.fallbacks || [])
+          .map((item) => ({
+            id: item.id,
+            model: item.model.trim(),
+          }))
+          .filter((item) => item.id && item.model),
+      }
+    : undefined
+
+  return {
+    name: input.name.trim(),
+    instructions: input.instructions?.trim() || undefined,
+    description: input.description?.trim() || undefined,
+    tags: normalizeList(input.tags),
+    tools: normalizeList(input.tools),
+    skills: normalizeList(input.skills),
+    modelConfig:
+      normalizedModelConfig && normalizedModelConfig.default.model
+        ? normalizedModelConfig
+        : undefined,
+  }
+}
+
+export function useAgents() {
+  const [items, setItems] = useState<AgentItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const { data, refetch } = useQuery(GET_AGENTS, {
+    fetchPolicy: 'network-only',
+  })
+
+  const [createMutation] = useMutation(CREATE_AGENT)
+  const [updateMutation] = useMutation(UPDATE_AGENT)
+  const [deleteMutation] = useMutation(DELETE_AGENT)
+
+  useEffect(() => {
+    if (!data?.agents) return
+    setItems(data.agents.nodes.map((node: AgentNode) => mapFromGraphQL(node)))
+    setLoading(false)
+  }, [data])
+
+  const createItem = async (input: AgentInput) => {
+    setError(null)
+    const result = await createMutation({
+      variables: {
+        input: {
+          agent: normalizeInput(input),
+        },
+      },
+    })
+
+    const created = result.data?.createOneAgent as AgentNode | undefined
+    if (!created) {
+      throw new Error('创建 Agent 失败')
+    }
+
+    const mapped = mapFromGraphQL(created)
+    setItems((prev) => [mapped, ...prev])
+    return mapped
+  }
+
+  const updateItem = async (id: string, updates: Partial<AgentInput>) => {
+    setError(null)
+    const result = await updateMutation({
+      variables: {
+        input: {
+          id,
+          update: normalizeInput({ name: '', ...updates }),
+        },
+      },
+    })
+
+    const updated = result.data?.updateOneAgent as AgentNode | undefined
+    if (!updated) {
+      throw new Error('更新 Agent 失败')
+    }
+
+    const mapped = mapFromGraphQL(updated)
+    setItems((prev) => prev.map((item) => (item.id === id ? mapped : item)))
+    return mapped
+  }
+
+  const deleteItem = async (id: string) => {
+    setError(null)
+    await deleteMutation({
+      variables: {
+        input: { id },
+      },
+    })
+    setItems((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  const refetchItems = async () => {
+    setLoading(true)
+    try {
+      await refetch()
+    } catch (err) {
+      const nextError = err instanceof Error ? err : new Error('刷新 Agent 列表失败')
+      setError(nextError)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return {
+    items,
+    loading,
+    error,
+    createItem,
+    updateItem,
+    deleteItem,
+    refetchItems,
+  }
+}

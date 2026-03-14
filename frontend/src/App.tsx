@@ -14,6 +14,7 @@ import { AppConfigPage } from '@/pages/AppConfigPage'
 import { SkillsSettingsPage } from '@/pages/SkillsSettingsPage'
 import { QueueManagementPage } from '@/pages/QueueManagementPage'
 import { ErrorBoundary } from '@/components/error'
+import { AgentsPage } from '@/pages/AgentsPage'
 
 function RootRedirect() {
   return hasOnboardingCompleted() ? (
@@ -35,6 +36,7 @@ function App() {
             <Route path="projects/:id" element={<ProjectDetailPage />} />
             <Route path="issues/:id" element={<IssueDetailPage />} />
             <Route path="agent" element={<AgentPage />} />
+            <Route path="agents" element={<AgentsPage />} />
             <Route path="settings" element={<SettingsPage />}>
               <Route index element={<Navigate to="/settings/base" replace />} />
               <Route path="base" element={<PurfenceConfigPage />} />

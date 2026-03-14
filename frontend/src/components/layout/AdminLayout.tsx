@@ -73,6 +73,13 @@ function getBreadcrumbs(pathname: string) {
       </BreadcrumbItem>
     )
   }
+  if (pathname === '/agents') {
+    return (
+      <BreadcrumbItem>
+        <BreadcrumbPage>Agents</BreadcrumbPage>
+      </BreadcrumbItem>
+    )
+  }
   return null
 }
 

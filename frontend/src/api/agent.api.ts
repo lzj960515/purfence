@@ -2,12 +2,26 @@ import type { Tool } from '@/lib/socket-agent';
 import type { ChatArtifact } from '@/lib/socket-agent';
 import { getBackendBaseUrl } from '@/lib/backend';
 
+export interface SkillItem {
+  name: string;
+  description: string;
+}
+
 /** 获取可用工具列表 */
 export async function fetchTools(): Promise<Tool[]> {
   const backendBaseUrl = getBackendBaseUrl();
   const response = await fetch(`${backendBaseUrl}/api/agent/tools`);
   if (!response.ok) {
     throw new Error(`Failed to fetch tools: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function fetchSkills(): Promise<SkillItem[]> {
+  const backendBaseUrl = getBackendBaseUrl();
+  const response = await fetch(`${backendBaseUrl}/api/agent/skills`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch skills: ${response.statusText}`);
   }
   return response.json();
 }

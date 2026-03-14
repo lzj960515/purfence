@@ -1,4 +1,5 @@
 import {
+  Bot,
   FolderKanban,
   Plus,
   Trash2,
@@ -19,7 +20,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
@@ -45,6 +46,11 @@ const items = [
     title: '项目列表',
     url: '/projects',
     icon: FolderKanban,
+  },
+  {
+    title: 'Agents',
+    url: '/agents',
+    icon: Bot,
   },
   {
     title: '设置',
@@ -89,7 +95,7 @@ export function AppSidebar() {
     }
   }, [updateStatus])
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     setLoadingConversations(true)
     try {
       const data = await fetchConversations()
@@ -100,7 +106,7 @@ export function AppSidebar() {
     } finally {
       setLoadingConversations(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadConversations()
@@ -108,7 +114,7 @@ export function AppSidebar() {
       loadConversations()
     }, 5000)
     return () => clearInterval(handle)
-  }, [])
+  }, [loadConversations])
 
   // 持久化展开/折叠状态
   useEffect(() => {
@@ -149,12 +155,19 @@ export function AppSidebar() {
           {/* Logo Section */}
           <SidebarGroup>
             <div className="flex items-center justify-between px-2 py-4">
-              <div
+              <button
+                type="button"
                 className={cn(
                   'flex items-center gap-2 group relative',
                   collapsed && 'cursor-pointer',
                 )}
                 onClick={() => collapsed && setCollapsed(false)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && collapsed) {
+                    event.preventDefault()
+                    setCollapsed(false)
+                  }
+                }}
               >
                 <div
                   className={cn(
@@ -181,7 +194,7 @@ export function AppSidebar() {
                 {!collapsed && (
                   <span className="text-sm font-semibold">紫微垣</span>
                 )}
-              </div>
+              </button>
               {!collapsed && (
                 <SidebarTrigger className="h-8 w-8" />
               )}
@@ -197,6 +210,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     {item.action === 'new-chat' ? (
                       <button
+                        type="button"
                         onClick={handleNewChat}
                         className={cn(
                           'flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
@@ -225,6 +239,7 @@ export function AppSidebar() {
           {!collapsed && (
             <SidebarGroup className="flex-1 overflow-hidden flex flex-col">
               <button
+                type="button"
                 onClick={toggleHistoryExpanded}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground justify-start"
               >
@@ -301,6 +316,7 @@ export function AppSidebar() {
               </p>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => setUpdateDialogOpen(false)}
                   className="flex-1 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
                 >
