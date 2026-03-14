@@ -9,8 +9,15 @@ import { TianfuTools } from './tianfu.tools';
 import { ExecutionTools } from './execution.tools';
 import { GenericTools } from './generic.tools';
 import { GenericToolsService } from './generic-tools.service';
+import { ImageTool } from './image.tool';
 
-const tools = [];
+const tools = [
+  ImageTool,
+  PurfenceTools,
+  TianfuTools,
+  ExecutionTools,
+  GenericTools,
+];
 
 @Global()
 @Module({
@@ -21,10 +28,6 @@ const tools = [];
     PurfenceIssueService,
     PurfenceExecutionService,
     GenericToolsService,
-    PurfenceTools,
-    TianfuTools,
-    ExecutionTools,
-    GenericTools,
   ],
   exports: [
     ...tools,
@@ -32,10 +35,6 @@ const tools = [];
     PurfenceIssueService,
     PurfenceExecutionService,
     GenericToolsService,
-    PurfenceTools,
-    TianfuTools,
-    ExecutionTools,
-    GenericTools,
   ],
 })
 export class ToolsModule {}

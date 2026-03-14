@@ -1,12 +1,14 @@
+import { LanguageModelV3 } from '@ai-sdk/provider';
 import { MyAgentService, getAgentPrompt } from '@app/my-agent';
+import { LlmService } from '@app/my-agent/llm.service';
 import { SocketService } from '@app/my-agent/socket.service';
-import { MyUtil } from '@app/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { readFileSync } from 'node:fs';
 import { ProviderModelService } from './provider-model.service';
 import { PurfenceExecution } from './purfence-execution.entity';
 import { ExecutionStage } from './purfence-status.enum';
-import { readFile } from 'node:fs/promises';
-
+import { generateText, streamText } from 'ai';
+import { MyUtil } from '@app/shared';
 const ZIWEI_TOOLS = [
   'createProject',
   'createIssue',
@@ -17,6 +19,7 @@ const ZIWEI_TOOLS = [
   'updateProject',
   'renderArtifacts',
   'createScheduledTask',
+  'image',
 ] as const;
 
 const TIANXIANG_TOOLS = [
@@ -45,6 +48,7 @@ export class PurfenceAgentService {
   constructor(
     private readonly myAgentService: MyAgentService,
     private readonly providerModelService: ProviderModelService,
+    private readonly llmService: LlmService,
   ) {}
 
   async streamZiwei(params: {
@@ -115,29 +119,22 @@ export class PurfenceAgentService {
       prompt: params.prompt,
     });
 
-    const parts: Array<
-      | { type: 'text'; text: string }
-      | { type: 'file'; url: string; mediaType: string }
-    > = [{ type: 'text', text: params.query }];
-
-    if (params.imageUrl) {
-      const buffer = await readFile(params.imageUrl);
-      const base64 = buffer.toString('base64');
-      const mediaType = this.inferMediaType(params.imageUrl);
-      parts.push({
-        type: 'file',
-        url: `data:${mediaType};base64,${base64}`,
-        mediaType,
-      });
-    }
-
     await SocketService.warpSocket(params.threadId, () =>
       agent.stream({
         message: [
           {
             id: MyUtil.uuid(),
             role: 'user',
-            parts,
+            parts: [
+              {
+                type: 'text',
+                text: params.query,
+              },
+              {
+                type: 'text',
+                text: `user uploaded image path is: ${params.imageUrl}`,
+              },
+            ],
           },
         ],
         conversationId: params.threadId,
@@ -148,28 +145,6 @@ export class PurfenceAgentService {
         },
       }),
     );
-  }
-
-  /**
-   * 根据文件扩展名推断 media type
-   */
-  private inferMediaType(url: string): string {
-    const ext = url.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      case 'svg':
-        return 'image/svg+xml';
-      default:
-        return 'image/png';
-    }
   }
 
   /**
