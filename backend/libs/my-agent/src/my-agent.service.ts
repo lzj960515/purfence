@@ -193,12 +193,15 @@ export class MyAgentService {
   }
 
   private getAgentTools(tools: AgentOptions['tools']) {
+    if (_.isEmpty(tools)) {
+      return this.toolsService.getAllLocalTools();
+    }
+
     return _.chain(tools)
       .map((tool) => {
         if (_.isString(tool)) {
           return this.toolsService.getTools([tool]);
         }
-        return tool;
       })
       .flatten()
       .value() as VoltAgentOptions['tools'];

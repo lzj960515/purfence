@@ -1,4 +1,4 @@
-import { AgentModelOptions } from '@app/my-agent/types';
+import { AgentModelOptions, Providers } from '@app/my-agent/types';
 import { Injectable } from '@nestjs/common';
 import { ModelProvider } from './model-provider/model-provider.entity';
 import {
@@ -6,16 +6,28 @@ import {
   PurfenceConfig,
 } from './purfence-config/purfence-config.entity';
 import { ModelConfig } from './type';
+import { ProviderType } from './types/provider-type.enum';
 
 @Injectable()
 export class ProviderModelService {
-  async findAgentModelOptions(): Promise<AgentModelOptions> {
-    const config = await PurfenceConfig.findOne({
-      where: { key: ConfigKey.MODEL_CONFIG },
-    });
-    const modelConfig = config?.value as ModelConfig;
-    const defaultModel = modelConfig.default;
-    const fallbacks = modelConfig.fallbacks;
+  private mapProvider(provider: ModelProvider['provider']): Providers {
+    switch (provider) {
+      case ProviderType.OPENAI:
+        return 'openai';
+      case ProviderType.ANTHROPIC:
+        return 'anthropic';
+      case ProviderType.OPENAI_COMPATIBLE:
+        return 'openai-compatible';
+    }
+  }
+
+  async findAgentModelOptions(
+    modelConfig?: ModelConfig,
+  ): Promise<AgentModelOptions> {
+    const resolvedModelConfig =
+      modelConfig ?? (await this.getGlobalModelConfig());
+    const defaultModel = resolvedModelConfig.default;
+    const fallbacks = resolvedModelConfig.fallbacks;
     const modelProvider = await ModelProvider.findOneOrFail({
       where: {
         id: defaultModel.id,
@@ -25,21 +37,21 @@ export class ProviderModelService {
       baseUrl: modelProvider.baseUrl,
       apiKey: modelProvider.apiKey,
       model: defaultModel.model,
-      provider: modelProvider.provider,
+      provider: this.mapProvider(modelProvider.provider),
     };
 
     const fallbacksModelOptions = await Promise.all(
       fallbacks.map(async (fallback) => {
-        const modelProvider = await ModelProvider.findOneOrFail({
+        const fallbackProvider = await ModelProvider.findOneOrFail({
           where: {
             id: fallback.id,
           },
         });
         return {
-          baseUrl: modelProvider.baseUrl,
-          apiKey: modelProvider.apiKey,
+          baseUrl: fallbackProvider.baseUrl,
+          apiKey: fallbackProvider.apiKey,
           model: fallback.model,
-          provider: modelProvider.provider,
+          provider: this.mapProvider(fallbackProvider.provider),
         };
       }),
     );
@@ -47,6 +59,20 @@ export class ProviderModelService {
     return {
       default: defaultModelOptions,
       fallbacks: fallbacksModelOptions,
+    };
+  }
+
+  private async getGlobalModelConfig(): Promise<ModelConfig> {
+    const config = await PurfenceConfig.findOne({
+      where: { key: ConfigKey.MODEL_CONFIG },
+    });
+    const modelConfig = config?.value as ModelConfig | undefined;
+    if (!modelConfig) {
+      throw new Error('请在通用设置中配置模型配置');
+    }
+    return {
+      default: modelConfig.default,
+      fallbacks: modelConfig.fallbacks,
     };
   }
 }

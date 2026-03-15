@@ -1,14 +1,13 @@
-import { LanguageModelV3 } from '@ai-sdk/provider';
 import { MyAgentService, getAgentPrompt } from '@app/my-agent';
 import { LlmService } from '@app/my-agent/llm.service';
 import { SocketService } from '@app/my-agent/socket.service';
+import { AgentModelOptions } from '@app/my-agent/types';
 import { Injectable, Logger } from '@nestjs/common';
-import { readFileSync } from 'node:fs';
 import { ProviderModelService } from './provider-model.service';
 import { PurfenceExecution } from './purfence-execution.entity';
 import { ExecutionStage } from './purfence-status.enum';
-import { generateText, streamText } from 'ai';
 import { MyUtil } from '@app/shared';
+import { Agent } from './agent/agent.entity';
 const ZIWEI_TOOLS = [
   'createProject',
   'createIssue',
@@ -51,72 +50,33 @@ export class PurfenceAgentService {
     private readonly llmService: LlmService,
   ) {}
 
-  async streamZiwei(params: {
-    threadId: string;
-    query: string;
-    providerName?: string;
-    context?: Record<string, unknown>;
-    userId?: string;
-    imageUrl?: string;
-  }) {
-    const ziweiPrompt = getAgentPrompt('ziwei');
-    if (!ziweiPrompt) {
-      throw new Error('ziwei agent not found');
-    }
-
-    await this.streamAgent({
-      threadId: params.threadId,
-      query: params.query,
-      agentName: 'ziwei',
-      prompt: ziweiPrompt,
-      tools: [...ZIWEI_TOOLS],
-      providerName: params.providerName,
-      context: params.context,
-      userId: params.userId,
-      imageUrl: params.imageUrl,
-    });
-  }
-
   async streamTianxiang(params: {
     threadId: string;
     query: string;
-    providerName?: string;
     context?: Record<string, unknown>;
-  }) {
-    const tianxiangPrompt = getAgentPrompt('tianxiang');
-    if (!tianxiangPrompt) {
-      throw new Error('tianxiang agent not found');
-    }
-
-    await this.streamAgent({
-      threadId: params.threadId,
-      query: params.query,
-      agentName: 'tianxiang',
-      prompt: tianxiangPrompt,
-      tools: [...TIANXIANG_TOOLS],
-      providerName: params.providerName,
-      context: params.context,
-    });
-  }
+  }) {}
 
   async streamAgent(params: {
+    userId: string;
     threadId: string;
     query: string;
-    agentName: string;
-    prompt: string;
-    tools: readonly string[];
-    providerName?: string;
+    agentId: string;
     context?: Record<string, unknown>;
-    userId?: string;
     imageUrl?: string;
   }) {
+    const agentConfig = await Agent.findOneOrFail({
+      where: { id: params.agentId },
+    });
+
     const agentModelOptions =
-      await this.providerModelService.findAgentModelOptions();
+      await this.providerModelService.findAgentModelOptions(
+        agentConfig.modelConfig,
+      );
 
     const agent = this.myAgentService.createAgent({
-      tools: [...params.tools],
-      name: params.agentName,
-      prompt: params.prompt,
+      tools: agentConfig.tools,
+      name: agentConfig.name,
+      prompt: agentConfig.instructions,
     });
 
     await SocketService.warpSocket(params.threadId, () =>
@@ -138,79 +98,12 @@ export class PurfenceAgentService {
           },
         ],
         conversationId: params.threadId,
-        userId: params.userId || 'purfence',
+        userId: params.userId,
         agentModelOptions,
         context: {
           ...(params.context || {}),
         },
       }),
     );
-  }
-
-  /**
-   * 根据 agent 类型继续执行 Execution
-   * - tianji: 使用天机 Agent（调度、分配任务）
-   * - tianfu: 使用天府 Agent（评估、规划下一步）
-   */
-  async streamExecutionAgent(params: {
-    threadId: string;
-    query: string;
-    agent: 'tianji' | 'tianfu';
-    executionId: string;
-    providerName?: string;
-    context?: Record<string, unknown>;
-  }) {
-    const { threadId, query, agent, executionId, providerName, context } =
-      params;
-
-    this.logger.log(
-      `streamExecutionAgent: executionId=${executionId}, agent=${agent}`,
-    );
-
-    // 获取 Execution 信息
-    const execution = await PurfenceExecution.findOne({
-      where: { id: executionId },
-    });
-
-    if (!execution) {
-      throw new Error(`Execution not found: ${executionId}`);
-    }
-
-    // 更新 stage
-    const newStage =
-      agent === 'tianji' ? ExecutionStage.tianji : ExecutionStage.tianfu;
-    execution.stage = newStage;
-    await execution.save();
-
-    this.logger.log(`Updated execution ${executionId} stage to ${newStage}`);
-
-    // 根据 agent 类型选择提示词和工具集
-    const prompt = getAgentPrompt(agent);
-    if (!prompt) {
-      throw new Error(`${agent} agent prompt not found`);
-    }
-
-    const tools = agent === 'tianji' ? [...TIANJI_TOOLS] : [...TIANFU_TOOLS];
-
-    // 构建 context
-    const streamContext = {
-      executionId,
-      issueId: execution.issueId,
-      event:
-        agent === 'tianji'
-          ? 'purfence.execution.evaluate'
-          : 'purfence.evaluation.stream-ended',
-      ...context,
-    };
-
-    await this.streamAgent({
-      threadId,
-      query,
-      agentName: agent,
-      prompt,
-      tools,
-      providerName,
-      context: streamContext,
-    });
   }
 }

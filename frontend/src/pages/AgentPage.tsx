@@ -1,31 +1,47 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import { MessageList } from '@/components/agent/MessageList';
 import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
-import { useProviderConfigs } from '@/hooks/useProviderConfigs';
+import { GET_AGENTS } from '@/api/agent.graphql';
 import { fetchConversationMessages, uploadImage } from '@/api/agent.api';
 import type { ChatMessage, AgentType } from '@/lib/socket-agent';
+
+type AgentListNode = {
+  id: string;
+  name?: string | null;
+};
+
+type AgentsQueryData = {
+  agents?: {
+    nodes: AgentListNode[];
+  };
+};
 
 export function AgentPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [threadId, setThreadId] = useState('');
-  const [isFirstMessage, setIsFirstMessage] = useState(true);
-  const [selectedProviderName, setSelectedProviderName] = useState<string>('');
+  const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const autoSentThreadRef = useRef<string>('');
-  const { configs } = useProviderConfigs();
+  const { data: agentsData } = useQuery<AgentsQueryData>(GET_AGENTS, {
+    fetchPolicy: 'network-only',
+  });
 
-  // Execution 模式相关状态
-  const [isExecutionMode, setIsExecutionMode] = useState(false);
-  const [executionId, setExecutionId] = useState<string>('');
-  const [selectedAgent, setSelectedAgent] = useState<AgentType>('tianji');
+  const [selectedExecutionAgent, setSelectedExecutionAgent] = useState<AgentType>('tianji');
 
   // 待发送图片状态
   const [pendingImage, setPendingImage] = useState<File | null>(null);
 
-  const activeProviderOptions = configs
-    .filter((config) => config.isActive)
-    .map((config) => ({ name: config.name }));
+  const agentOptions = (agentsData?.agents?.nodes || [])
+    .filter((agent): agent is { id: string; name: string } => {
+      return typeof agent.id === 'string' && typeof agent.name === 'string' && agent.name.length > 0;
+    })
+    .map((agent) => ({ id: agent.id, name: agent.name }));
+
+  const effectiveSelectedAgentId = agentOptions.some((agent) => agent.id === selectedAgentId)
+    ? selectedAgentId
+    : (agentOptions[0]?.id ?? '');
 
   const {
     connectionState,
@@ -134,9 +150,6 @@ export function AgentPage() {
       }
 
       setMessages(convertedMessages);
-      if (convertedMessages.length > 0) {
-        setIsFirstMessage(false);
-      }
     } catch (e) {
       console.error('Failed to load history:', e as unknown);
       // 加载失败时清空消息
@@ -149,41 +162,9 @@ export function AgentPage() {
   const sourceFromUrl = searchParams.get('source');
   const prefillFromUrl = searchParams.get('prefill') || '';
   const autoSendFromUrl = searchParams.get('autoSend') === '1';
-  // Execution 模式相关参数
   const executionIdFromUrl = searchParams.get('executionId');
-  const agentFromUrl = searchParams.get('agent') as AgentType | null;
-
-  // 解析 execution 模式参数
-  useEffect(() => {
-    if (sourceFromUrl === 'execution' && executionIdFromUrl) {
-      setIsExecutionMode(true);
-      setExecutionId(executionIdFromUrl);
-      if (agentFromUrl && (agentFromUrl === 'tianji' || agentFromUrl === 'tianfu')) {
-        setSelectedAgent(agentFromUrl);
-      }
-    } else {
-      setIsExecutionMode(false);
-      setExecutionId('');
-    }
-  }, [sourceFromUrl, executionIdFromUrl, agentFromUrl]);
-
-  useEffect(() => {
-    if (activeProviderOptions.length === 0) {
-      setSelectedProviderName('');
-      return;
-    }
-
-    if (
-      selectedProviderName &&
-      activeProviderOptions.some((provider) => provider.name === selectedProviderName)
-    ) {
-      return;
-    }
-
-    const defaultProvider = configs.find((config) => config.isActive);
-
-    setSelectedProviderName(defaultProvider?.name || activeProviderOptions[0].name);
-  }, [activeProviderOptions, configs, selectedProviderName]);
+  const isExecutionMode = sourceFromUrl === 'execution' && !!executionIdFromUrl;
+  const executionId = executionIdFromUrl || '';
 
   // 连接成功后创建并打开新会话（由 URL 参数驱动）
   useEffect(() => {
@@ -192,35 +173,40 @@ export function AgentPage() {
     if (threadFromUrl) {
       if (threadFromUrl === threadId) return;
 
-      // 1. 立即清空消息
       clearMessages();
-      setIsFirstMessage(sourceFromUrl !== 'history');
 
-      // 2. 关闭旧会话
       if (threadId) {
         sessionClose({ threadId });
       }
 
-      // 3. 更新 threadId
-      setThreadId(threadFromUrl);
+      const timeoutId = window.setTimeout(() => {
+        setThreadId(threadFromUrl);
+        sessionOpen({ threadId: threadFromUrl });
+        void loadHistoryMessages(threadFromUrl);
+      }, 0);
 
-      // 4. 打开新会话并加载历史
-      sessionOpen({ threadId: threadFromUrl });
-      void loadHistoryMessages(threadFromUrl);
-      return;
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+
     }
 
     if (!threadId) {
       const newThreadId = crypto.randomUUID();
-      setThreadId(newThreadId);
-      sessionOpen({ threadId: newThreadId });
-      setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
+      const timeoutId = window.setTimeout(() => {
+        setThreadId(newThreadId);
+        sessionOpen({ threadId: newThreadId });
+        setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
   }, [
     connectionState,
     threadId,
     threadFromUrl,
-    sourceFromUrl,
     setSearchParams,
     sessionOpen,
     sessionClose,
@@ -251,37 +237,30 @@ export function AgentPage() {
         sendExecutionMessage({
           message: query,
           conversationId: threadId,
-          agent: selectedAgent,
+          agent: selectedExecutionAgent,
           executionId,
-          providerName: selectedProviderName || undefined,
+          agentId: effectiveSelectedAgentId || undefined,
         });
       } else {
         // 普通模式：使用 chat 事件
         sendMessage({
           threadId,
           query,
-          providerName: selectedProviderName || undefined,
+          agentId: effectiveSelectedAgentId || undefined,
           imageUrl,
         });
       }
 
-      // 发送成功后清除待发送图片
       setPendingImage(null);
-
-      // 发送第一条消息后，输入框移至底部
-      if (isFirstMessage) {
-        setIsFirstMessage(false);
-      }
     },
     [
       threadId,
       sendMessage,
       sendExecutionMessage,
-      isFirstMessage,
-      selectedProviderName,
       isExecutionMode,
       executionId,
-      selectedAgent,
+      selectedExecutionAgent,
+      effectiveSelectedAgentId,
       pendingImage,
     ],
   );
@@ -293,7 +272,7 @@ export function AgentPage() {
     }
   }, [threadId, sessionTerminate]);
 
-  const shouldShowCenteredInput = sourceFromUrl !== 'history' && isFirstMessage;
+  const shouldShowCenteredInput = sourceFromUrl !== 'history' && messages.length === 0;
 
   useEffect(() => {
     if (!autoSendFromUrl || !prefillFromUrl) return;
@@ -302,8 +281,14 @@ export function AgentPage() {
     if (autoSentThreadRef.current === threadId) return;
     if (messages.length > 0) return;
 
-    autoSentThreadRef.current = threadId;
-    handleSendMessage(prefillFromUrl);
+    const timeoutId = window.setTimeout(() => {
+      autoSentThreadRef.current = threadId;
+      void handleSendMessage(prefillFromUrl);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [
     autoSendFromUrl,
     prefillFromUrl,
@@ -329,12 +314,12 @@ export function AgentPage() {
             disabled={connectionState !== 'connected'}
             isSending={isSending}
             isFirstMessage={true}
-            providerOptions={activeProviderOptions}
-            selectedProviderName={selectedProviderName}
-            onProviderChange={setSelectedProviderName}
+            agentOptions={agentOptions}
+            selectedAgentId={effectiveSelectedAgentId}
+            onAgentIdChange={setSelectedAgentId}
             showAgentSelector={isExecutionMode}
-            selectedAgent={selectedAgent}
-            onAgentChange={setSelectedAgent}
+            selectedAgent={selectedExecutionAgent}
+            onAgentChange={setSelectedExecutionAgent}
             pendingImage={pendingImage}
             onPendingImageChange={setPendingImage}
           />
@@ -343,6 +328,7 @@ export function AgentPage() {
              {["Write code", "Analyze data", "Brainstorm ideas", "Summarize text"].map((action) => (
                <button 
                  key={action}
+                 type="button"
                  onClick={() => handleSendMessage(action)}
                  className="px-4 py-2 bg-muted/50 hover:bg-muted rounded-full text-sm text-muted-foreground transition-colors cursor-pointer"
                >
@@ -364,12 +350,12 @@ export function AgentPage() {
               disabled={connectionState !== 'connected'}
               isSending={isSending}
               isFirstMessage={false}
-              providerOptions={activeProviderOptions}
-              selectedProviderName={selectedProviderName}
-              onProviderChange={setSelectedProviderName}
+              agentOptions={agentOptions}
+              selectedAgentId={effectiveSelectedAgentId}
+              onAgentIdChange={setSelectedAgentId}
               showAgentSelector={isExecutionMode}
-              selectedAgent={selectedAgent}
-              onAgentChange={setSelectedAgent}
+              selectedAgent={selectedExecutionAgent}
+              onAgentChange={setSelectedExecutionAgent}
               pendingImage={pendingImage}
               onPendingImageChange={setPendingImage}
             />

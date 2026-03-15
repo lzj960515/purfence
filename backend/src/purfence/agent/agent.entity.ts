@@ -1,7 +1,8 @@
 import { BaseEntity } from '@app/shared';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { ModelConfig } from '../type';
 
+@Index(['name', 'version'], { unique: true })
 @Entity()
 export class Agent extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
@@ -32,4 +33,7 @@ export class Agent extends BaseEntity {
 
   @Column({ type: 'json', nullable: true, comment: '为空使用全局配置' })
   modelConfig: ModelConfig;
+
+  @Column({ type: 'int', default: 1 })
+  version: number;
 }

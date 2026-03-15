@@ -38,7 +38,7 @@ export class ToolsService implements OnModuleInit {
   getTools(tools: string[]): any {
     return _.chain(tools)
       .map((toolName) => {
-        const tool = this.getLocalTools([toolName])[0];
+        const tool = this.getLocalTool(toolName);
         if (tool) return tool;
 
         const toolKit = this.toolKits.get(toolName);

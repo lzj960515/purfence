@@ -120,18 +120,18 @@ ${goalLine}
 请分析以上信息，选择合适的团队（通过 delegateTask）来推进这个 Issue。
 `;
 
-    await this.purfenceAgentService.streamAgent({
-      threadId: execution.id,
-      query: taskPrompt,
-      agentName: 'tianji',
-      prompt: tianjiPrompt,
-      tools: ['delegateTask', 'getCurrentTime'],
-      context: {
-        issueId: issue.id,
-        executionId: execution.id,
-        event: 'purfence.execution.evaluate',
-      },
-    });
+    // await this.purfenceAgentService.streamAgent({
+    //   threadId: execution.id,
+    //   query: taskPrompt,
+    //   agentName: 'tianji',
+    //   prompt: tianjiPrompt,
+    //   tools: ['delegateTask', 'getCurrentTime'],
+    //   context: {
+    //     issueId: issue.id,
+    //     executionId: execution.id,
+    //     event: 'purfence.execution.evaluate',
+    //   },
+    // });
 
     return execution;
   }
@@ -186,30 +186,30 @@ ${execution.goal ? `刚才执行的目标是：${execution.goal}` : '刚才执�
 2. 判断这个 Issue 是否已达成目标
 3. 如果完成了，规划下一步应该做什么（比如创建新的 Issue）`;
 
-    await this.purfenceAgentService.streamAgent({
-      threadId: execution.id,
-      query: userMessage,
-      agentName: 'tianfu',
-      prompt: tianfuPrompt,
-      tools: [
-        'continueExecution',
-        'createNextExecution',
-        'completeIssue',
-        'createNextIssue',
-        'delegateTask',
-        'getCurrentTime',
-      ],
-      context: {
-        issueId: issue.id,
-        executionId: execution.id,
-        projectId: project.id,
-        // 传递项目的 Slack 配置，用于评估完成时的通知
-        slackAppConfigId: project.slackAppConfigId,
-        slackChannelId: project.slackChannelId,
-        // 评估完成时发送 Slack 通知的事件（复用定时任务的事件机制）
-        event: 'purfence.evaluation.stream-ended',
-      },
-    });
+    // await this.purfenceAgentService.streamAgent({
+    //   threadId: execution.id,
+    //   query: userMessage,
+    //   agentName: 'tianfu',
+    //   prompt: tianfuPrompt,
+    //   tools: [
+    //     'continueExecution',
+    //     'createNextExecution',
+    //     'completeIssue',
+    //     'createNextIssue',
+    //     'delegateTask',
+    //     'getCurrentTime',
+    //   ],
+    //   context: {
+    //     issueId: issue.id,
+    //     executionId: execution.id,
+    //     projectId: project.id,
+    //     // 传递项目的 Slack 配置，用于评估完成时的通知
+    //     slackAppConfigId: project.slackAppConfigId,
+    //     slackChannelId: project.slackChannelId,
+    //     // 评估完成时发送 Slack 通知的事件（复用定时任务的事件机制）
+    //     event: 'purfence.evaluation.stream-ended',
+    //   },
+    // });
   }
 
   async listIssueArtifactFiles(issueId: string) {
@@ -283,16 +283,16 @@ ${execution.goal ? `刚才执行的目标是：${execution.goal}` : '刚才执�
 
     const conversationId = crypto.randomUUID();
 
-    await this.purfenceAgentService.streamAgent({
-      threadId: conversationId,
-      query: analyzePrompt,
-      agentName: 'project-analyzer',
-      prompt: analyzerPrompt,
-      tools: ['Task', 'updateProject'],
-      context: {
-        projectId: project.id,
-      },
-    });
+    // await this.purfenceAgentService.streamAgent({
+    //   threadId: conversationId,
+    //   query: analyzePrompt,
+    //   agentName: 'project-analyzer',
+    //   prompt: analyzerPrompt,
+    //   tools: ['Task', 'updateProject'],
+    //   context: {
+    //     projectId: project.id,
+    //   },
+    // });
 
     return project;
   }

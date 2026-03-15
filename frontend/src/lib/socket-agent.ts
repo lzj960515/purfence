@@ -72,7 +72,7 @@ export interface ChatArgs {
   query: string;
   tools?: string[];
   model?: string;
-  providerName?: string;
+  agentId?: string;
   imageUrl?: string;
 }
 
@@ -86,8 +86,7 @@ export interface ChatExecutionArgs {
   agent: 'tianji' | 'tianfu';
   /** 要继续执行的 Execution ID */
   executionId: string;
-  /** 模型提供商名称（可选） */
-  providerName?: string;
+  agentId?: string;
 }
 
 /** Execution 执行阶段 */

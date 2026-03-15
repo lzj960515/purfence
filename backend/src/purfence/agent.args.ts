@@ -1,12 +1,10 @@
 import { Transform } from 'class-transformer';
 import {
   IsArray,
-  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
-  ValidateNested,
 } from 'class-validator';
 import _ from 'lodash';
 import { ModelOptions } from '@app/my-agent/types';
@@ -77,7 +75,7 @@ export class ChatAnyArgs {
 
   @IsOptional()
   @IsString()
-  providerName?: string;
+  agentId?: string;
 
   @IsOptional()
   @IsString()
@@ -107,5 +105,5 @@ export class ChatExecutionArgs {
 
   @IsOptional()
   @IsString()
-  providerName?: string;
+  agentId?: string;
 }

@@ -126,7 +126,6 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
     }
 
     for (const conversationId of timedOutSessionIds) {
-      const session = this.activeSessions.get(conversationId);
       this.activeSessions.delete(conversationId);
       this.logger.warn(
         `Cleaned up timed-out session: conversationId=${conversationId}`,
@@ -219,18 +218,12 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    await this.start(
-      config.botToken,
-      config.appToken,
-      config.providerName,
-      config.appConfigId,
-    );
+    await this.start(config.botToken, config.appToken, config.appConfigId);
   }
 
   private async start(
     botToken: string,
     appToken: string,
-    providerName?: string,
     appConfigId?: string,
   ) {
     await this.stop();
@@ -330,20 +323,19 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
         close: async () => this.closeMirror(conversationId),
       });
       try {
-        await this.purfenceAgentService.streamZiwei({
-          threadId: conversationId,
-          query,
-          providerName,
-          userId: event.user,
-          context: {
-            channel: 'slack',
-            trigger: 'slack_dm',
-            slackChannelId: event.channel,
-            slackUserId: event.user,
-            slackThreadTs: threadTs,
-            slackAppConfigId: appConfigId,
-          },
-        });
+        // await this.purfenceAgentService.streamZiwei({
+        //   threadId: conversationId,
+        //   query,
+        //   userId: event.user,
+        //   context: {
+        //     channel: 'slack',
+        //     trigger: 'slack_dm',
+        //     slackChannelId: event.channel,
+        //     slackUserId: event.user,
+        //     slackThreadTs: threadTs,
+        //     slackAppConfigId: appConfigId,
+        //   },
+        // });
       } catch (error) {
         await this.flushCurrentBlock(conversationId);
         await this.postErrorBlock(
@@ -420,7 +412,10 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
       }
 
       if (type === 'thinking' || type === 'text') {
-        const content = String(payload.content || '');
+        const content =
+          typeof payload.content === 'string'
+            ? payload.content
+            : JSON.stringify(payload.content ?? '');
         if (!content) return;
         session.currentType = type;
         session.markdownBuffer += content;
@@ -429,7 +424,10 @@ export class SlackRuntimeService implements OnModuleInit, OnModuleDestroy {
 
       if (type === 'tool_text') {
         const taskId = String(payload.id || '');
-        const title = String(payload.content || '');
+        const title =
+          typeof payload.content === 'string'
+            ? payload.content
+            : JSON.stringify(payload.content ?? '');
         if (!taskId || !title) return;
         const messageTs = await this.postTaskCardStart(
           app,

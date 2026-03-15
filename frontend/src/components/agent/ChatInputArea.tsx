@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils'
 import type { AgentType } from '@/lib/socket-agent'
 import { AGENT_OPTIONS } from '@/lib/socket-agent'
 
-interface ProviderOption {
+interface AgentOption {
+  id: string
   name: string
 }
 
@@ -23,9 +24,9 @@ interface ChatInputAreaProps {
   disabled?: boolean
   isSending?: boolean
   isFirstMessage?: boolean
-  providerOptions?: ProviderOption[]
-  selectedProviderName?: string
-  onProviderChange?: (providerName: string) => void
+  agentOptions?: AgentOption[]
+  selectedAgentId?: string
+  onAgentIdChange?: (agentId: string) => void
   /** 是否显示 Agent 选择器（execution 模式） */
   showAgentSelector?: boolean
   /** 当前选中的 Agent */
@@ -44,9 +45,9 @@ export function ChatInputArea({
   disabled = false,
   isSending = false,
   isFirstMessage = false,
-  providerOptions = [],
-  selectedProviderName,
-  onProviderChange,
+  agentOptions = [],
+  selectedAgentId,
+  onAgentIdChange,
   showAgentSelector = false,
   selectedAgent = 'tianji',
   onAgentChange,
@@ -54,7 +55,6 @@ export function ChatInputArea({
   onPendingImageChange,
 }: ChatInputAreaProps) {
   const [value, setValue] = useState('')
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -63,27 +63,25 @@ export function ChatInputArea({
   const setPendingImage = (file: File | null) => {
     onPendingImageChange?.(file)
   }
+  const imagePreview = useMemo(
+    () => (pendingImage ? URL.createObjectURL(pendingImage) : null),
+    [pendingImage],
+  )
 
-  // Auto-resize textarea
-  useEffect(() => {
+  const resizeTextarea = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
-  }, [value])
+  }
 
-  // 同步外部 pendingImage 变化到预览
   useEffect(() => {
-    if (pendingImage) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string)
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview)
       }
-      reader.readAsDataURL(pendingImage)
-    } else {
-      setImagePreview(null)
     }
-  }, [pendingImage])
+  }, [imagePreview])
 
   const handleSend = () => {
     const content = value.trim()
@@ -129,7 +127,6 @@ export function ChatInputArea({
   // Remove selected image
   const handleRemoveImage = () => {
     setPendingImage(null)
-    setImagePreview(null)
   }
 
   // Handle file input change
@@ -185,7 +182,10 @@ export function ChatInputArea({
         <Textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value)
+            requestAnimationFrame(resizeTextarea)
+          }}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           disabled={disabled}
@@ -241,19 +241,19 @@ export function ChatInputArea({
               </Select>
             )}
 
-            {providerOptions.length > 0 && selectedProviderName ? (
+            {agentOptions.length > 0 && selectedAgentId ? (
               <Select
-                value={selectedProviderName}
-                onValueChange={(providerName) => onProviderChange?.(providerName)}
+                value={selectedAgentId}
+                onValueChange={(agentId) => onAgentIdChange?.(agentId)}
                 disabled={disabled || isSending}
               >
                 <SelectTrigger className="h-8 w-auto min-w-[120px] rounded-full border-0 bg-muted px-3 text-sm font-medium text-foreground shadow-none hover:bg-muted/80 focus:ring-0 focus:ring-offset-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="end">
-                  {providerOptions.map((provider) => (
-                    <SelectItem key={provider.name} value={provider.name}>
-                      {provider.name}
+                  {agentOptions.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
