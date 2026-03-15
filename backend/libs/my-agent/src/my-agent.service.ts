@@ -171,7 +171,7 @@ export class MyAgentService {
 
     const agent: Agent = new Agent({
       name,
-      instructions: prompt,
+      instructions: prompt ?? `You are a ${name} agent.`,
       model: ({ context }) => {
         const modelOptions = context?.get('modelOptions') as ModelOptions;
         return this.llmService.get(modelOptions).model() as any;
