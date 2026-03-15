@@ -17,10 +17,6 @@ import { zhCN } from 'date-fns/locale'
 import type { PurfenceStatus } from '@/graphql/__generated__/types'
 import { START_ISSUE_MUTATION } from '@/api/purfence.graphql'
 import { useToast } from '@/hooks/use-toast'
-import type { AgentType } from '@/lib/socket-agent'
-
-/** Execution 执行阶段（前端定义，后端可能还未同步到 GraphQL 类型） */
-type ExecutionStage = 'tianji' | 'tianfu'
 
 const statusConfig: Record<
   PurfenceStatus,
@@ -237,26 +233,17 @@ export function IssueDetailPage() {
         ) : (
           <div className="space-y-3">
             {executions.map((execution) => {
-              // 获取 stage 字段，如果没有则默认为 'tianji'
-              // 注意：stage 字段需要后端同步到 GraphQL 类型后才能从 execution 中获取
-              // 这里暂时使用类型断言来访问可能存在的 stage 字段
-              const executionStage = (execution as unknown as { stage?: ExecutionStage }).stage ?? 'tianji'
-              const agent: AgentType = executionStage === 'tianfu' ? 'tianfu' : 'tianji'
-
               return (
                 <Card
                   key={execution.id}
                   className="cursor-pointer hover:bg-muted/50 transition-colors group"
-                  onClick={() => navigate(`/agent?thread=${execution.id}&source=execution&executionId=${execution.id}&issueId=${id}&agent=${agent}`)}
+                  onClick={() => navigate(`/agent?thread=${execution.id}&source=history&issueId=${id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <code className="rounded bg-muted px-2 py-0.5 text-xs">{execution.id}</code>
                         {getStatusBadge(execution.status)}
-                        <Badge variant="outline" className="text-xs">
-                          {executionStage === 'tianji' ? '天机' : '天府'}
-                        </Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -265,7 +252,7 @@ export function IssueDetailPage() {
                           className="h-7 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation()
-                            navigate(`/agent?thread=${execution.id}&source=execution&executionId=${execution.id}&issueId=${id}&agent=${agent}`)
+                            navigate(`/agent?thread=${execution.id}&source=history&issueId=${id}`)
                           }}
                         >
                           <MessageSquare className="mr-1 h-3 w-3" />

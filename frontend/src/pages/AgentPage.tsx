@@ -6,7 +6,7 @@ import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
 import { GET_AGENTS } from '@/api/agent.graphql';
 import { fetchConversationMessages, uploadImage } from '@/api/agent.api';
-import type { ChatMessage, AgentType } from '@/lib/socket-agent';
+import type { ChatMessage } from '@/lib/socket-agent';
 
 type AgentListNode = {
   id: string;
@@ -27,8 +27,6 @@ export function AgentPage() {
   const { data: agentsData } = useQuery<AgentsQueryData>(GET_AGENTS, {
     fetchPolicy: 'network-only',
   });
-
-  const [selectedExecutionAgent, setSelectedExecutionAgent] = useState<AgentType>('tianji');
 
   // 待发送图片状态
   const [pendingImage, setPendingImage] = useState<File | null>(null);
@@ -53,7 +51,6 @@ export function AgentPage() {
     sessionClose,
     sessionTerminate,
     sendMessage,
-    sendExecutionMessage,
     clearMessages,
     setMessages,
   } = useSocketAgent();
@@ -162,9 +159,6 @@ export function AgentPage() {
   const sourceFromUrl = searchParams.get('source');
   const prefillFromUrl = searchParams.get('prefill') || '';
   const autoSendFromUrl = searchParams.get('autoSend') === '1';
-  const executionIdFromUrl = searchParams.get('executionId');
-  const isExecutionMode = sourceFromUrl === 'execution' && !!executionIdFromUrl;
-  const executionId = executionIdFromUrl || '';
 
   // 连接成功后创建并打开新会话（由 URL 参数驱动）
   useEffect(() => {
@@ -232,34 +226,18 @@ export function AgentPage() {
         }
       }
 
-      if (isExecutionMode && executionId) {
-        // Execution 模式：使用 chat_execution 事件
-        sendExecutionMessage({
-          message: query,
-          conversationId: threadId,
-          agent: selectedExecutionAgent,
-          executionId,
-          agentId: effectiveSelectedAgentId || undefined,
-        });
-      } else {
-        // 普通模式：使用 chat 事件
-        sendMessage({
-          threadId,
-          query,
-          agentId: effectiveSelectedAgentId || undefined,
-          imageUrl,
-        });
-      }
+      sendMessage({
+        threadId,
+        query,
+        agentId: effectiveSelectedAgentId || undefined,
+        imageUrl,
+      });
 
       setPendingImage(null);
     },
     [
       threadId,
       sendMessage,
-      sendExecutionMessage,
-      isExecutionMode,
-      executionId,
-      selectedExecutionAgent,
       effectiveSelectedAgentId,
       pendingImage,
     ],
@@ -317,9 +295,6 @@ export function AgentPage() {
             agentOptions={agentOptions}
             selectedAgentId={effectiveSelectedAgentId}
             onAgentIdChange={setSelectedAgentId}
-            showAgentSelector={isExecutionMode}
-            selectedAgent={selectedExecutionAgent}
-            onAgentChange={setSelectedExecutionAgent}
             pendingImage={pendingImage}
             onPendingImageChange={setPendingImage}
           />
@@ -353,9 +328,6 @@ export function AgentPage() {
               agentOptions={agentOptions}
               selectedAgentId={effectiveSelectedAgentId}
               onAgentIdChange={setSelectedAgentId}
-              showAgentSelector={isExecutionMode}
-              selectedAgent={selectedExecutionAgent}
-              onAgentChange={setSelectedExecutionAgent}
               pendingImage={pendingImage}
               onPendingImageChange={setPendingImage}
             />

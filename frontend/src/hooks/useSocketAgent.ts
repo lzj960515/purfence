@@ -3,7 +3,6 @@ import type { Socket } from 'socket.io-client';
 import {
   createAgentSocket,
   type ChatArgs,
-  type ChatExecutionArgs,
   type ChatArtifact,
   type ChatMessage,
   type ConnectionState,
@@ -46,8 +45,6 @@ interface UseSocketAgentReturn {
   sessionClose: (args: SessionOpenArgs) => void;
   sessionTerminate: (threadId: string) => void;
   sendMessage: (args: ChatArgs) => void;
-  /** 发送 execution 模式的消息，使用 chat_execution 事件 */
-  sendExecutionMessage: (args: ChatExecutionArgs) => void;
   clearMessages: () => void;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 }
@@ -179,7 +176,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
               },
             ];
 
-          case 'tool_result':
+          case 'tool_result': {
             // 工具执行结果
             // content 可能是字符串或对象
             const incomingArtifacts = normalizeArtifacts(data.artifact);
@@ -211,7 +208,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
               typeof toolContent === 'string'
                 ? toolContent
                 : (toolContent as { content?: string })?.content ?? JSON.stringify(toolContent ?? '');
-                
+
             return [
               ...prev,
               {
@@ -223,6 +220,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
                 toolResult: data.content,
               },
             ];
+          }
 
           case 'tool_progress':
             // 工具执行进度，追加到对应的工具消息
@@ -249,7 +247,8 @@ export function useSocketAgent(): UseSocketAgentReturn {
         if (parsed && typeof parsed === 'object' && parsed.message) {
           errorMessage = parsed.message;
         }
-      } catch (e) {
+      } catch {
+        errorMessage = data.message;
       }
 
       setMessages((prev) => [
@@ -263,7 +262,7 @@ export function useSocketAgent(): UseSocketAgentReturn {
         },
       ]);
     });
-  }, []);
+  }, [isCurrentThreadEvent]);
 
   // 断开连接
   const disconnect = useCallback(() => {
@@ -319,25 +318,6 @@ export function useSocketAgent(): UseSocketAgentReturn {
     [],
   );
 
-  // 发送 execution 模式的消息（使用 chat_execution 事件）
-  const sendExecutionMessage = useCallback(
-    (args: ChatExecutionArgs) => {
-      pendingArtifactsRef.current = [];
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          type: 'user',
-          content: args.message,
-          timestamp: new Date(),
-        },
-      ]);
-
-      socketRef.current?.emit('chat_execution', args);
-    },
-    [],
-  );
-
   // 清空消息
   const clearMessages = useCallback(() => {
     pendingArtifactsRef.current = [];
@@ -362,7 +342,6 @@ export function useSocketAgent(): UseSocketAgentReturn {
     sessionClose,
     sessionTerminate,
     sendMessage,
-    sendExecutionMessage,
     clearMessages,
     setMessages,
   };

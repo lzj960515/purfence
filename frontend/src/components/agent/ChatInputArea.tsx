@@ -10,8 +10,6 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Paperclip, ArrowUp, Square, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { AgentType } from '@/lib/socket-agent'
-import { AGENT_OPTIONS } from '@/lib/socket-agent'
 
 interface AgentOption {
   id: string
@@ -27,12 +25,6 @@ interface ChatInputAreaProps {
   agentOptions?: AgentOption[]
   selectedAgentId?: string
   onAgentIdChange?: (agentId: string) => void
-  /** 是否显示 Agent 选择器（execution 模式） */
-  showAgentSelector?: boolean
-  /** 当前选中的 Agent */
-  selectedAgent?: AgentType
-  /** Agent 切换回调 */
-  onAgentChange?: (agent: AgentType) => void
   /** 待发送图片 */
   pendingImage?: File | null
   /** 待发送图片变化回调 */
@@ -48,9 +40,6 @@ export function ChatInputArea({
   agentOptions = [],
   selectedAgentId,
   onAgentIdChange,
-  showAgentSelector = false,
-  selectedAgent = 'tianji',
-  onAgentChange,
   pendingImage: externalPendingImage,
   onPendingImageChange,
 }: ChatInputAreaProps) {
@@ -221,26 +210,6 @@ export function ChatInputArea({
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
-            {/* Agent 选择器（execution 模式下显示） */}
-            {showAgentSelector && (
-              <Select
-                value={selectedAgent}
-                onValueChange={(value) => onAgentChange?.(value as AgentType)}
-                disabled={disabled || isSending}
-              >
-                <SelectTrigger className="h-8 w-auto min-w-[80px] rounded-full border-0 bg-muted px-3 text-sm font-medium text-foreground shadow-none hover:bg-muted/80 focus:ring-0 focus:ring-offset-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="end">
-                  {AGENT_OPTIONS.map((agent) => (
-                    <SelectItem key={agent.value} value={agent.value}>
-                      {agent.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
             {agentOptions.length > 0 && selectedAgentId ? (
               <Select
                 value={selectedAgentId}

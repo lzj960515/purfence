@@ -83,7 +83,7 @@ export class ToolsService implements OnModuleInit {
   async onModuleInit() {
     await this.registerMcpTools();
     this.scanAndRegisterTools();
-    this.createToolKits();
+    // this.createToolKits();
     const reasoningToolkit: Toolkit = createReasoningTools();
     this.toolKits.set('reasoning_tools', reasoningToolkit);
   }
