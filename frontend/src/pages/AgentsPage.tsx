@@ -7,6 +7,7 @@ import {
   RefreshCw,
   Trash2,
   Wrench,
+  X,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -241,6 +242,21 @@ export function AgentsPage() {
         },
         fallbacks: prev.modelConfig?.fallbacks || [],
       },
+    }))
+  }
+
+  const clearDefaultModel = () => {
+    setForm((prev) => ({
+      ...prev,
+      modelConfig: prev.modelConfig
+        ? {
+            default: {
+              id: '',
+              model: '',
+            },
+            fallbacks: prev.modelConfig.fallbacks,
+          }
+        : undefined,
     }))
   }
 
@@ -580,21 +596,36 @@ export function AgentsPage() {
                           </div>
                         </div>
                         <div className="grid gap-3">
-                          <Select
-                            value={form.modelConfig?.default.id || ''}
-                            onValueChange={(value) => updateModelDefault('id', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder={providersLoading ? '加载提供商中...' : '选择默认提供商'} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {activeProviders.map((provider) => (
-                                <SelectItem key={provider.id} value={provider.id}>
-                                  {provider.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={form.modelConfig?.default.id || ''}
+                              onValueChange={(value) => updateModelDefault('id', value)}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder={providersLoading ? '加载提供商中...' : '选择默认提供商'} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {activeProviders.map((provider) => (
+                                  <SelectItem key={provider.id} value={provider.id}>
+                                    {provider.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {form.modelConfig?.default.id || form.modelConfig?.default.model ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={clearDefaultModel}
+                                aria-label="清空默认模型"
+                                title="清空默认模型"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            ) : null}
+                          </div>
                           <Input
                             value={form.modelConfig?.default.model || ''}
                             onChange={(event) => updateModelDefault('model', event.target.value)}

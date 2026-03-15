@@ -40,6 +40,16 @@ export interface AgentInput {
   modelConfig?: AgentModelConfig
 }
 
+type AgentMutationInput = {
+  name?: string | null
+  instructions?: string | null
+  description?: string | null
+  tags?: string[] | null
+  tools?: string[] | null
+  skills?: string[] | null
+  modelConfig?: AgentModelConfig | null
+}
+
 type AgentNode = {
   id: string
   name?: string | null
@@ -112,39 +122,74 @@ function mapFromGraphQL(node: AgentNode): AgentItem {
   }
 }
 
-function normalizeInput(input: AgentInput): AgentInput {
-  const normalizeList = (items?: string[]) => {
-    const next = items?.map((item) => item.trim()).filter(Boolean)
-    return next && next.length > 0 ? next : undefined
+function hasOwnField<T extends object>(value: T, key: keyof T): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key)
+}
+
+function normalizeInput(
+  input: AgentMutationInput,
+  mode: 'create' | 'update',
+): AgentMutationInput {
+  const normalized: AgentMutationInput = {}
+
+  if (hasOwnField(input, 'name')) {
+    normalized.name = input.name?.trim() ?? (mode === 'update' ? null : undefined)
   }
 
-  const normalizedModelConfig = input.modelConfig?.default.id
-    ? {
-        default: {
-          id: input.modelConfig.default.id,
-          model: input.modelConfig.default.model.trim(),
-        },
-        fallbacks: (input.modelConfig.fallbacks || [])
-          .map((item) => ({
-            id: item.id,
-            model: item.model.trim(),
-          }))
-          .filter((item) => item.id && item.model),
-      }
-    : undefined
-
-  return {
-    name: input.name.trim(),
-    instructions: input.instructions?.trim() || undefined,
-    description: input.description?.trim() || undefined,
-    tags: normalizeList(input.tags),
-    tools: normalizeList(input.tools),
-    skills: normalizeList(input.skills),
-    modelConfig:
-      normalizedModelConfig && normalizedModelConfig.default.model
-        ? normalizedModelConfig
-        : undefined,
+  if (hasOwnField(input, 'instructions')) {
+    const instructions = input.instructions?.trim() ?? ''
+    normalized.instructions = instructions || (mode === 'update' ? null : undefined)
   }
+
+  if (hasOwnField(input, 'description')) {
+    const description = input.description?.trim() ?? ''
+    normalized.description = description || (mode === 'update' ? null : undefined)
+  }
+
+  const normalizeList = (items: string[] | null | undefined) => {
+    const next = items?.map((item) => item.trim()).filter(Boolean) ?? []
+    if (next.length > 0) {
+      return next
+    }
+    return mode === 'update' ? [] : undefined
+  }
+
+  if (hasOwnField(input, 'tags')) {
+    normalized.tags = normalizeList(input.tags)
+  }
+
+  if (hasOwnField(input, 'tools')) {
+    normalized.tools = normalizeList(input.tools)
+  }
+
+  if (hasOwnField(input, 'skills')) {
+    normalized.skills = normalizeList(input.skills)
+  }
+
+  if (hasOwnField(input, 'modelConfig')) {
+    const defaultId = input.modelConfig?.default.id?.trim() ?? ''
+    const defaultModel = input.modelConfig?.default.model?.trim() ?? ''
+
+    normalized.modelConfig =
+      defaultId && defaultModel
+        ? {
+            default: {
+              id: defaultId,
+              model: defaultModel,
+            },
+            fallbacks: (input.modelConfig?.fallbacks || [])
+              .map((item) => ({
+                id: item.id.trim(),
+                model: item.model.trim(),
+              }))
+              .filter((item) => item.id && item.model),
+          }
+        : mode === 'update'
+          ? null
+          : undefined
+  }
+
+  return normalized
 }
 
 export function useAgents() {
@@ -171,7 +216,7 @@ export function useAgents() {
     const result = await createMutation({
       variables: {
         input: {
-          agent: normalizeInput(input),
+          agent: normalizeInput(input, 'create'),
         },
       },
     })
@@ -192,7 +237,7 @@ export function useAgents() {
       variables: {
         input: {
           id,
-          update: normalizeInput({ name: '', ...updates }),
+          update: normalizeInput(updates, 'update'),
         },
       },
     })
