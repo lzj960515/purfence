@@ -21,8 +21,6 @@ Before writing ANY new code, you MUST:
   - Keep files flat in the module directory.
 - Do NOT use wrong imports.
   - Follow existing aliases (e.g. entities should import `BaseEntity` from `@app/shared` if that’s the established pattern).
-- Do NOT forget `entity-id-prefix.json`.
-  - When creating a new entity that extends `BaseEntity`, you MUST update `backend/src/entity-id-prefix.json`.
 - Do NOT make assumptions about GraphQL decorators.
   - Check existing entities: don’t add `@ObjectType` / `@Field` unless needed.
 
@@ -37,6 +35,7 @@ Before writing ANY new code, you MUST:
 If services are already running in your environment, do not start/stop them from an agent; ask the user first.
 
 Common backend commands:
+
 - Dev: `npm -w backend run start:dev`
 - Build: `npm -w backend run build`
 - Lint: `npm -w backend run lint`
@@ -47,7 +46,6 @@ Common backend commands:
 ## Notes
 
 - Entity creation checklist lives at `.claude/commands/create-entity.md`.
-- `BaseEntity` loads prefix mapping from `backend/src/entity-id-prefix.json` (see `backend/libs/shared/src/domain/base-entity.ts`).
 
 ## GraphQL / Pagination limits
 
@@ -69,6 +67,7 @@ Common backend commands:
 #### ✅ 推荐做法
 
 - **使用 `@Transactional()` 注解**：从 `typeorm-transactional` 导入并使用
+
   ```typescript
   import { Transactional } from 'typeorm-transactional';
 
@@ -79,6 +78,7 @@ Common backend commands:
   ```
 
 - **保持方法为 public**：由于 `@Transactional()` 依赖 AOP 代理，在 `private` 方法上不生效
+
   ```typescript
   // ✅ 正确
   @Transactional()

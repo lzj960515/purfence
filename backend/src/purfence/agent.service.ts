@@ -90,10 +90,14 @@ export class PurfenceAgentService {
                 type: 'text',
                 text: params.query,
               },
-              {
-                type: 'text',
-                text: `user uploaded image path is: ${params.imageUrl}`,
-              },
+              ...(params.imageUrl
+                ? [
+                    {
+                      type: 'text' as const,
+                      text: `user uploaded image path is: ${params.imageUrl}`,
+                    },
+                  ]
+                : []),
             ],
           },
         ],

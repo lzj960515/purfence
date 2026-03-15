@@ -64,7 +64,6 @@ experiments/**/*.js.map
 /packaging/*.dSYM/
 /src-tauri/binaries/purfence-backend-*
 /src-tauri/binaries/node_sqlite3.node
-/src-tauri/binaries/entity-id-prefix.json
 /src-tauri/binaries/agents/
 /src-tauri/target/
 /src-tauri/.cargo/

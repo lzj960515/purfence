@@ -7,6 +7,32 @@ export interface SkillItem {
   description: string;
 }
 
+export interface AgentModelRoutePayload {
+  id: string;
+  model: string;
+}
+
+export interface AgentModelConfigPayload {
+  default: AgentModelRoutePayload;
+  fallbacks: AgentModelRoutePayload[];
+}
+
+export interface AgentHistoryItem {
+  id: string;
+  agentId: string;
+  version: number;
+  name: string;
+  instructions?: string | null;
+  description?: string | null;
+  changeDescription?: string | null;
+  tags?: string[] | null;
+  tools?: string[] | null;
+  skills?: string[] | null;
+  modelConfig?: AgentModelConfigPayload | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** 获取可用工具列表 */
 export async function fetchTools(): Promise<Tool[]> {
   const backendBaseUrl = getBackendBaseUrl();

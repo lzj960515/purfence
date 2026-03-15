@@ -1,12 +1,18 @@
 import { BaseDto } from '@app/shared';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { FilterableField } from '@ptc-org/nestjs-query-graphql';
 import { GraphQLJSON } from 'graphql-scalars';
 import { ModelConfig } from '../type';
 
-@ObjectType('Agent')
-export class AgentDto extends BaseDto {
+@ObjectType('AgentHistory')
+export class AgentHistoryDto extends BaseDto {
   @FilterableField()
+  agentId: string;
+
+  @FilterableField(() => Int)
+  version: number;
+
+  @Field()
   name: string;
 
   @Field({ nullable: true })

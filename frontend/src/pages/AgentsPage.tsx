@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
 import {
+  ArrowLeftRight,
   BrainCircuit,
   CircleDashed,
+  History,
   PencilLine,
   Plus,
   RefreshCw,
+  RotateCcw,
   Trash2,
   Wrench,
   X,
@@ -12,6 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -24,7 +29,19 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { DeleteConfirmDialog } from '@/components/settings/DeleteConfirmDialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import {
+  GET_AGENT_HISTORIES,
+  ROLLBACK_AGENT_HISTORY,
+} from '@/api/agent.graphql'
 import {
   type AgentInput,
   type AgentItem,
@@ -32,7 +49,11 @@ import {
   useAgents,
 } from '@/hooks/useAgents'
 import { useProviderConfigs } from '@/hooks/useProviderConfigs'
-import { fetchSkills, fetchTools } from '@/api/agent.api'
+import {
+  type AgentHistoryItem,
+  fetchSkills,
+  fetchTools,
+} from '@/api/agent.api'
 import {
   CatalogPickerDialog,
   type CatalogOption,
@@ -43,6 +64,7 @@ type FormState = {
   id?: string
   name: string
   description: string
+  changeDescription: string
   instructions: string
   tags: string[]
   tools: string[]
@@ -59,11 +81,17 @@ type FallbackDraft = {
 const EMPTY_FORM: FormState = {
   name: '',
   description: '',
+  changeDescription: '',
   instructions: '',
   tags: [],
   tools: [],
   skills: [],
 }
+
+const AgentVersionDiffDialog = lazy(async () => {
+  const module = await import('@/components/agents/AgentVersionDiffDialog')
+  return { default: module.AgentVersionDiffDialog }
+})
 
 function makeFallbackKey() {
   return `fallback-${crypto.randomUUID()}`
@@ -78,6 +106,7 @@ function agentToForm(agent?: AgentItem | null): FormState {
     id: agent.id,
     name: agent.name,
     description: agent.description || '',
+    changeDescription: '',
     instructions: agent.instructions || '',
     tags: agent.tags || [],
     tools: agent.tools || [],
@@ -90,6 +119,7 @@ function formToInput(form: FormState, fallbacks: FallbackDraft[]): AgentInput {
   return {
     name: form.name,
     description: form.description,
+    changeDescription: form.changeDescription,
     instructions: form.instructions,
     tags: form.tags,
     tools: form.tools,
@@ -131,11 +161,31 @@ export function AgentsPage() {
   const [skillOptions, setSkillOptions] = useState<CatalogOption[]>([])
   const [catalogsLoading, setCatalogsLoading] = useState(false)
   const [fallbacks, setFallbacks] = useState<FallbackDraft[]>([])
+  const [historyItems, setHistoryItems] = useState<AgentHistoryItem[]>([])
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([])
+  const [diffDialogOpen, setDiffDialogOpen] = useState(false)
+  const [rollbackTarget, setRollbackTarget] = useState<AgentHistoryItem | null>(null)
+  const [rollbacking, setRollbacking] = useState(false)
 
   const activeProviders = useMemo(
     () => providerConfigs.filter((config) => config.isActive),
     [providerConfigs],
   )
+
+  const {
+    data: historyData,
+    loading: historyLoading,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useQuery(GET_AGENT_HISTORIES, {
+    variables: { agentId: selectedAgentId ?? '' },
+    skip: isCreating || !selectedAgentId || !historyDialogOpen,
+    fetchPolicy: 'network-only',
+  })
+
+  const [rollbackHistoryMutation] = useMutation(ROLLBACK_AGENT_HISTORY)
 
   const selectedAgent = useMemo(
     () => items.find((item) => item.id === selectedAgentId) ?? null,
@@ -206,6 +256,44 @@ export function AgentsPage() {
   const instructionsWordCount = useMemo(() => {
     return form.instructions.trim() ? form.instructions.trim().split(/\s+/).length : 0
   }, [form.instructions])
+
+  const leftCompareVersion = useMemo(
+    () => historyItems.find((item) => item.id === selectedHistoryIds[0]) ?? null,
+    [historyItems, selectedHistoryIds],
+  )
+
+  const rightCompareVersion = useMemo(
+    () => historyItems.find((item) => item.id === selectedHistoryIds[1]) ?? null,
+    [historyItems, selectedHistoryIds],
+  )
+
+  const canCompare = selectedHistoryIds.length === 2 && !!leftCompareVersion && !!rightCompareVersion
+
+  useEffect(() => {
+    if (isCreating || !selectedAgentId || !historyDialogOpen) {
+      setHistoryItems([])
+      setSelectedHistoryIds([])
+      return
+    }
+
+    const versions = historyData?.agentHistories?.nodes ?? []
+    setHistoryItems(versions)
+    setSelectedHistoryIds((current) =>
+      current.filter((id) => versions.some((item: AgentHistoryItem) => item.id === id)).slice(0, 2),
+    )
+  }, [historyData, historyDialogOpen, isCreating, selectedAgentId])
+
+  useEffect(() => {
+    if (!historyError) {
+      return
+    }
+
+    toast({
+      title: '版本记录加载失败',
+      description: historyError.message,
+      variant: 'destructive',
+    })
+  }, [historyError, toast])
 
   const createNewAgent = () => {
     setIsCreating(true)
@@ -281,7 +369,7 @@ export function AgentsPage() {
         description: 'Agent 名称不能为空。',
         variant: 'destructive',
       })
-      return
+      return false
     }
 
     setIsSaving(true)
@@ -292,20 +380,40 @@ export function AgentsPage() {
         const created = await createItem(payload)
         setIsCreating(false)
         setSelectedAgentId(created.id)
+        setForm((prev) => ({ ...prev, changeDescription: '' }))
         toast({ title: '创建成功', description: '新的 Agent 已加入主菜单管理列表。' })
       } else if (form.id) {
         await updateItem(form.id, payload)
+        if (historyDialogOpen) {
+          await refetchHistory({ agentId: form.id })
+        }
+        setForm((prev) => ({ ...prev, changeDescription: '' }))
         toast({ title: '保存成功', description: 'Agent 配置已更新。' })
       }
+      return true
     } catch (saveError) {
       toast({
         title: '保存失败',
         description: saveError instanceof Error ? saveError.message : '请稍后重试',
         variant: 'destructive',
       })
+      return false
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const openSaveDialog = () => {
+    if (!form.name.trim()) {
+      toast({
+        title: '请填写名称',
+        description: 'Agent 名称不能为空。',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setSaveDialogOpen(true)
   }
 
   const handleDelete = async () => {
@@ -326,6 +434,89 @@ export function AgentsPage() {
         variant: 'destructive',
       })
     }
+  }
+
+  const handleRollback = async () => {
+    if (!selectedAgentId || !rollbackTarget) return
+
+    setRollbacking(true)
+    try {
+      await rollbackHistoryMutation({
+        variables: {
+          agentId: selectedAgentId,
+          historyId: rollbackTarget.id,
+          changeDescription:
+            form.changeDescription.trim() || `回滚到 v${rollbackTarget.version}`,
+        },
+      })
+
+      const refreshedItems = await refetchItems()
+      if (historyDialogOpen) {
+        const historyResult = await refetchHistory({ agentId: selectedAgentId })
+        const versions = historyResult.data?.agentHistories?.nodes ?? []
+        setHistoryItems(versions)
+        setSelectedHistoryIds([])
+      }
+
+      const refreshedAgent = refreshedItems?.find((item: AgentItem) => item.id === selectedAgentId)
+      if (refreshedAgent) {
+        setForm(agentToForm(refreshedAgent))
+        setFallbacks(
+          (refreshedAgent.modelConfig?.fallbacks || []).map((item: AgentModelConfig['fallbacks'][number]) => ({
+            key: makeFallbackKey(),
+            id: item.id,
+            model: item.model,
+          })),
+        )
+      }
+
+      setForm((prev) => ({ ...prev, changeDescription: '' }))
+      setRollbackTarget(null)
+      toast({
+        title: '回滚成功',
+        description: `已将 Agent 回滚到 v${rollbackTarget.version} 的配置，并生成新的当前版本。`,
+      })
+    } catch (rollbackError) {
+      toast({
+        title: '回滚失败',
+        description: rollbackError instanceof Error ? rollbackError.message : '请稍后重试',
+        variant: 'destructive',
+      })
+    } finally {
+      setRollbacking(false)
+    }
+  }
+
+  const openDiffDialog = () => {
+    if (!canCompare) {
+      toast({
+        title: '请选择两个不同版本',
+        description: '需要先从版本列表中选择左右两个不同版本，才能开始对比。',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setDiffDialogOpen(true)
+  }
+
+  const toggleHistorySelection = (historyId: string, checked: boolean) => {
+    setSelectedHistoryIds((current) => {
+      if (checked) {
+        if (current.includes(historyId)) {
+          return current
+        }
+
+        return [...current, historyId].slice(-2)
+      }
+
+      return current.filter((id) => id !== historyId)
+    })
+  }
+
+  const openHistoryDialog = () => {
+    setSelectedHistoryIds([])
+    setHistoryDialogOpen(true)
   }
 
   const currentAgentLabel = isCreating ? '新 Agent 草稿' : selectedAgent?.name || '未选择 Agent'
@@ -399,6 +590,12 @@ export function AgentsPage() {
 
               <div className="flex flex-wrap items-center gap-2">
                 {!isCreating && selectedAgent ? (
+                  <Button variant="outline" className="gap-2" onClick={openHistoryDialog}>
+                    <History className="h-4 w-4" />
+                    版本记录
+                  </Button>
+                ) : null}
+                {!isCreating && selectedAgent ? (
                   <Button
                     variant="outline"
                     className="gap-2 text-destructive hover:text-destructive"
@@ -413,7 +610,7 @@ export function AgentsPage() {
                     取消新建
                   </Button>
                 ) : null}
-                <Button className="gap-2" onClick={handleSave} disabled={isSaving}>
+                <Button className="gap-2" onClick={openSaveDialog} disabled={isSaving}>
                   <PencilLine className="h-4 w-4" />
                   {isSaving ? '保存中...' : isCreating ? '创建 Agent' : '保存修改'}
                 </Button>
@@ -701,6 +898,7 @@ export function AgentsPage() {
                     </CardContent>
                   </Card>
                 </div>
+
               </div>
             </div>
           </div>
@@ -745,6 +943,169 @@ export function AgentsPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeletingAgent(null)}
       />
+
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent className="sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>{isCreating ? '创建 Agent 前填写变更说明' : '保存修改前填写变更说明'}</DialogTitle>
+            <DialogDescription>
+              这段说明会写入当前版本记录，方便后续查看历史、回滚和比对。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="agent-save-change-description">变更说明</Label>
+            <Textarea
+              id="agent-save-change-description"
+              value={form.changeDescription}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, changeDescription: event.target.value }))
+              }
+              className="min-h-[120px]"
+              placeholder="简要描述本次修改的目的，例如：收紧工具权限、调整系统提示词、切换默认模型。"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)} disabled={isSaving}>
+              取消
+            </Button>
+            <Button
+              onClick={async () => {
+                const saved = await handleSave()
+                if (saved) {
+                  setSaveDialogOpen(false)
+                }
+              }}
+              disabled={isSaving}
+            >
+              {isSaving ? '保存中...' : '确认保存'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="h-[82vh] max-w-[960px] overflow-hidden p-0">
+          <DialogHeader className="border-b px-6 py-5">
+            <DialogTitle>版本记录</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-between gap-3 border-b bg-muted/20 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="rounded-full px-3 py-1">
+                已选 {selectedHistoryIds.length}/2
+              </Badge>
+            </div>
+            <Button type="button" variant="default" className="gap-2" onClick={openDiffDialog} disabled={!canCompare}>
+              <ArrowLeftRight className="h-4 w-4" />
+              对比版本
+            </Button>
+          </div>
+          <div className="h-full overflow-y-auto px-6 py-5">
+            {historyLoading ? (
+              <div className="flex items-center justify-center rounded-2xl border border-dashed bg-muted/20 px-4 py-8 text-sm text-muted-foreground">
+                <CircleDashed className="mr-2 h-4 w-4 animate-spin" />
+                正在加载版本记录...
+              </div>
+            ) : historyItems.length === 0 ? (
+              <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-8 text-sm text-muted-foreground">
+                当前还没有可展示的版本记录。
+              </div>
+            ) : (
+              <div className="space-y-3 pb-6">
+                {historyItems.map((history, index) => {
+                  const isCurrent = index === 0
+                  const isChecked = selectedHistoryIds.includes(history.id)
+
+                  return (
+                    <div
+                      key={history.id}
+                      className={isChecked
+                        ? 'flex cursor-pointer gap-4 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 transition-colors'
+                        : 'flex cursor-pointer gap-4 rounded-2xl border border-border/80 bg-background/90 p-4 transition-colors hover:border-border hover:bg-muted/20'}
+                    >
+                      <label
+                        htmlFor={`history-select-${history.id}`}
+                        className="flex flex-1 cursor-pointer gap-4"
+                      >
+                        <Checkbox
+                          id={`history-select-${history.id}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => toggleHistorySelection(history.id, checked === true)}
+                          aria-label={`选择版本 v${history.version}`}
+                          className="mt-0.5"
+                        />
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={isCurrent ? 'default' : 'secondary'}>v{history.version}</Badge>
+                            {isCurrent ? <Badge variant="outline">当前</Badge> : null}
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(history.createdAt).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="text-sm font-medium">{history.name}</div>
+                          {history.changeDescription ? (
+                            <p className="text-sm text-muted-foreground">{history.changeDescription}</p>
+                          ) : null}
+                          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                            <span>Tools: {(history.tools || []).length || '全部'}</span>
+                            <span>Skills: {(history.skills || []).length || '全部'}</span>
+                            <span>Tags: {(history.tags || []).length || '开放'}</span>
+                          </div>
+                        </div>
+                      </label>
+                      {!isCurrent ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 self-start"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            setRollbackTarget(history)
+                          }}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          回滚到此版本
+                        </Button>
+                      ) : null}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!rollbackTarget} onOpenChange={(open) => !open && setRollbackTarget(null)}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>确认回滚版本</DialogTitle>
+            <DialogDescription>
+              {rollbackTarget
+                ? `确认将当前 Agent 回滚到 v${rollbackTarget.version} 吗？回滚会生成一个新的当前版本记录。`
+                : '请选择要回滚的版本。'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRollbackTarget(null)} disabled={rollbacking}>
+              取消
+            </Button>
+            <Button onClick={() => void handleRollback()} disabled={rollbacking}>
+              {rollbacking ? '回滚中...' : '确认回滚'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Suspense fallback={null}>
+        <AgentVersionDiffDialog
+          open={diffDialogOpen}
+          leftVersion={leftCompareVersion}
+          rightVersion={rightCompareVersion}
+          onOpenChange={setDiffDialogOpen}
+        />
+      </Suspense>
     </div>
   )
 }

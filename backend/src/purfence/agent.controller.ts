@@ -12,7 +12,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MyAgentService, MessageService, loadSkills } from '@app/my-agent';
+import { MyAgentService, MessageService } from '@app/my-agent';
+import { loadSkills } from '@app/my-agent/utils/skill-loader.util';
 import { Memory } from '@voltagent/core';
 import type { Response } from 'express';
 import {

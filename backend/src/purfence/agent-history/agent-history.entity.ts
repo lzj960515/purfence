@@ -1,39 +1,45 @@
-import { BaseEntity } from '@app/shared';
+import { BaseEntity, IDColumnOpts } from '@app/shared';
 import { Column, Entity, Index } from 'typeorm';
 import { ModelConfig } from '../type';
 
-@Index(['name'], { unique: true })
 @Entity()
-export class Agent extends BaseEntity {
+@Index(['agentId', 'version'], { unique: true })
+export class AgentHistory extends BaseEntity {
+  @Column({ ...IDColumnOpts })
+  agentId: string;
+
+  @Column({ type: 'int' })
+  version: number;
+
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
   @Column({ type: 'text', nullable: true })
-  instructions: string;
+  instructions?: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'text', nullable: true })
-  changeDescription: string;
+  changeDescription?: string;
 
   @Column({
     type: 'simple-json',
     nullable: true,
     comment: '为空所有agent都可以访问该agent',
   })
-  tags: string[];
+  tags?: string[];
 
   @Column({ type: 'simple-json', nullable: true, comment: '为空使用全部工具' })
-  tools: string[];
+  tools?: string[];
 
   @Column({
     type: 'simple-json',
     nullable: true,
     comment: '为空使用全部skills',
   })
-  skills: string[];
+  skills?: string[];
 
   @Column({ type: 'json', nullable: true, comment: '为空使用全局配置' })
-  modelConfig: ModelConfig;
+  modelConfig?: ModelConfig;
 }

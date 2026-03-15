@@ -1,6 +1,7 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsObject,
   IsOptional,
@@ -11,7 +12,16 @@ import { GraphQLJSON } from 'graphql-scalars';
 import { ModelConfig } from '../type';
 
 @InputType()
-export class AgentCreateInput {
+export class AgentHistoryCreateInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  agentId: string;
+
+  @Field(() => Int)
+  @IsInt()
+  version: number;
+
   @Field()
   @IsString()
   @IsNotEmpty()

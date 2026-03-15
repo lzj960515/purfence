@@ -8,6 +8,7 @@ import { NestjsQueryTypeOrmModule } from '@ptc-org/nestjs-query-typeorm';
 import { AgentCreateInput } from './agent-create.input';
 import { AgentDto } from './agent.dto';
 import { Agent } from './agent.entity';
+import { AgentSubscriber } from './agent.subscriber';
 import { AgentUpdateInput } from './agent-update.input';
 
 @Global()
@@ -31,5 +32,6 @@ import { AgentUpdateInput } from './agent-update.input';
       ],
     }),
   ],
+  providers: [AgentSubscriber],
 })
 export class AgentModule {}

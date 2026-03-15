@@ -22,6 +22,7 @@ export interface AgentItem {
   name: string
   instructions?: string
   description?: string
+  changeDescription?: string
   tags?: string[]
   tools?: string[]
   skills?: string[]
@@ -34,6 +35,7 @@ export interface AgentInput {
   name: string
   instructions?: string
   description?: string
+  changeDescription?: string
   tags?: string[]
   tools?: string[]
   skills?: string[]
@@ -44,6 +46,7 @@ type AgentMutationInput = {
   name?: string | null
   instructions?: string | null
   description?: string | null
+  changeDescription?: string | null
   tags?: string[] | null
   tools?: string[] | null
   skills?: string[] | null
@@ -55,6 +58,7 @@ type AgentNode = {
   name?: string | null
   instructions?: string | null
   description?: string | null
+  changeDescription?: string | null
   tags?: unknown
   tools?: unknown
   skills?: unknown
@@ -113,6 +117,7 @@ function mapFromGraphQL(node: AgentNode): AgentItem {
     name: String(node.name || ''),
     instructions: node.instructions || undefined,
     description: node.description || undefined,
+    changeDescription: node.changeDescription || undefined,
     tags: toStringArray(node.tags),
     tools: toStringArray(node.tools),
     skills: toStringArray(node.skills),
@@ -144,6 +149,12 @@ function normalizeInput(
   if (hasOwnField(input, 'description')) {
     const description = input.description?.trim() ?? ''
     normalized.description = description || (mode === 'update' ? null : undefined)
+  }
+
+  if (hasOwnField(input, 'changeDescription')) {
+    const changeDescription = input.changeDescription?.trim() ?? ''
+    normalized.changeDescription =
+      changeDescription || (mode === 'update' ? null : undefined)
   }
 
   const normalizeList = (items: string[] | null | undefined) => {
@@ -231,7 +242,10 @@ export function useAgents() {
     return mapped
   }
 
-  const updateItem = async (id: string, updates: Partial<AgentInput>) => {
+  const updateItem = async (
+    id: string,
+    updates: Partial<AgentInput>,
+  ) => {
     setError(null)
     const result = await updateMutation({
       variables: {
@@ -265,10 +279,17 @@ export function useAgents() {
   const refetchItems = async () => {
     setLoading(true)
     try {
-      await refetch()
+      const result = await refetch()
+      if (result.data?.agents?.nodes) {
+        const nextItems = result.data.agents.nodes.map((node: AgentNode) => mapFromGraphQL(node))
+        setItems(nextItems)
+        return nextItems
+      }
+      return items
     } catch (err) {
       const nextError = err instanceof Error ? err : new Error('刷新 Agent 列表失败')
       setError(nextError)
+      throw nextError
     } finally {
       setLoading(false)
     }
