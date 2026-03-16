@@ -4,7 +4,7 @@ import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
 import { extractText, GetMessagesOptions, Memory } from '@voltagent/core';
 import { type ToolUIPart, type UIMessage } from 'ai';
 import _ from 'lodash';
-import { AgentConversationSession } from './agent-conversation-sessions.ai.entity';
+import { AgentConversationSession } from './agent-conversation-sessions.entity';
 import { MyModel } from './model';
 import { bridgePrompt } from './prompt';
 import type { ChatOptions } from './types';

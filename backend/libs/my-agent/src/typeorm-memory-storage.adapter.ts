@@ -11,10 +11,10 @@ import type {
 import { ConversationAlreadyExistsError } from '@voltagent/core';
 import type { UIMessage } from 'ai';
 import { In } from 'typeorm';
-import { AgentMemoryConversation } from './agent-memory-conversation.ai.entity';
-import { AgentMemoryMessage } from './agent-memory-message.ai.entity';
-import { AgentWorkingMemory } from './agent-working-memory.ai.entity';
-import { AgentWorkflowState } from './agent-workflow-state.ai.entity';
+import { AgentMemoryConversation } from './agent-memory-conversation.entity';
+import { AgentMemoryMessage } from './agent-memory-message.entity';
+import { AgentWorkingMemory } from './agent-working-memory.entity';
+import { AgentWorkflowState } from './agent-workflow-state.entity';
 
 function toIso(d: Date) {
   return d.toISOString();

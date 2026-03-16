@@ -27,17 +27,4 @@ export class AgentConversationSession extends BaseEntity {
 
   @Column({ default: 0 })
   cachedInputTokens: number;
-
-  /**
-   * @deprecated use fields directly
-   */
-  get totalUsage() {
-    return {
-      inputTokens: this.inputTokens,
-      outputTokens: this.outputTokens,
-      totalTokens: this.totalTokens,
-      reasoningTokens: this.reasoningTokens,
-      cachedInputTokens: this.cachedInputTokens,
-    };
-  }
 }

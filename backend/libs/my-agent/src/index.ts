@@ -4,11 +4,11 @@ export { MyAgentService } from './my-agent.service';
 export { LlmService } from './llm.service';
 export { MessageService } from './message.service';
 export { MyAgent } from './my-agent';
-export * from './agent-conversation-sessions.ai.entity';
-export * from './agent-memory-conversation.ai.entity';
-export * from './agent-memory-message.ai.entity';
-export * from './agent-working-memory.ai.entity';
-export * from './agent-workflow-state.ai.entity';
+export * from './agent-conversation-sessions.entity';
+export * from './agent-memory-conversation.entity';
+export * from './agent-memory-message.entity';
+export * from './agent-working-memory.entity';
+export * from './agent-workflow-state.entity';
 export type {
   MyAgentModuleOptions,
   AgentOptions,

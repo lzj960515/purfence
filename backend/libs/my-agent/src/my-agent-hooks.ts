@@ -9,7 +9,7 @@ import {
   messageHelpers,
 } from '@voltagent/core';
 import _ from 'lodash';
-import { AgentConversationSession } from './agent-conversation-sessions.ai.entity';
+import { AgentConversationSession } from './agent-conversation-sessions.entity';
 import { LlmService } from './llm.service';
 import { Providers } from './types';
 import { CommonService } from '@src/common';

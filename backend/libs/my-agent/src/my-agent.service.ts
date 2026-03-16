@@ -32,7 +32,7 @@ import {
   timer,
 } from 'rxjs';
 import { z } from 'zod';
-import { AgentConversationSession } from './agent-conversation-sessions.ai.entity';
+import { AgentConversationSession } from './agent-conversation-sessions.entity';
 import { AgentSseErrorActionType } from './agent-sse-error-action.enum';
 import {
   getErrorActionType,
