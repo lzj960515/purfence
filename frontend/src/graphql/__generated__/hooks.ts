@@ -24,6 +24,22 @@ export type Scalars = {
   link__Import: { input: any; output: any; }
 };
 
+export type Agent = {
+  __typename?: 'Agent';
+  changeDescription?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  instructions?: Maybe<Scalars['String']['output']>;
+  modelConfig?: Maybe<Scalars['JSON']['output']>;
+  name: Scalars['String']['output'];
+  skills?: Maybe<Array<Scalars['String']['output']>>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  tools?: Maybe<Array<Scalars['String']['output']>>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type AgentArtifact = {
   __typename?: 'AgentArtifact';
   content?: Maybe<AgentArtifactContentDto>;
@@ -108,6 +124,207 @@ export type AgentArtifactUpdateInput = {
   published: Scalars['Boolean']['input'];
 };
 
+export type AgentConnection = {
+  __typename?: 'AgentConnection';
+  /** Array of nodes. */
+  nodes: Array<Agent>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AgentConversationSession = {
+  __typename?: 'AgentConversationSession';
+  createdAt: Scalars['DateTime']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentConversationSessionConnection = {
+  __typename?: 'AgentConversationSessionConnection';
+  /** Array of nodes. */
+  nodes: Array<AgentConversationSession>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AgentConversationSessionCreateInput = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentConversationSessionDeleteResponse = {
+  __typename?: 'AgentConversationSessionDeleteResponse';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentConversationSessionFilter = {
+  and?: InputMaybe<Array<AgentConversationSessionFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  or?: InputMaybe<Array<AgentConversationSessionFilter>>;
+  title?: InputMaybe<StringFieldComparison>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+  userId?: InputMaybe<StringFieldComparison>;
+};
+
+export type AgentConversationSessionSort = {
+  direction: SortDirection;
+  field: AgentConversationSessionSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type AgentConversationSessionSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'title'
+  | 'updatedAt'
+  | 'userId';
+
+export type AgentConversationSessionUpdateInput = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentCreateInput = {
+  changeDescription?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  modelConfig?: InputMaybe<Scalars['JSON']['input']>;
+  name: Scalars['String']['input'];
+  skills?: InputMaybe<Array<Scalars['String']['input']>>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  tools?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type AgentDeleteResponse = {
+  __typename?: 'AgentDeleteResponse';
+  changeDescription?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  instructions?: Maybe<Scalars['String']['output']>;
+  modelConfig?: Maybe<Scalars['JSON']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  skills?: Maybe<Array<Scalars['String']['output']>>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  tools?: Maybe<Array<Scalars['String']['output']>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentFilter = {
+  and?: InputMaybe<Array<AgentFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<AgentFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type AgentHistory = {
+  __typename?: 'AgentHistory';
+  agentId: Scalars['String']['output'];
+  changeDescription?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id: Scalars['ID']['output'];
+  instructions?: Maybe<Scalars['String']['output']>;
+  modelConfig?: Maybe<Scalars['JSON']['output']>;
+  name: Scalars['String']['output'];
+  skills?: Maybe<Array<Scalars['String']['output']>>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  tools?: Maybe<Array<Scalars['String']['output']>>;
+  updatedAt: Scalars['DateTime']['output'];
+  version: Scalars['Int']['output'];
+};
+
+export type AgentHistoryConnection = {
+  __typename?: 'AgentHistoryConnection';
+  /** Array of nodes. */
+  nodes: Array<AgentHistory>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AgentHistoryDeleteResponse = {
+  __typename?: 'AgentHistoryDeleteResponse';
+  agentId?: Maybe<Scalars['String']['output']>;
+  changeDescription?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  /** ID */
+  id?: Maybe<Scalars['ID']['output']>;
+  instructions?: Maybe<Scalars['String']['output']>;
+  modelConfig?: Maybe<Scalars['JSON']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  skills?: Maybe<Array<Scalars['String']['output']>>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  tools?: Maybe<Array<Scalars['String']['output']>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['Int']['output']>;
+};
+
+export type AgentHistoryFilter = {
+  agentId?: InputMaybe<StringFieldComparison>;
+  and?: InputMaybe<Array<AgentHistoryFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  or?: InputMaybe<Array<AgentHistoryFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+  version?: InputMaybe<IntFieldComparison>;
+};
+
+export type AgentHistorySort = {
+  direction: SortDirection;
+  field: AgentHistorySortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type AgentHistorySortFields =
+  | 'agentId'
+  | 'createdAt'
+  | 'id'
+  | 'updatedAt'
+  | 'version';
+
+export type AgentSort = {
+  direction: SortDirection;
+  field: AgentSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type AgentSortFields =
+  | 'createdAt'
+  | 'id'
+  | 'name'
+  | 'updatedAt';
+
+export type AgentUpdateInput = {
+  changeDescription?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  modelConfig?: InputMaybe<Scalars['JSON']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  skills?: InputMaybe<Array<Scalars['String']['input']>>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  tools?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 /** Third-party app integration type */
 export type AppConfigType =
   | 'SLACK';
@@ -137,6 +354,16 @@ export type BooleanFieldComparison = {
 export type CreateManyPurfenceIssuesInput = {
   /** Array of records to create */
   purfenceIssues: Array<PurfenceIssueCreateInput>;
+};
+
+export type CreateOneAgentConversationSessionInput = {
+  /** The record to create */
+  agentConversationSession: AgentConversationSessionCreateInput;
+};
+
+export type CreateOneAgentInput = {
+  /** The record to create */
+  agent: AgentCreateInput;
 };
 
 export type CreateOneModelProviderInput = {
@@ -208,6 +435,21 @@ export type DeleteManyResponse = {
   __typename?: 'DeleteManyResponse';
   /** The number of records deleted. */
   deletedCount: Scalars['Int']['output'];
+};
+
+export type DeleteOneAgentConversationSessionInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneAgentHistoryInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
+};
+
+export type DeleteOneAgentInput = {
+  /** The id of the record to delete. */
+  id: Scalars['ID']['input'];
 };
 
 export type DeleteOneModelProviderInput = {
@@ -390,6 +632,8 @@ export type ModelProviderUpdateInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createManyPurfenceIssues: Array<PurfenceIssue>;
+  createOneAgent: Agent;
+  createOneAgentConversationSession: AgentConversationSession;
   createOneModelProvider: ModelProvider;
   createOneMyQueue: MyQueue;
   createOneMyQueueJob: MyQueueJob;
@@ -400,6 +644,9 @@ export type Mutation = {
   createPurfenceScheduledTask: PurfenceScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
+  deleteOneAgent: AgentDeleteResponse;
+  deleteOneAgentConversationSession: AgentConversationSessionDeleteResponse;
+  deleteOneAgentHistory: AgentHistoryDeleteResponse;
   deleteOneModelProvider: ModelProviderDeleteResponse;
   deleteOneMyQueue: MyQueueDeleteResponse;
   deleteOneMyQueueJob: MyQueueJobDeleteResponse;
@@ -409,13 +656,16 @@ export type Mutation = {
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
   deletePurfenceScheduledTask: Scalars['ID']['output'];
+  rollbackAgentHistory: Agent;
   runPurfenceScheduledTask: Scalars['ID']['output'];
   startIssue: Scalars['ID']['output'];
   startRemoteIssue: PurfenceIssue;
   updateManyPurfenceExecutions: UpdateManyResponse;
   updateManyPurfenceIssues: UpdateManyResponse;
   updateManyPurfenceProjects: UpdateManyResponse;
+  updateOneAgent: Agent;
   updateOneAgentArtifact: AgentArtifact;
+  updateOneAgentConversationSession: AgentConversationSession;
   updateOneModelProvider: ModelProvider;
   updateOneMyQueue: MyQueue;
   updateOneMyQueueJob: MyQueueJob;
@@ -430,6 +680,16 @@ export type Mutation = {
 
 export type MutationCreateManyPurfenceIssuesArgs = {
   input: CreateManyPurfenceIssuesInput;
+};
+
+
+export type MutationCreateOneAgentArgs = {
+  input: CreateOneAgentInput;
+};
+
+
+export type MutationCreateOneAgentConversationSessionArgs = {
+  input: CreateOneAgentConversationSessionInput;
 };
 
 
@@ -483,6 +743,21 @@ export type MutationDeleteManyPurfenceProjectsArgs = {
 };
 
 
+export type MutationDeleteOneAgentArgs = {
+  input: DeleteOneAgentInput;
+};
+
+
+export type MutationDeleteOneAgentConversationSessionArgs = {
+  input: DeleteOneAgentConversationSessionInput;
+};
+
+
+export type MutationDeleteOneAgentHistoryArgs = {
+  input: DeleteOneAgentHistoryInput;
+};
+
+
 export type MutationDeleteOneModelProviderArgs = {
   input: DeleteOneModelProviderInput;
 };
@@ -528,6 +803,13 @@ export type MutationDeletePurfenceScheduledTaskArgs = {
 };
 
 
+export type MutationRollbackAgentHistoryArgs = {
+  agentId: Scalars['ID']['input'];
+  changeDescription?: InputMaybe<Scalars['String']['input']>;
+  historyId: Scalars['ID']['input'];
+};
+
+
 export type MutationRunPurfenceScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
@@ -558,8 +840,18 @@ export type MutationUpdateManyPurfenceProjectsArgs = {
 };
 
 
+export type MutationUpdateOneAgentArgs = {
+  input: UpdateOneAgentInput;
+};
+
+
 export type MutationUpdateOneAgentArtifactArgs = {
   input: UpdateOneAgentArtifactInput;
+};
+
+
+export type MutationUpdateOneAgentConversationSessionArgs = {
+  input: UpdateOneAgentConversationSessionInput;
 };
 
 
@@ -1392,8 +1684,14 @@ export type PurfenceStatusFilterComparison = {
 export type Query = {
   __typename?: 'Query';
   _service: _Service;
+  agent: Agent;
   agentArtifact: AgentArtifact;
   agentArtifacts: AgentArtifactConnection;
+  agentConversationSession: AgentConversationSession;
+  agentConversationSessions: AgentConversationSessionConnection;
+  agentHistories: AgentHistoryConnection;
+  agentHistory: AgentHistory;
+  agents: AgentConnection;
   /** ping test */
   hello?: Maybe<Scalars['JSON']['output']>;
   modelProvider: ModelProvider;
@@ -1419,6 +1717,11 @@ export type Query = {
 };
 
 
+export type QueryAgentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryAgentArtifactArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1428,6 +1731,37 @@ export type QueryAgentArtifactsArgs = {
   filter?: AgentArtifactFilter;
   paging?: OffsetPaging;
   sorting?: Array<AgentArtifactSort>;
+};
+
+
+export type QueryAgentConversationSessionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryAgentConversationSessionsArgs = {
+  filter?: AgentConversationSessionFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<AgentConversationSessionSort>;
+};
+
+
+export type QueryAgentHistoriesArgs = {
+  filter?: AgentHistoryFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<AgentHistorySort>;
+};
+
+
+export type QueryAgentHistoryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryAgentsArgs = {
+  filter?: AgentFilter;
+  paging?: OffsetPaging;
+  sorting?: Array<AgentSort>;
 };
 
 
@@ -1610,6 +1944,20 @@ export type UpdateOneAgentArtifactInput = {
   update: AgentArtifactUpdateInput;
 };
 
+export type UpdateOneAgentConversationSessionInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: AgentConversationSessionUpdateInput;
+};
+
+export type UpdateOneAgentInput = {
+  /** The id of the record to update */
+  id: Scalars['ID']['input'];
+  /** The update to apply. */
+  update: AgentUpdateInput;
+};
+
 export type UpdateOneModelProviderInput = {
   /** The id of the record to update */
   id: Scalars['ID']['input'];
@@ -1676,6 +2024,78 @@ export type Link__Purpose =
   | 'EXECUTION'
   /** `SECURITY` features provide metadata necessary to securely resolve fields. */
   | 'SECURITY';
+
+export type GetAgentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAgentsQuery = { __typename?: 'Query', agents: { __typename?: 'AgentConnection', totalCount: number, nodes: Array<{ __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
+
+export type GetAgentHistoriesQueryVariables = Exact<{
+  agentId: Scalars['String']['input'];
+}>;
+
+
+export type GetAgentHistoriesQuery = { __typename?: 'Query', agentHistories: { __typename?: 'AgentHistoryConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentHistory', id: string, agentId: string, version: number, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
+
+export type AgentConversationSessionsQueryVariables = Exact<{
+  filter?: InputMaybe<AgentConversationSessionFilter>;
+  paging?: InputMaybe<OffsetPaging>;
+  sorting?: InputMaybe<Array<AgentConversationSessionSort> | AgentConversationSessionSort>;
+}>;
+
+
+export type AgentConversationSessionsQuery = { __typename?: 'Query', agentConversationSessions: { __typename?: 'AgentConversationSessionConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentConversationSession', id: string, userId?: string | null, title?: string | null, createdAt: any, updatedAt: any }> } };
+
+export type CreateOneAgentConversationSessionMutationVariables = Exact<{
+  input: AgentConversationSessionCreateInput;
+}>;
+
+
+export type CreateOneAgentConversationSessionMutation = { __typename?: 'Mutation', createOneAgentConversationSession: { __typename?: 'AgentConversationSession', id: string, userId?: string | null, title?: string | null, createdAt: any, updatedAt: any } };
+
+export type DeleteOneAgentConversationSessionMutationVariables = Exact<{
+  input: DeleteOneAgentConversationSessionInput;
+}>;
+
+
+export type DeleteOneAgentConversationSessionMutation = { __typename?: 'Mutation', deleteOneAgentConversationSession: { __typename?: 'AgentConversationSessionDeleteResponse', id?: string | null } };
+
+export type CreateAgentMutationVariables = Exact<{
+  input: AgentCreateInput;
+}>;
+
+
+export type CreateAgentMutation = { __typename?: 'Mutation', createOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+
+export type UpdateAgentMutationVariables = Exact<{
+  input: UpdateOneAgentInput;
+}>;
+
+
+export type UpdateAgentMutation = { __typename?: 'Mutation', updateOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+
+export type RollbackAgentHistoryMutationVariables = Exact<{
+  agentId: Scalars['ID']['input'];
+  historyId: Scalars['ID']['input'];
+  changeDescription?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type RollbackAgentHistoryMutation = { __typename?: 'Mutation', rollbackAgentHistory: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+
+export type DeleteAgentHistoryMutationVariables = Exact<{
+  input: DeleteOneAgentHistoryInput;
+}>;
+
+
+export type DeleteAgentHistoryMutation = { __typename?: 'Mutation', deleteOneAgentHistory: { __typename?: 'AgentHistoryDeleteResponse', id?: string | null } };
+
+export type DeleteAgentMutationVariables = Exact<{
+  input: DeleteOneAgentInput;
+}>;
+
+
+export type DeleteAgentMutation = { __typename?: 'Mutation', deleteOneAgent: { __typename?: 'AgentDeleteResponse', id?: string | null } };
 
 export type GetAppConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1915,6 +2335,448 @@ export type RunPurfenceScheduledTaskMutationVariables = Exact<{
 export type RunPurfenceScheduledTaskMutation = { __typename?: 'Mutation', runPurfenceScheduledTask: string };
 
 
+export const GetAgentsDocument = gql`
+    query GetAgents {
+  agents(
+    paging: {offset: 0, limit: 50}
+    sorting: [{field: updatedAt, direction: DESC}]
+  ) {
+    nodes {
+      id
+      name
+      instructions
+      description
+      changeDescription
+      tags
+      tools
+      skills
+      modelConfig
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetAgentsQuery__
+ *
+ * To run a query within a React component, call `useGetAgentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAgentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAgentsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAgentsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAgentsQuery, GetAgentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetAgentsQuery, GetAgentsQueryVariables>(GetAgentsDocument, options);
+      }
+export function useGetAgentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAgentsQuery, GetAgentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetAgentsQuery, GetAgentsQueryVariables>(GetAgentsDocument, options);
+        }
+// @ts-ignore
+export function useGetAgentsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetAgentsQuery, GetAgentsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetAgentsQuery, GetAgentsQueryVariables>;
+export function useGetAgentsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAgentsQuery, GetAgentsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetAgentsQuery | undefined, GetAgentsQueryVariables>;
+export function useGetAgentsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAgentsQuery, GetAgentsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetAgentsQuery, GetAgentsQueryVariables>(GetAgentsDocument, options);
+        }
+export type GetAgentsQueryHookResult = ReturnType<typeof useGetAgentsQuery>;
+export type GetAgentsLazyQueryHookResult = ReturnType<typeof useGetAgentsLazyQuery>;
+export type GetAgentsSuspenseQueryHookResult = ReturnType<typeof useGetAgentsSuspenseQuery>;
+export type GetAgentsQueryResult = Apollo.QueryResult<GetAgentsQuery, GetAgentsQueryVariables>;
+export const GetAgentHistoriesDocument = gql`
+    query GetAgentHistories($agentId: String!) {
+  agentHistories(
+    filter: {agentId: {eq: $agentId}}
+    paging: {offset: 0, limit: 50}
+    sorting: [{field: version, direction: DESC}]
+  ) {
+    nodes {
+      id
+      agentId
+      version
+      name
+      instructions
+      description
+      changeDescription
+      tags
+      tools
+      skills
+      modelConfig
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useGetAgentHistoriesQuery__
+ *
+ * To run a query within a React component, call `useGetAgentHistoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAgentHistoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAgentHistoriesQuery({
+ *   variables: {
+ *      agentId: // value for 'agentId'
+ *   },
+ * });
+ */
+export function useGetAgentHistoriesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables> & ({ variables: GetAgentHistoriesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>(GetAgentHistoriesDocument, options);
+      }
+export function useGetAgentHistoriesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>(GetAgentHistoriesDocument, options);
+        }
+// @ts-ignore
+export function useGetAgentHistoriesSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>;
+export function useGetAgentHistoriesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<GetAgentHistoriesQuery | undefined, GetAgentHistoriesQueryVariables>;
+export function useGetAgentHistoriesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>(GetAgentHistoriesDocument, options);
+        }
+export type GetAgentHistoriesQueryHookResult = ReturnType<typeof useGetAgentHistoriesQuery>;
+export type GetAgentHistoriesLazyQueryHookResult = ReturnType<typeof useGetAgentHistoriesLazyQuery>;
+export type GetAgentHistoriesSuspenseQueryHookResult = ReturnType<typeof useGetAgentHistoriesSuspenseQuery>;
+export type GetAgentHistoriesQueryResult = Apollo.QueryResult<GetAgentHistoriesQuery, GetAgentHistoriesQueryVariables>;
+export const AgentConversationSessionsDocument = gql`
+    query AgentConversationSessions($filter: AgentConversationSessionFilter, $paging: OffsetPaging, $sorting: [AgentConversationSessionSort!]) {
+  agentConversationSessions(filter: $filter, paging: $paging, sorting: $sorting) {
+    nodes {
+      id
+      userId
+      title
+      createdAt
+      updatedAt
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useAgentConversationSessionsQuery__
+ *
+ * To run a query within a React component, call `useAgentConversationSessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentConversationSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentConversationSessionsQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *      paging: // value for 'paging'
+ *      sorting: // value for 'sorting'
+ *   },
+ * });
+ */
+export function useAgentConversationSessionsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>(AgentConversationSessionsDocument, options);
+      }
+export function useAgentConversationSessionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>(AgentConversationSessionsDocument, options);
+        }
+// @ts-ignore
+export function useAgentConversationSessionsSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>;
+export function useAgentConversationSessionsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<AgentConversationSessionsQuery | undefined, AgentConversationSessionsQueryVariables>;
+export function useAgentConversationSessionsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>(AgentConversationSessionsDocument, options);
+        }
+export type AgentConversationSessionsQueryHookResult = ReturnType<typeof useAgentConversationSessionsQuery>;
+export type AgentConversationSessionsLazyQueryHookResult = ReturnType<typeof useAgentConversationSessionsLazyQuery>;
+export type AgentConversationSessionsSuspenseQueryHookResult = ReturnType<typeof useAgentConversationSessionsSuspenseQuery>;
+export type AgentConversationSessionsQueryResult = Apollo.QueryResult<AgentConversationSessionsQuery, AgentConversationSessionsQueryVariables>;
+export const CreateOneAgentConversationSessionDocument = gql`
+    mutation CreateOneAgentConversationSession($input: AgentConversationSessionCreateInput!) {
+  createOneAgentConversationSession(input: {agentConversationSession: $input}) {
+    id
+    userId
+    title
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateOneAgentConversationSessionMutationFn = Apollo.MutationFunction<CreateOneAgentConversationSessionMutation, CreateOneAgentConversationSessionMutationVariables>;
+
+/**
+ * __useCreateOneAgentConversationSessionMutation__
+ *
+ * To run a mutation, you first call `useCreateOneAgentConversationSessionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOneAgentConversationSessionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOneAgentConversationSessionMutation, { data, loading, error }] = useCreateOneAgentConversationSessionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateOneAgentConversationSessionMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateOneAgentConversationSessionMutation, CreateOneAgentConversationSessionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateOneAgentConversationSessionMutation, CreateOneAgentConversationSessionMutationVariables>(CreateOneAgentConversationSessionDocument, options);
+      }
+export type CreateOneAgentConversationSessionMutationHookResult = ReturnType<typeof useCreateOneAgentConversationSessionMutation>;
+export type CreateOneAgentConversationSessionMutationResult = Apollo.MutationResult<CreateOneAgentConversationSessionMutation>;
+export type CreateOneAgentConversationSessionMutationOptions = Apollo.BaseMutationOptions<CreateOneAgentConversationSessionMutation, CreateOneAgentConversationSessionMutationVariables>;
+export const DeleteOneAgentConversationSessionDocument = gql`
+    mutation DeleteOneAgentConversationSession($input: DeleteOneAgentConversationSessionInput!) {
+  deleteOneAgentConversationSession(input: $input) {
+    id
+  }
+}
+    `;
+export type DeleteOneAgentConversationSessionMutationFn = Apollo.MutationFunction<DeleteOneAgentConversationSessionMutation, DeleteOneAgentConversationSessionMutationVariables>;
+
+/**
+ * __useDeleteOneAgentConversationSessionMutation__
+ *
+ * To run a mutation, you first call `useDeleteOneAgentConversationSessionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteOneAgentConversationSessionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteOneAgentConversationSessionMutation, { data, loading, error }] = useDeleteOneAgentConversationSessionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteOneAgentConversationSessionMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteOneAgentConversationSessionMutation, DeleteOneAgentConversationSessionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteOneAgentConversationSessionMutation, DeleteOneAgentConversationSessionMutationVariables>(DeleteOneAgentConversationSessionDocument, options);
+      }
+export type DeleteOneAgentConversationSessionMutationHookResult = ReturnType<typeof useDeleteOneAgentConversationSessionMutation>;
+export type DeleteOneAgentConversationSessionMutationResult = Apollo.MutationResult<DeleteOneAgentConversationSessionMutation>;
+export type DeleteOneAgentConversationSessionMutationOptions = Apollo.BaseMutationOptions<DeleteOneAgentConversationSessionMutation, DeleteOneAgentConversationSessionMutationVariables>;
+export const CreateAgentDocument = gql`
+    mutation CreateAgent($input: AgentCreateInput!) {
+  createOneAgent(input: {agent: $input}) {
+    id
+    name
+    instructions
+    description
+    changeDescription
+    tags
+    tools
+    skills
+    modelConfig
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateAgentMutationFn = Apollo.MutationFunction<CreateAgentMutation, CreateAgentMutationVariables>;
+
+/**
+ * __useCreateAgentMutation__
+ *
+ * To run a mutation, you first call `useCreateAgentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAgentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAgentMutation, { data, loading, error }] = useCreateAgentMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateAgentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateAgentMutation, CreateAgentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateAgentMutation, CreateAgentMutationVariables>(CreateAgentDocument, options);
+      }
+export type CreateAgentMutationHookResult = ReturnType<typeof useCreateAgentMutation>;
+export type CreateAgentMutationResult = Apollo.MutationResult<CreateAgentMutation>;
+export type CreateAgentMutationOptions = Apollo.BaseMutationOptions<CreateAgentMutation, CreateAgentMutationVariables>;
+export const UpdateAgentDocument = gql`
+    mutation UpdateAgent($input: UpdateOneAgentInput!) {
+  updateOneAgent(input: $input) {
+    id
+    name
+    instructions
+    description
+    changeDescription
+    tags
+    tools
+    skills
+    modelConfig
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateAgentMutationFn = Apollo.MutationFunction<UpdateAgentMutation, UpdateAgentMutationVariables>;
+
+/**
+ * __useUpdateAgentMutation__
+ *
+ * To run a mutation, you first call `useUpdateAgentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateAgentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateAgentMutation, { data, loading, error }] = useUpdateAgentMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateAgentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateAgentMutation, UpdateAgentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateAgentMutation, UpdateAgentMutationVariables>(UpdateAgentDocument, options);
+      }
+export type UpdateAgentMutationHookResult = ReturnType<typeof useUpdateAgentMutation>;
+export type UpdateAgentMutationResult = Apollo.MutationResult<UpdateAgentMutation>;
+export type UpdateAgentMutationOptions = Apollo.BaseMutationOptions<UpdateAgentMutation, UpdateAgentMutationVariables>;
+export const RollbackAgentHistoryDocument = gql`
+    mutation RollbackAgentHistory($agentId: ID!, $historyId: ID!, $changeDescription: String) {
+  rollbackAgentHistory(
+    agentId: $agentId
+    historyId: $historyId
+    changeDescription: $changeDescription
+  ) {
+    id
+    name
+    instructions
+    description
+    tags
+    tools
+    skills
+    modelConfig
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type RollbackAgentHistoryMutationFn = Apollo.MutationFunction<RollbackAgentHistoryMutation, RollbackAgentHistoryMutationVariables>;
+
+/**
+ * __useRollbackAgentHistoryMutation__
+ *
+ * To run a mutation, you first call `useRollbackAgentHistoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRollbackAgentHistoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rollbackAgentHistoryMutation, { data, loading, error }] = useRollbackAgentHistoryMutation({
+ *   variables: {
+ *      agentId: // value for 'agentId'
+ *      historyId: // value for 'historyId'
+ *      changeDescription: // value for 'changeDescription'
+ *   },
+ * });
+ */
+export function useRollbackAgentHistoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RollbackAgentHistoryMutation, RollbackAgentHistoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<RollbackAgentHistoryMutation, RollbackAgentHistoryMutationVariables>(RollbackAgentHistoryDocument, options);
+      }
+export type RollbackAgentHistoryMutationHookResult = ReturnType<typeof useRollbackAgentHistoryMutation>;
+export type RollbackAgentHistoryMutationResult = Apollo.MutationResult<RollbackAgentHistoryMutation>;
+export type RollbackAgentHistoryMutationOptions = Apollo.BaseMutationOptions<RollbackAgentHistoryMutation, RollbackAgentHistoryMutationVariables>;
+export const DeleteAgentHistoryDocument = gql`
+    mutation DeleteAgentHistory($input: DeleteOneAgentHistoryInput!) {
+  deleteOneAgentHistory(input: $input) {
+    id
+  }
+}
+    `;
+export type DeleteAgentHistoryMutationFn = Apollo.MutationFunction<DeleteAgentHistoryMutation, DeleteAgentHistoryMutationVariables>;
+
+/**
+ * __useDeleteAgentHistoryMutation__
+ *
+ * To run a mutation, you first call `useDeleteAgentHistoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAgentHistoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAgentHistoryMutation, { data, loading, error }] = useDeleteAgentHistoryMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteAgentHistoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteAgentHistoryMutation, DeleteAgentHistoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteAgentHistoryMutation, DeleteAgentHistoryMutationVariables>(DeleteAgentHistoryDocument, options);
+      }
+export type DeleteAgentHistoryMutationHookResult = ReturnType<typeof useDeleteAgentHistoryMutation>;
+export type DeleteAgentHistoryMutationResult = Apollo.MutationResult<DeleteAgentHistoryMutation>;
+export type DeleteAgentHistoryMutationOptions = Apollo.BaseMutationOptions<DeleteAgentHistoryMutation, DeleteAgentHistoryMutationVariables>;
+export const DeleteAgentDocument = gql`
+    mutation DeleteAgent($input: DeleteOneAgentInput!) {
+  deleteOneAgent(input: $input) {
+    id
+  }
+}
+    `;
+export type DeleteAgentMutationFn = Apollo.MutationFunction<DeleteAgentMutation, DeleteAgentMutationVariables>;
+
+/**
+ * __useDeleteAgentMutation__
+ *
+ * To run a mutation, you first call `useDeleteAgentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAgentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAgentMutation, { data, loading, error }] = useDeleteAgentMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteAgentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteAgentMutation, DeleteAgentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteAgentMutation, DeleteAgentMutationVariables>(DeleteAgentDocument, options);
+      }
+export type DeleteAgentMutationHookResult = ReturnType<typeof useDeleteAgentMutation>;
+export type DeleteAgentMutationResult = Apollo.MutationResult<DeleteAgentMutation>;
+export type DeleteAgentMutationOptions = Apollo.BaseMutationOptions<DeleteAgentMutation, DeleteAgentMutationVariables>;
 export const GetAppConfigsDocument = gql`
     query GetAppConfigs {
   purfenceAppConfigs {

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
+import { useCreateOneAgentConversationSessionMutation } from '@/graphql/__generated__/hooks';
 import { MessageList } from '@/components/agent/MessageList';
 import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
@@ -24,6 +25,7 @@ export function AgentPage() {
   const [threadId, setThreadId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const autoSentThreadRef = useRef<string>('');
+  const creatingThreadRef = useRef(false);
   const { data: agentsData } = useQuery<AgentsQueryData>(GET_AGENTS, {
     fetchPolicy: 'network-only',
   });
@@ -36,6 +38,12 @@ export function AgentPage() {
       return typeof agent.id === 'string' && typeof agent.name === 'string' && agent.name.length > 0;
     })
     .map((agent) => ({ id: agent.id, name: agent.name }));
+
+  const [createConversation] = useCreateOneAgentConversationSessionMutation({
+    onError: (error) => {
+      console.error('Failed to create conversation:', error);
+    },
+  });
 
   const effectiveSelectedAgentId = agentOptions.some((agent) => agent.id === selectedAgentId)
     ? selectedAgentId
@@ -185,17 +193,43 @@ export function AgentPage() {
 
     }
 
-    if (!threadId) {
-      const newThreadId = crypto.randomUUID();
+    if (!threadFromUrl && threadId) {
+      clearMessages();
+      sessionClose({ threadId });
+      autoSentThreadRef.current = '';
       const timeoutId = window.setTimeout(() => {
-        setThreadId(newThreadId);
-        sessionOpen({ threadId: newThreadId });
-        setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
+        setThreadId('');
       }, 0);
 
       return () => {
         window.clearTimeout(timeoutId);
       };
+    }
+
+    if (!threadId) {
+      if (creatingThreadRef.current) return;
+
+      creatingThreadRef.current = true;
+      void createConversation({
+        variables: {
+          input: {
+            userId: 'purfence',
+          },
+        },
+      })
+        .then(({ data }) => {
+          const newThreadId = data?.createOneAgentConversationSession?.id;
+          if (!newThreadId) {
+            return;
+          }
+
+          setThreadId(newThreadId);
+          sessionOpen({ threadId: newThreadId });
+          setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
+        })
+        .finally(() => {
+          creatingThreadRef.current = false;
+        });
     }
   }, [
     connectionState,
@@ -205,6 +239,7 @@ export function AgentPage() {
     sessionOpen,
     sessionClose,
     clearMessages,
+    createConversation,
     loadHistoryMessages,
   ]);
 

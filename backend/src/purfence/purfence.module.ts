@@ -46,6 +46,7 @@ import { MyQueueJobCreateInput } from './my-queue/my-queue-job-create.input';
 import { MyQueueJobUpdateInput } from './my-queue/my-queue-job-update.input';
 import { AgentModule } from './agent/agent.module';
 import { AgentHistoryModule } from './agent-history/agent-history.module';
+import { AgentConversationModule } from './conversation/agent-conversation.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { AgentHistoryModule } from './agent-history/agent-history.module';
     ToolsModule,
     AgentModule,
     AgentHistoryModule,
+    AgentConversationModule,
     ModelProviderModule,
     PurfenceConfigModule,
     PurfenceScheduledTaskModule,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Plus,
   MessageSquare,
@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { fetchConversations, type Conversation } from '@/api/agent.api';
+import { useAgentConversationSessionsQuery } from '@/graphql/__generated__/hooks';
 
 interface ConversationSidebarProps {
   currentThreadId: string;
@@ -27,44 +27,23 @@ export function ConversationSidebar({
   connectionStatus,
 }: ConversationSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, loading: isLoading } = useAgentConversationSessionsQuery({
+    variables: {
+      filter: { userId: { eq: 'purfence' } },
+      paging: { limit: 20, offset: 0 },
+      sorting: [{ field: 'updatedAt', direction: 'DESC' }],
+    },
+    pollInterval: connectionStatus === 'connected' ? 5000 : 0,
+    fetchPolicy: 'network-only',
+  });
 
-  // 从后端加载历史对话列表
-  const loadConversations = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchConversations();
-      setConversations(data);
-    } catch (e) {
-      console.error('Failed to load conversations:', e);
-      setConversations([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  // 当发送消息后，重新加载对话列表（更新排序和时间）
-  useEffect(() => {
-    if (connectionStatus === 'connected') {
-      const handle = setInterval(() => {
-        loadConversations();
-      }, 5000); // 每 5 秒刷新一次
-      return () => clearInterval(handle);
-    }
-  }, [connectionStatus]);
+  const conversations = data?.agentConversationSessions?.nodes ?? [];
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (onDeleteConversation) {
       onDeleteConversation(id);
     }
-    // 从列表中移除
-    setConversations((prev) => prev.filter((c) => c.id !== id));
   };
 
   return (

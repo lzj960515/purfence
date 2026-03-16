@@ -5,7 +5,10 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { PurfenceProject } from './purfence-project.entity';
 import { ensureDir, writeText } from '../common/utils/file.util';
-import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
+import {
+  PurfenceConfig,
+  ConfigKey,
+} from './purfence-config/purfence-config.entity';
 
 const execFileAsync = promisify(execFile);
 

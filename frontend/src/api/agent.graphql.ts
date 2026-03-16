@@ -51,6 +51,55 @@ export const GET_AGENT_HISTORIES = gql`
   }
 `
 
+export const AGENT_CONVERSATION_SESSIONS = gql`
+  query AgentConversationSessions(
+    $filter: AgentConversationSessionFilter
+    $paging: OffsetPaging
+    $sorting: [AgentConversationSessionSort!]
+  ) {
+    agentConversationSessions(
+      filter: $filter
+      paging: $paging
+      sorting: $sorting
+    ) {
+      nodes {
+        id
+        userId
+        title
+        createdAt
+        updatedAt
+      }
+      totalCount
+    }
+  }
+`
+
+export const CREATE_ONE_AGENT_CONVERSATION_SESSION = gql`
+  mutation CreateOneAgentConversationSession(
+    $input: AgentConversationSessionCreateInput!
+  ) {
+    createOneAgentConversationSession(
+      input: { agentConversationSession: $input }
+    ) {
+      id
+      userId
+      title
+      createdAt
+      updatedAt
+    }
+  }
+`
+
+export const DELETE_ONE_AGENT_CONVERSATION_SESSION = gql`
+  mutation DeleteOneAgentConversationSession(
+    $input: DeleteOneAgentConversationSessionInput!
+  ) {
+    deleteOneAgentConversationSession(input: $input) {
+      id
+    }
+  }
+`
+
 export const CREATE_AGENT = gql`
   mutation CreateAgent($input: AgentCreateInput!) {
     createOneAgent(input: { agent: $input }) {

@@ -20,14 +20,13 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
-  deleteConversation,
-  fetchConversations,
-  type Conversation,
-} from '@/api/agent.api'
+  useAgentConversationSessionsQuery,
+  useDeleteOneAgentConversationSessionMutation,
+} from '@/graphql/__generated__/hooks'
 import logoPng from '@/assets/purfence-logo.png'
 import { useUpdate } from '@/hooks/useUpdate'
 import { UpdateDialog } from '@/components/update'
@@ -64,8 +63,6 @@ export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [loadingConversations, setLoadingConversations] = useState(false)
   const [historyExpanded, setHistoryExpanded] = useState(() => {
     try {
       const saved = localStorage.getItem(SIDEBAR_STATE_KEY)
@@ -91,30 +88,37 @@ export function AppSidebar() {
   // Auto-open dialog when update is available
   useEffect(() => {
     if (updateStatus === 'available' || updateStatus === 'downloaded') {
-      setUpdateDialogOpen(true)
+      const timeoutId = window.setTimeout(() => {
+        setUpdateDialogOpen(true)
+      }, 0)
+
+      return () => {
+        window.clearTimeout(timeoutId)
+      }
     }
   }, [updateStatus])
 
-  const loadConversations = useCallback(async () => {
-    setLoadingConversations(true)
-    try {
-      const data = await fetchConversations()
-      setConversations(data)
-    } catch (e) {
-      console.error('Failed to load conversations:', e)
-      setConversations([])
-    } finally {
-      setLoadingConversations(false)
-    }
-  }, [])
+  const {
+    data: conversationData,
+    loading: loadingConversations,
+    refetch: refetchConversations,
+  } = useAgentConversationSessionsQuery({
+    variables: {
+      filter: { userId: { eq: 'purfence' } },
+      paging: { limit: 20, offset: 0 },
+      sorting: [{ field: 'updatedAt', direction: 'DESC' }],
+    },
+    pollInterval: 5000,
+    fetchPolicy: 'network-only',
+  })
 
-  useEffect(() => {
-    loadConversations()
-    const handle = setInterval(() => {
-      loadConversations()
-    }, 5000)
-    return () => clearInterval(handle)
-  }, [loadConversations])
+  const conversations = conversationData?.agentConversationSessions?.nodes ?? []
+
+  const [deleteConversationMutation] = useDeleteOneAgentConversationSessionMutation({
+    onError: (error) => {
+      console.error('Failed to delete conversation:', error)
+    },
+  })
 
   // 持久化展开/折叠状态
   useEffect(() => {
@@ -131,14 +135,20 @@ export function AppSidebar() {
   }, [location.search])
 
   const handleNewChat = () => {
-    const newThreadId = crypto.randomUUID()
-    navigate(`/agent?thread=${newThreadId}`)
+    navigate('/agent')
   }
 
   const handleDeleteConversation = async (convId: string) => {
     try {
-      await deleteConversation(convId)
-      setConversations((prev) => prev.filter((c) => c.id !== convId))
+      await deleteConversationMutation({
+        variables: {
+          input: { id: convId },
+        },
+      })
+      await refetchConversations()
+      if (activeThreadId === convId) {
+        navigate('/agent')
+      }
     } catch (e) {
       console.error('Failed to delete conversation:', e)
     }

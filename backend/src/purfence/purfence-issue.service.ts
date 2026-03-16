@@ -16,7 +16,10 @@ import {
   safeReaddir,
   writeText,
 } from '../common/utils/file.util';
-import { PurfenceConfig, ConfigKey } from './purfence-config/purfence-config.entity';
+import {
+  PurfenceConfig,
+  ConfigKey,
+} from './purfence-config/purfence-config.entity';
 import { PurfenceExecutionService } from './purfence-execution.service';
 import { IssueOrigin } from './purfence-status.enum';
 

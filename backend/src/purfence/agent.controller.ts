@@ -24,6 +24,7 @@ import { ensureDir } from '@src/common/utils/file.util';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { AgentConversationSession } from './conversation/agent-conversation.entity';
 
 const USER_ID = 'purfence';
 
@@ -66,10 +67,10 @@ export class AgentController {
 
   @Get('conversations')
   async getConversations() {
-    const conversations = await this.memory.getConversationsByUserId(USER_ID, {
-      limit: 20,
-      orderBy: 'updated_at',
-      orderDirection: 'DESC',
+    const conversations = await AgentConversationSession.find({
+      where: { userId: USER_ID },
+      order: { updatedAt: 'DESC' },
+      take: 20,
     });
     return conversations;
   }

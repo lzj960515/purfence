@@ -5,13 +5,9 @@ import {
   createHooks,
   OnEndHookArgs,
   OperationContext,
-  Memory,
-  messageHelpers,
 } from '@voltagent/core';
-import _ from 'lodash';
 import { AgentConversationSession } from './agent-conversation-sessions.entity';
 import { LlmService } from './llm.service';
-import { Providers } from './types';
 import { CommonService } from '@src/common';
 import { UIMessage } from 'ai';
 import { MessageService } from './message.service';
@@ -26,30 +22,29 @@ export class MyAgentHooks {
     private messageService: MessageService,
   ) {
     this.hooks = createHooks({
-      onEnd: async ({ agent, output, context, error }) => {
+      onEnd: async ({ output, context, error }) => {
         if (!context?.conversationId) {
           return;
         }
 
-        if (!error && context.context.get('provider') === ProviderType.OPENAI) {
-          const title = this.messageService.extractRawText(
-            context.input as UIMessage[],
-          );
+        const title =
+          !error && context.context.get('provider') === ProviderType.OPENAI
+            ? this.messageService.extractRawText(context.input as UIMessage[])
+            : undefined;
 
-          await this.messageService.updateConversationTitle(
-            context.conversationId,
-            title,
-          );
-        }
+        await this.messageService.touchConversation(
+          context.conversationId,
+          title,
+        );
 
         await this.updateSessionUsage({ output, context });
 
-        await this.handleEvent({ context, error });
+        this.handleEvent({ context, error });
       },
     });
   }
 
-  private async handleEvent({
+  private handleEvent({
     context,
     error,
   }: {
