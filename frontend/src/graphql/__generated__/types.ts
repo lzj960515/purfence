@@ -130,8 +130,8 @@ export type AgentConnection = {
   totalCount: Scalars['Int']['output'];
 };
 
-export type AgentConversationSession = {
-  __typename?: 'AgentConversationSession';
+export type AgentConversation = {
+  __typename?: 'AgentConversation';
   createdAt: Scalars['DateTime']['output'];
   /** ID */
   id: Scalars['ID']['output'];
@@ -140,23 +140,23 @@ export type AgentConversationSession = {
   userId: Maybe<Scalars['String']['output']>;
 };
 
-export type AgentConversationSessionConnection = {
-  __typename?: 'AgentConversationSessionConnection';
+export type AgentConversationConnection = {
+  __typename?: 'AgentConversationConnection';
   /** Array of nodes. */
-  nodes: Array<AgentConversationSession>;
+  nodes: Array<AgentConversation>;
   /** Paging information */
   pageInfo: OffsetPageInfo;
   /** Fetch total count of records */
   totalCount: Scalars['Int']['output'];
 };
 
-export type AgentConversationSessionCreateInput = {
+export type AgentConversationCreateInput = {
   title: InputMaybe<Scalars['String']['input']>;
   userId: InputMaybe<Scalars['String']['input']>;
 };
 
-export type AgentConversationSessionDeleteResponse = {
-  __typename?: 'AgentConversationSessionDeleteResponse';
+export type AgentConversationDeleteResponse = {
+  __typename?: 'AgentConversationDeleteResponse';
   createdAt: Maybe<Scalars['DateTime']['output']>;
   /** ID */
   id: Maybe<Scalars['ID']['output']>;
@@ -165,30 +165,30 @@ export type AgentConversationSessionDeleteResponse = {
   userId: Maybe<Scalars['String']['output']>;
 };
 
-export type AgentConversationSessionFilter = {
-  and: InputMaybe<Array<AgentConversationSessionFilter>>;
+export type AgentConversationFilter = {
+  and: InputMaybe<Array<AgentConversationFilter>>;
   createdAt: InputMaybe<DateFieldComparison>;
   id: InputMaybe<IdFilterComparison>;
-  or: InputMaybe<Array<AgentConversationSessionFilter>>;
+  or: InputMaybe<Array<AgentConversationFilter>>;
   title: InputMaybe<StringFieldComparison>;
   updatedAt: InputMaybe<DateFieldComparison>;
   userId: InputMaybe<StringFieldComparison>;
 };
 
-export type AgentConversationSessionSort = {
+export type AgentConversationSort = {
   direction: SortDirection;
-  field: AgentConversationSessionSortFields;
+  field: AgentConversationSortFields;
   nulls: InputMaybe<SortNulls>;
 };
 
-export type AgentConversationSessionSortFields =
+export type AgentConversationSortFields =
   | 'createdAt'
   | 'id'
   | 'title'
   | 'updatedAt'
   | 'userId';
 
-export type AgentConversationSessionUpdateInput = {
+export type AgentConversationUpdateInput = {
   title: InputMaybe<Scalars['String']['input']>;
   userId: InputMaybe<Scalars['String']['input']>;
 };
@@ -352,9 +352,9 @@ export type CreateManyPurfenceIssuesInput = {
   purfenceIssues: Array<PurfenceIssueCreateInput>;
 };
 
-export type CreateOneAgentConversationSessionInput = {
+export type CreateOneAgentConversationInput = {
   /** The record to create */
-  agentConversationSession: AgentConversationSessionCreateInput;
+  agentConversation: AgentConversationCreateInput;
 };
 
 export type CreateOneAgentInput = {
@@ -433,7 +433,7 @@ export type DeleteManyResponse = {
   deletedCount: Scalars['Int']['output'];
 };
 
-export type DeleteOneAgentConversationSessionInput = {
+export type DeleteOneAgentConversationInput = {
   /** The id of the record to delete. */
   id: Scalars['ID']['input'];
 };
@@ -629,7 +629,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createManyPurfenceIssues: Array<PurfenceIssue>;
   createOneAgent: Agent;
-  createOneAgentConversationSession: AgentConversationSession;
+  createOneAgentConversation: AgentConversation;
   createOneModelProvider: ModelProvider;
   createOneMyQueue: MyQueue;
   createOneMyQueueJob: MyQueueJob;
@@ -641,7 +641,7 @@ export type Mutation = {
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneAgent: AgentDeleteResponse;
-  deleteOneAgentConversationSession: AgentConversationSessionDeleteResponse;
+  deleteOneAgentConversation: AgentConversationDeleteResponse;
   deleteOneAgentHistory: AgentHistoryDeleteResponse;
   deleteOneModelProvider: ModelProviderDeleteResponse;
   deleteOneMyQueue: MyQueueDeleteResponse;
@@ -661,7 +661,7 @@ export type Mutation = {
   updateManyPurfenceProjects: UpdateManyResponse;
   updateOneAgent: Agent;
   updateOneAgentArtifact: AgentArtifact;
-  updateOneAgentConversationSession: AgentConversationSession;
+  updateOneAgentConversation: AgentConversation;
   updateOneModelProvider: ModelProvider;
   updateOneMyQueue: MyQueue;
   updateOneMyQueueJob: MyQueueJob;
@@ -684,8 +684,8 @@ export type MutationCreateOneAgentArgs = {
 };
 
 
-export type MutationCreateOneAgentConversationSessionArgs = {
-  input: CreateOneAgentConversationSessionInput;
+export type MutationCreateOneAgentConversationArgs = {
+  input: CreateOneAgentConversationInput;
 };
 
 
@@ -744,8 +744,8 @@ export type MutationDeleteOneAgentArgs = {
 };
 
 
-export type MutationDeleteOneAgentConversationSessionArgs = {
-  input: DeleteOneAgentConversationSessionInput;
+export type MutationDeleteOneAgentConversationArgs = {
+  input: DeleteOneAgentConversationInput;
 };
 
 
@@ -846,8 +846,8 @@ export type MutationUpdateOneAgentArtifactArgs = {
 };
 
 
-export type MutationUpdateOneAgentConversationSessionArgs = {
-  input: UpdateOneAgentConversationSessionInput;
+export type MutationUpdateOneAgentConversationArgs = {
+  input: UpdateOneAgentConversationInput;
 };
 
 
@@ -1683,8 +1683,8 @@ export type Query = {
   agent: Agent;
   agentArtifact: AgentArtifact;
   agentArtifacts: AgentArtifactConnection;
-  agentConversationSession: AgentConversationSession;
-  agentConversationSessions: AgentConversationSessionConnection;
+  agentConversation: AgentConversation;
+  agentConversations: AgentConversationConnection;
   agentHistories: AgentHistoryConnection;
   agentHistory: AgentHistory;
   agents: AgentConnection;
@@ -1730,15 +1730,15 @@ export type QueryAgentArtifactsArgs = {
 };
 
 
-export type QueryAgentConversationSessionArgs = {
+export type QueryAgentConversationArgs = {
   id: Scalars['ID']['input'];
 };
 
 
-export type QueryAgentConversationSessionsArgs = {
-  filter?: AgentConversationSessionFilter;
+export type QueryAgentConversationsArgs = {
+  filter?: AgentConversationFilter;
   paging?: OffsetPaging;
-  sorting?: Array<AgentConversationSessionSort>;
+  sorting?: Array<AgentConversationSort>;
 };
 
 
@@ -1940,11 +1940,11 @@ export type UpdateOneAgentArtifactInput = {
   update: AgentArtifactUpdateInput;
 };
 
-export type UpdateOneAgentConversationSessionInput = {
+export type UpdateOneAgentConversationInput = {
   /** The id of the record to update */
   id: Scalars['ID']['input'];
   /** The update to apply. */
-  update: AgentConversationSessionUpdateInput;
+  update: AgentConversationUpdateInput;
 };
 
 export type UpdateOneAgentInput = {
@@ -2033,28 +2033,28 @@ export type GetAgentHistoriesQueryVariables = Exact<{
 
 export type GetAgentHistoriesQuery = { __typename?: 'Query', agentHistories: { __typename?: 'AgentHistoryConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentHistory', id: string, agentId: string, version: number, name: string, instructions: string | null, description: string | null, changeDescription: string | null, tags: Array<string> | null, tools: Array<string> | null, skills: Array<string> | null, modelConfig: any | null, createdAt: any, updatedAt: any }> } };
 
-export type AgentConversationSessionsQueryVariables = Exact<{
-  filter: InputMaybe<AgentConversationSessionFilter>;
+export type AgentConversationsQueryVariables = Exact<{
+  filter: InputMaybe<AgentConversationFilter>;
   paging: InputMaybe<OffsetPaging>;
-  sorting: InputMaybe<Array<AgentConversationSessionSort> | AgentConversationSessionSort>;
+  sorting: InputMaybe<Array<AgentConversationSort> | AgentConversationSort>;
 }>;
 
 
-export type AgentConversationSessionsQuery = { __typename?: 'Query', agentConversationSessions: { __typename?: 'AgentConversationSessionConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentConversationSession', id: string, userId: string | null, title: string | null, createdAt: any, updatedAt: any }> } };
+export type AgentConversationsQuery = { __typename?: 'Query', agentConversations: { __typename?: 'AgentConversationConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentConversation', id: string, userId: string | null, title: string | null, createdAt: any, updatedAt: any }> } };
 
-export type CreateOneAgentConversationSessionMutationVariables = Exact<{
-  input: AgentConversationSessionCreateInput;
+export type CreateOneAgentConversationMutationVariables = Exact<{
+  input: AgentConversationCreateInput;
 }>;
 
 
-export type CreateOneAgentConversationSessionMutation = { __typename?: 'Mutation', createOneAgentConversationSession: { __typename?: 'AgentConversationSession', id: string, userId: string | null, title: string | null, createdAt: any, updatedAt: any } };
+export type CreateOneAgentConversationMutation = { __typename?: 'Mutation', createOneAgentConversation: { __typename?: 'AgentConversation', id: string, userId: string | null, title: string | null, createdAt: any, updatedAt: any } };
 
-export type DeleteOneAgentConversationSessionMutationVariables = Exact<{
-  input: DeleteOneAgentConversationSessionInput;
+export type DeleteOneAgentConversationMutationVariables = Exact<{
+  input: DeleteOneAgentConversationInput;
 }>;
 
 
-export type DeleteOneAgentConversationSessionMutation = { __typename?: 'Mutation', deleteOneAgentConversationSession: { __typename?: 'AgentConversationSessionDeleteResponse', id: string | null } };
+export type DeleteOneAgentConversationMutation = { __typename?: 'Mutation', deleteOneAgentConversation: { __typename?: 'AgentConversationDeleteResponse', id: string | null } };
 
 export type CreateAgentMutationVariables = Exact<{
   input: AgentCreateInput;

@@ -1,5 +1,5 @@
 import { LanguageModelV3 } from '@ai-sdk/provider';
-import { Tool } from '@app/my-agent';
+import { MyAgentService, Tool } from '@app/my-agent';
 import { LlmService } from '@app/my-agent/llm.service';
 import { ModelOptions } from '@app/my-agent/types';
 import { Injectable } from '@nestjs/common';
@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import { z } from 'zod';
 @Injectable()
 export class ImageTool {
-  constructor(private readonly llmService: LlmService) {}
+  constructor(private readonly myAgentService: MyAgentService) {}
 
   @Tool({
     name: 'image',
@@ -25,32 +25,20 @@ export class ImageTool {
   ) {
     const context = options.context;
     const modelOptions = context?.get('modelOptions') as ModelOptions;
-    const model = this.llmService.get(modelOptions).model() as LanguageModelV3;
-
-    const result = streamText({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: prompt,
-            },
-            {
-              type: 'image',
-              image: readFileSync(image),
-            },
-          ],
-        },
-      ],
-    });
-    let resultText = '';
-    for await (const chunk of result.fullStream) {
-      if (chunk.type === 'text-delta') {
-        resultText += chunk.text;
-      }
-    }
-    return resultText;
+    return await this.myAgentService.generateText(modelOptions, [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: prompt,
+          },
+          {
+            type: 'image',
+            image: readFileSync(image),
+          },
+        ],
+      },
+    ]);
   }
 }

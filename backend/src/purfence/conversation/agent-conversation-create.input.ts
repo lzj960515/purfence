@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
-export class AgentConversationSessionCreateInput {
+export class AgentConversationCreateInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()

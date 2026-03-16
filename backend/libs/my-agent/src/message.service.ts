@@ -1,15 +1,10 @@
 import { MyUtil } from '@app/shared';
 import { Injectable } from '@nestjs/common';
-import { AgentConversationSession as RootAgentConversationSession } from '@src/purfence/conversation/agent-conversation.entity';
 import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
 import { extractText, GetMessagesOptions, Memory } from '@voltagent/core';
 import { type ToolUIPart, type UIMessage } from 'ai';
 import _ from 'lodash';
-import { In } from 'typeorm';
 import { AgentConversationSession } from './agent-conversation-sessions.entity';
-import { AgentMemoryConversation } from './agent-memory-conversation.entity';
-import { AgentMemoryMessage } from './agent-memory-message.entity';
-import { AgentWorkingMemory } from './agent-working-memory.entity';
 import { MyModel } from './model';
 import { bridgePrompt } from './prompt';
 import type { ChatOptions } from './types';
@@ -31,14 +26,8 @@ export class MessageService {
     return this.memory.getMessages(userId, conversationId, options);
   }
 
-  async updateConversationTitle(conversationId: string, title: string) {
-    return this.touchConversation(conversationId, title);
-  }
-
-  async touchConversation(conversationId: string, title?: string) {
-    const rootConversationId =
-      await this.resolveRootConversationId(conversationId);
-    await this.upsertRootConversation(rootConversationId, title);
+  async deleteConversation(conversationId: string) {
+    return this.memory.deleteConversation(conversationId);
   }
 
   async loadHistoryMessages(
@@ -75,31 +64,6 @@ export class MessageService {
     const messages = await this.memory.getMessages(userId, conversationId);
     const lastMessage = _.last(messages);
     return extractText(lastMessage);
-  }
-
-  async deleteConversation(conversationId: string) {
-    const rootConversationId =
-      await this.resolveRootConversationId(conversationId);
-    const sessions = await AgentConversationSession.find({
-      where: { conversationId: rootConversationId },
-    });
-    const scopedConversationIds = _.uniq([
-      rootConversationId,
-      ...sessions.map((session) => session.id),
-    ]);
-
-    await RootAgentConversationSession.delete({ id: rootConversationId });
-    await AgentArtifact.delete({ conversationId: rootConversationId });
-    await AgentMemoryConversation.delete({ id: In(scopedConversationIds) });
-    await AgentMemoryMessage.delete({
-      conversationId: In(scopedConversationIds),
-    });
-    await AgentWorkingMemory.delete({
-      conversationId: In(scopedConversationIds),
-    });
-    await AgentConversationSession.delete({
-      conversationId: rootConversationId,
-    });
   }
 
   extractText(messages: UIMessage[]) {
@@ -272,36 +236,5 @@ export class MessageService {
       }
     }
     return result;
-  }
-
-  private async resolveRootConversationId(conversationId: string) {
-    const session = await AgentConversationSession.findOne({
-      where: { id: conversationId },
-    });
-
-    return session?.conversationId ?? conversationId;
-  }
-
-  private async upsertRootConversation(conversationId: string, title?: string) {
-    let conversation = await RootAgentConversationSession.findOne({
-      where: { id: conversationId },
-    });
-
-    if (!conversation) {
-      conversation = RootAgentConversationSession.create({
-        id: conversationId,
-        userId: 'purfence',
-        title,
-      });
-      await conversation.save();
-      return conversation;
-    }
-
-    if (title !== undefined) {
-      conversation.title = title;
-    }
-    conversation.updatedAt = new Date();
-    await conversation.save();
-    return conversation;
   }
 }

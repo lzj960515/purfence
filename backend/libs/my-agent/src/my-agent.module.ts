@@ -29,7 +29,6 @@ async function createMemoryAdapter(config: ConfigService) {
       useFactory: async (config) => {
         return new Memory({
           storage: await createMemoryAdapter(config),
-          generateTitle: true,
         });
       },
     },

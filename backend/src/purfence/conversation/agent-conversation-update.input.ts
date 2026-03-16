@@ -1,7 +1,7 @@
 import { InputType, PartialType } from '@nestjs/graphql';
-import { AgentConversationSessionCreateInput } from './agent-conversation-create.input';
+import { AgentConversationCreateInput } from './agent-conversation-create.input';
 
 @InputType()
-export class AgentConversationSessionUpdateInput extends PartialType(
-  AgentConversationSessionCreateInput,
+export class AgentConversationUpdateInput extends PartialType(
+  AgentConversationCreateInput,
 ) {}

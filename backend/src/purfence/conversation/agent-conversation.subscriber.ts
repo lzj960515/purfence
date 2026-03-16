@@ -8,51 +8,40 @@ import {
 } from 'typeorm';
 import _ from 'lodash';
 import { In } from 'typeorm';
-import { AgentConversationSession as InternalAgentConversationSession } from '@app/my-agent/agent-conversation-sessions.entity';
 import { AgentMemoryConversation } from '@app/my-agent/agent-memory-conversation.entity';
 import { AgentMemoryMessage } from '@app/my-agent/agent-memory-message.entity';
 import { AgentWorkingMemory } from '@app/my-agent/agent-working-memory.entity';
 import { AgentArtifact } from '../artifact/agent-artifact.ai.entity';
-import { AgentConversationSession } from './agent-conversation.entity';
+import { AgentConversation } from './agent-conversation.entity';
+import { AgentConversationSession, MessageService } from '@app/my-agent';
 
 @EventSubscriber()
-export class AgentConversationSubscriber implements EntitySubscriberInterface<AgentConversationSession> {
+export class AgentConversationSubscriber implements EntitySubscriberInterface<AgentConversation> {
   @Log() logger: Logger;
 
-  constructor(ds: DataSource) {
+  constructor(
+    ds: DataSource,
+    private messageService: MessageService,
+  ) {
     ds.subscribers.push(this);
   }
 
   listenTo() {
-    return AgentConversationSession;
+    return AgentConversation;
   }
 
-  async afterRemove(event: RemoveEvent<AgentConversationSession>) {
-    const conversationId = event.entityId
-      ? String(event.entityId)
-      : event.entity?.id;
-
+  async afterRemove(event: RemoveEvent<AgentConversation>) {
+    const conversationId =
+      event.entity?.id || event.databaseEntity?.id || event.entityId;
     if (!conversationId) {
       return;
     }
 
-    const sessions = await InternalAgentConversationSession.find({
-      where: { conversationId },
-    });
-    const scopedConversationIds = _.uniq([
-      conversationId,
-      ...sessions.map((session) => session.id),
-    ]);
+    await AgentConversationSession.delete({ conversationId });
 
     await AgentArtifact.delete({ conversationId });
-    await AgentMemoryConversation.delete({ id: In(scopedConversationIds) });
-    await AgentMemoryMessage.delete({
-      conversationId: In(scopedConversationIds),
-    });
-    await AgentWorkingMemory.delete({
-      conversationId: In(scopedConversationIds),
-    });
-    await InternalAgentConversationSession.delete({ conversationId });
+
+    await this.messageService.deleteConversation(conversationId);
 
     this.logger.log(`Conversation deleted and cleaned up: ${conversationId}`);
   }

@@ -1,7 +1,6 @@
-import { AgentOptions, BaseGenerationOptions, Tool } from '@voltagent/core';
-import { LanguageModelV3Prompt } from '@ai-sdk/provider';
-import { AgentModelOptions, ModelOptions } from '../types';
-import { Providers } from '../types';
+import { LanguageModelV3, LanguageModelV3Prompt } from '@ai-sdk/provider';
+import { BaseGenerationOptions, Tool } from '@voltagent/core';
+import { ModelOptions, Providers } from '../types';
 
 export abstract class MyModel {
   constructor(protected readonly modelOptions: ModelOptions) {}
@@ -18,7 +17,7 @@ export abstract class MyModel {
     return this.modelOptions.model;
   }
 
-  abstract model(): AgentOptions['model'];
+  abstract model(): LanguageModelV3;
 
   abstract tokenLimit(): number;
 

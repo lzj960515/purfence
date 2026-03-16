@@ -8,6 +8,7 @@ import { PurfenceExecution } from './purfence-execution.entity';
 import { ExecutionStage } from './purfence-status.enum';
 import { MyUtil } from '@app/shared';
 import { Agent } from './agent/agent.entity';
+import { AgentConversation } from './conversation/agent-conversation.entity';
 const ZIWEI_TOOLS = [
   'createProject',
   'createIssue',
@@ -72,6 +73,30 @@ export class PurfenceAgentService {
       await this.providerModelService.findAgentModelOptions(
         agentConfig.modelConfig,
       );
+
+    const title = await this.myAgentService.generateText(
+      agentModelOptions.default,
+      [
+        {
+          role: 'system',
+          content:
+            'Please summarize the conversation messages in 20 characters or less. Return only plain text without any quotes, symbols, or formatting.',
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: params.query,
+            },
+          ],
+        },
+      ],
+    );
+
+    await AgentConversation.update(params.threadId, {
+      title,
+    });
 
     const agent = this.myAgentService.createAgent({
       tools: agentConfig.tools,

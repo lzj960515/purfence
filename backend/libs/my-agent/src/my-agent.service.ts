@@ -13,7 +13,7 @@ import VoltAgent, {
   VoltAgentTextStreamPart,
   Workflow,
 } from '@voltagent/core';
-import { Output, type Tool } from 'ai';
+import { ModelMessage, Output, streamText, type Tool } from 'ai';
 import _ from 'lodash';
 import {
   catchError,
@@ -190,6 +190,22 @@ export class MyAgentService {
 
   registerWorkflow(workflow: Workflow<any, any>) {
     this.voltAgent?.registerWorkflow(workflow);
+  }
+
+  async generateText(modelOptions: ModelOptions, messages: ModelMessage[]) {
+    const model = this.llmService.get(modelOptions).model();
+
+    const result = streamText({
+      model,
+      messages,
+    });
+    let resultText = '';
+    for await (const chunk of result.fullStream) {
+      if (chunk.type === 'text-delta') {
+        resultText += chunk.text;
+      }
+    }
+    return resultText;
   }
 
   private getAgentTools(tools: AgentOptions['tools']) {

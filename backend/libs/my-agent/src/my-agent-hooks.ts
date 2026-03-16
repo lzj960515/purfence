@@ -27,16 +27,6 @@ export class MyAgentHooks {
           return;
         }
 
-        const title =
-          !error && context.context.get('provider') === ProviderType.OPENAI
-            ? this.messageService.extractRawText(context.input as UIMessage[])
-            : undefined;
-
-        await this.messageService.touchConversation(
-          context.conversationId,
-          title,
-        );
-
         await this.updateSessionUsage({ output, context });
 
         this.handleEvent({ context, error });

@@ -51,13 +51,13 @@ export const GET_AGENT_HISTORIES = gql`
   }
 `
 
-export const AGENT_CONVERSATION_SESSIONS = gql`
-  query AgentConversationSessions(
-    $filter: AgentConversationSessionFilter
+export const AGENT_CONVERSATIONS = gql`
+  query AgentConversations(
+    $filter: AgentConversationFilter
     $paging: OffsetPaging
-    $sorting: [AgentConversationSessionSort!]
+    $sorting: [AgentConversationSort!]
   ) {
-    agentConversationSessions(
+    agentConversations(
       filter: $filter
       paging: $paging
       sorting: $sorting
@@ -74,12 +74,12 @@ export const AGENT_CONVERSATION_SESSIONS = gql`
   }
 `
 
-export const CREATE_ONE_AGENT_CONVERSATION_SESSION = gql`
-  mutation CreateOneAgentConversationSession(
-    $input: AgentConversationSessionCreateInput!
+export const CREATE_ONE_AGENT_CONVERSATION = gql`
+  mutation CreateOneAgentConversation(
+    $input: AgentConversationCreateInput!
   ) {
-    createOneAgentConversationSession(
-      input: { agentConversationSession: $input }
+    createOneAgentConversation(
+      input: { agentConversation: $input }
     ) {
       id
       userId
@@ -90,11 +90,11 @@ export const CREATE_ONE_AGENT_CONVERSATION_SESSION = gql`
   }
 `
 
-export const DELETE_ONE_AGENT_CONVERSATION_SESSION = gql`
-  mutation DeleteOneAgentConversationSession(
-    $input: DeleteOneAgentConversationSessionInput!
+export const DELETE_ONE_AGENT_CONVERSATION = gql`
+  mutation DeleteOneAgentConversation(
+    $input: DeleteOneAgentConversationInput!
   ) {
-    deleteOneAgentConversationSession(input: $input) {
+    deleteOneAgentConversation(input: $input) {
       id
     }
   }

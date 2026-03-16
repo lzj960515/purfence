@@ -2,7 +2,7 @@ import { BaseEntity, IDColumnOpts } from '@app/shared';
 import { Column, Entity } from 'typeorm';
 
 @Entity('agent_conversation')
-export class AgentConversationSession extends BaseEntity {
+export class AgentConversation extends BaseEntity {
   @Column({ ...IDColumnOpts, nullable: true })
   userId?: string;
 

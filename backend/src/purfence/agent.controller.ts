@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Post,
@@ -14,7 +13,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MyAgentService, MessageService } from '@app/my-agent';
 import { loadSkills } from '@app/my-agent/utils/skill-loader.util';
-import { Memory } from '@voltagent/core';
 import type { Response } from 'express';
 import {
   PurfenceConfig,
@@ -24,7 +22,6 @@ import { ensureDir } from '@src/common/utils/file.util';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { AgentConversationSession } from './conversation/agent-conversation.entity';
 
 const USER_ID = 'purfence';
 
@@ -44,10 +41,6 @@ export class AgentController {
     private readonly messageService: MessageService,
   ) {}
 
-  private get memory(): Memory {
-    return (this.messageService as any).memory;
-  }
-
   @Get('tools')
   getTools() {
     const tools = this.myAgentService.getTools();
@@ -63,16 +56,6 @@ export class AgentController {
       name: skill.name,
       description: skill.description,
     }));
-  }
-
-  @Get('conversations')
-  async getConversations() {
-    const conversations = await AgentConversationSession.find({
-      where: { userId: USER_ID },
-      order: { updatedAt: 'DESC' },
-      take: 20,
-    });
-    return conversations;
   }
 
   @Get('conversations/:threadId/messages')
@@ -92,12 +75,6 @@ export class AgentController {
     }
 
     return res.sendFile(filePath);
-  }
-
-  @Delete('conversations/:threadId')
-  async deleteConversation(@Param('threadId') threadId: string) {
-    await this.messageService.deleteConversation(threadId);
-    return { success: true };
   }
 
   @Post('upload-image')

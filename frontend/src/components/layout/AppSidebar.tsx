@@ -24,8 +24,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {
-  useAgentConversationSessionsQuery,
-  useDeleteOneAgentConversationSessionMutation,
+  useAgentConversationsQuery,
+  useDeleteOneAgentConversationMutation,
 } from '@/graphql/__generated__/hooks'
 import logoPng from '@/assets/purfence-logo.png'
 import { useUpdate } from '@/hooks/useUpdate'
@@ -102,7 +102,7 @@ export function AppSidebar() {
     data: conversationData,
     loading: loadingConversations,
     refetch: refetchConversations,
-  } = useAgentConversationSessionsQuery({
+  } = useAgentConversationsQuery({
     variables: {
       filter: { userId: { eq: 'purfence' } },
       paging: { limit: 20, offset: 0 },
@@ -112,9 +112,9 @@ export function AppSidebar() {
     fetchPolicy: 'network-only',
   })
 
-  const conversations = conversationData?.agentConversationSessions?.nodes ?? []
+  const conversations = conversationData?.agentConversations?.nodes ?? []
 
-  const [deleteConversationMutation] = useDeleteOneAgentConversationSessionMutation({
+  const [deleteConversationMutation] = useDeleteOneAgentConversationMutation({
     onError: (error) => {
       console.error('Failed to delete conversation:', error)
     },

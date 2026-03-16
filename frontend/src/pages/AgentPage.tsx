@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
-import { useCreateOneAgentConversationSessionMutation } from '@/graphql/__generated__/hooks';
+import { useCreateOneAgentConversationMutation } from '@/graphql/__generated__/hooks';
 import { MessageList } from '@/components/agent/MessageList';
 import { ChatInputArea } from '@/components/agent/ChatInputArea';
 import { useSocketAgent } from '@/hooks/useSocketAgent';
@@ -39,7 +39,7 @@ export function AgentPage() {
     })
     .map((agent) => ({ id: agent.id, name: agent.name }));
 
-  const [createConversation] = useCreateOneAgentConversationSessionMutation({
+  const [createConversation] = useCreateOneAgentConversationMutation({
     onError: (error) => {
       console.error('Failed to create conversation:', error);
     },
@@ -218,7 +218,7 @@ export function AgentPage() {
         },
       })
         .then(({ data }) => {
-          const newThreadId = data?.createOneAgentConversationSession?.id;
+          const newThreadId = data?.createOneAgentConversation?.id;
           if (!newThreadId) {
             return;
           }

@@ -535,10 +535,6 @@ ${issueDescription.trim()}
     const issue = await this.validateIssueForDelete(issueId);
     this.logger.log(`${loggerPrefix} validation_passed status=${issue.status}`);
 
-    // 阶段2: 对话清理（事务外，失败不阻断）
-    await this.cleanupConversations(issueId);
-    this.logger.log(`${loggerPrefix} conversation_cleanup_completed`);
-
     // 阶段3: Git 资源清理（事务外，失败不阻断）
     await this.cleanupGitResources(issue);
     this.logger.log(`${loggerPrefix} git_cleanup_completed`);
@@ -565,34 +561,6 @@ ${issueDescription.trim()}
     }
 
     return issue;
-  }
-
-  /**
-   * 阶段2: 对话清理
-   * - 查询该 Issue 的所有 Execution 记录
-   * - 对每个存在 sessionId 的 Execution，调用 deleteConversation
-   * - 异常捕获，记录日志，不阻断主流程
-   */
-  private async cleanupConversations(issueId: string): Promise<void> {
-    const executions = await PurfenceExecution.find({ where: { issueId } });
-
-    for (const execution of executions) {
-      if (execution.sessionId) {
-        try {
-          await this.messageService.deleteConversation(execution.sessionId);
-          this.logger.debug(
-            `[purfence-issue-delete] ${issueId} conversation_deleted ` +
-              `executionId=${execution.id}, sessionId=${execution.sessionId}`,
-          );
-        } catch (error) {
-          this.logger.warn(
-            `[purfence-issue-delete] ${issueId} conversation_cleanup_failed ` +
-              `executionId=${execution.id}, sessionId=${execution.sessionId}, ` +
-              `error=${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      }
-    }
   }
 
   /**

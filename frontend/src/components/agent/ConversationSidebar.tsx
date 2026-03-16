@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useAgentConversationSessionsQuery } from '@/graphql/__generated__/hooks';
+import { useAgentConversationsQuery } from '@/graphql/__generated__/hooks';
 
 interface ConversationSidebarProps {
   currentThreadId: string;
@@ -27,7 +27,7 @@ export function ConversationSidebar({
   connectionStatus,
 }: ConversationSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { data, loading: isLoading } = useAgentConversationSessionsQuery({
+  const { data, loading: isLoading } = useAgentConversationsQuery({
     variables: {
       filter: { userId: { eq: 'purfence' } },
       paging: { limit: 20, offset: 0 },
@@ -37,7 +37,7 @@ export function ConversationSidebar({
     fetchPolicy: 'network-only',
   });
 
-  const conversations = data?.agentConversationSessions?.nodes ?? [];
+  const conversations = data?.agentConversations?.nodes ?? [];
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
