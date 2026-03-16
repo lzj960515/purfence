@@ -3,10 +3,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Transactional } from 'typeorm-transactional';
 import { AgentHistory } from './agent-history.entity';
-import { AgentCreateInput } from '../agent/agent-create.input';
 import { AgentDto } from '../agent/agent.dto';
 import { Agent } from '../agent/agent.entity';
-import { AgentUpdateInput } from '../agent/agent-update.input';
 
 @Injectable()
 export class AgentHistoryService {

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
 import {
   ArrowLeftRight,
@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import {
+  DELETE_AGENT_HISTORY,
   GET_AGENT_HISTORIES,
   ROLLBACK_AGENT_HISTORY,
 } from '@/api/agent.graphql'
@@ -167,7 +168,11 @@ export function AgentsPage() {
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([])
   const [diffDialogOpen, setDiffDialogOpen] = useState(false)
   const [rollbackTarget, setRollbackTarget] = useState<AgentHistoryItem | null>(null)
+  const [deletingHistory, setDeletingHistory] = useState<AgentHistoryItem | null>(null)
   const [rollbacking, setRollbacking] = useState(false)
+  const [deletingHistoryPending, setDeletingHistoryPending] = useState(false)
+  const [highlightHistoryId, setHighlightHistoryId] = useState<string | null>(null)
+  const historyRowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const activeProviders = useMemo(
     () => providerConfigs.filter((config) => config.isActive),
@@ -186,6 +191,7 @@ export function AgentsPage() {
   })
 
   const [rollbackHistoryMutation] = useMutation(ROLLBACK_AGENT_HISTORY)
+  const [deleteHistoryMutation] = useMutation(DELETE_AGENT_HISTORY)
 
   const selectedAgent = useMemo(
     () => items.find((item) => item.id === selectedAgentId) ?? null,
@@ -294,6 +300,26 @@ export function AgentsPage() {
       variant: 'destructive',
     })
   }, [historyError, toast])
+
+  useEffect(() => {
+    if (!historyDialogOpen || !highlightHistoryId) {
+      return
+    }
+
+    const target = historyRowRefs.current[highlightHistoryId]
+    if (!target) {
+      return
+    }
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    const timeoutId = window.setTimeout(() => {
+      setHighlightHistoryId(null)
+    }, 2200)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [highlightHistoryId, historyDialogOpen])
 
   const createNewAgent = () => {
     setIsCreating(true)
@@ -456,6 +482,7 @@ export function AgentsPage() {
         const versions = historyResult.data?.agentHistories?.nodes ?? []
         setHistoryItems(versions)
         setSelectedHistoryIds([])
+        setHighlightHistoryId(versions[0]?.id ?? null)
       }
 
       const refreshedAgent = refreshedItems?.find((item: AgentItem) => item.id === selectedAgentId)
@@ -484,6 +511,37 @@ export function AgentsPage() {
       })
     } finally {
       setRollbacking(false)
+    }
+  }
+
+  const handleDeleteHistory = async () => {
+    if (!deletingHistory || !selectedAgentId) return
+
+    setDeletingHistoryPending(true)
+    try {
+      await deleteHistoryMutation({
+        variables: {
+          input: { id: deletingHistory.id },
+        },
+      })
+
+      const historyResult = await refetchHistory({ agentId: selectedAgentId })
+      const versions = historyResult.data?.agentHistories?.nodes ?? []
+      setHistoryItems(versions)
+      setSelectedHistoryIds((current) => current.filter((id) => id !== deletingHistory.id))
+      setDeletingHistory(null)
+      toast({
+        title: '删除成功',
+        description: `版本 v${deletingHistory.version} 已删除。`,
+      })
+    } catch (deleteError) {
+      toast({
+        title: '删除失败',
+        description: deleteError instanceof Error ? deleteError.message : '请稍后重试',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeletingHistoryPending(false)
     }
   }
 
@@ -1018,9 +1076,14 @@ export function AgentsPage() {
                   return (
                     <div
                       key={history.id}
-                      className={isChecked
-                        ? 'flex cursor-pointer gap-4 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 transition-colors'
-                        : 'flex cursor-pointer gap-4 rounded-2xl border border-border/80 bg-background/90 p-4 transition-colors hover:border-border hover:bg-muted/20'}
+                      ref={(node) => {
+                        historyRowRefs.current[history.id] = node
+                      }}
+                      className={highlightHistoryId === history.id
+                        ? 'flex cursor-pointer gap-4 rounded-2xl border-2 border-emerald-500/60 bg-emerald-500/10 p-4 shadow-[0_0_0_1px_rgba(16,185,129,0.2)] transition-colors'
+                        : isChecked
+                          ? 'flex cursor-pointer gap-4 rounded-2xl border-2 border-primary/50 bg-primary/5 p-4 transition-colors'
+                          : 'flex cursor-pointer gap-4 rounded-2xl border border-border/80 bg-background/90 p-4 transition-colors hover:border-border hover:bg-muted/20'}
                     >
                       <label
                         htmlFor={`history-select-${history.id}`}
@@ -1053,20 +1116,35 @@ export function AgentsPage() {
                         </div>
                       </label>
                       {!isCurrent ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 self-start"
-                          onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            setRollbackTarget(history)
-                          }}
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                          回滚到此版本
-                        </Button>
+                        <div className="flex items-center gap-2 self-start">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setRollbackTarget(history)
+                            }}
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                            回滚到此版本
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setDeletingHistory(history)
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       ) : null}
                     </div>
                   )
@@ -1093,6 +1171,27 @@ export function AgentsPage() {
             </Button>
             <Button onClick={() => void handleRollback()} disabled={rollbacking}>
               {rollbacking ? '回滚中...' : '确认回滚'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deletingHistory} onOpenChange={(open) => !open && setDeletingHistory(null)}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>确认删除版本</DialogTitle>
+            <DialogDescription>
+              {deletingHistory
+                ? `确认删除 v${deletingHistory.version} 吗？删除后该历史记录无法恢复。`
+                : '请选择要删除的版本。'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingHistory(null)} disabled={deletingHistoryPending}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDeleteHistory()} disabled={deletingHistoryPending}>
+              {deletingHistoryPending ? '删除中...' : '确认删除'}
             </Button>
           </DialogFooter>
         </DialogContent>

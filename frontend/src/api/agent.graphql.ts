@@ -108,6 +108,14 @@ export const ROLLBACK_AGENT_HISTORY = gql`
   }
 `
 
+export const DELETE_AGENT_HISTORY = gql`
+  mutation DeleteAgentHistory($input: DeleteOneAgentHistoryInput!) {
+    deleteOneAgentHistory(input: $input) {
+      id
+    }
+  }
+`
+
 export const DELETE_AGENT = gql`
   mutation DeleteAgent($input: DeleteOneAgentInput!) {
     deleteOneAgent(input: $input) {
