@@ -25,7 +25,8 @@ export function AgentPage() {
   const [threadId, setThreadId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const autoSentThreadRef = useRef<string>('');
-  const creatingThreadRef = useRef(false);
+  const creatingThreadPromiseRef = useRef<Promise<string | null> | null>(null);
+  const openingThreadRef = useRef('');
   const { data: agentsData } = useQuery<AgentsQueryData>(GET_AGENTS, {
     fetchPolicy: 'network-only',
   });
@@ -168,12 +169,49 @@ export function AgentPage() {
   const prefillFromUrl = searchParams.get('prefill') || '';
   const autoSendFromUrl = searchParams.get('autoSend') === '1';
 
-  // 连接成功后创建并打开新会话（由 URL 参数驱动）
+  const ensureThreadId = useCallback(async () => {
+    if (threadId) {
+      return threadId;
+    }
+
+    if (creatingThreadPromiseRef.current) {
+      return creatingThreadPromiseRef.current;
+    }
+
+    const promise = createConversation({
+      variables: {
+        input: {
+          userId: 'purfence',
+        },
+      },
+    })
+      .then(({ data }) => {
+        const newThreadId = data?.createOneAgentConversation?.id;
+        if (!newThreadId) {
+          return null;
+        }
+
+        openingThreadRef.current = newThreadId;
+        setThreadId(newThreadId);
+        sessionOpen({ threadId: newThreadId });
+        setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
+        return newThreadId;
+      })
+      .finally(() => {
+        creatingThreadPromiseRef.current = null;
+      });
+
+    creatingThreadPromiseRef.current = promise;
+    return promise;
+  }, [threadId, createConversation, sessionOpen, setSearchParams]);
+
   useEffect(() => {
     if (connectionState !== 'connected') return;
 
-    if (threadFromUrl) {
-      if (threadFromUrl === threadId) return;
+    if (threadFromUrl && sourceFromUrl === 'history') {
+      if (threadFromUrl === threadId) {
+        return;
+      }
 
       clearMessages();
 
@@ -193,6 +231,24 @@ export function AgentPage() {
 
     }
 
+    if (threadFromUrl && sourceFromUrl === 'new') {
+      if (threadFromUrl === threadId || threadFromUrl === openingThreadRef.current) {
+        if (threadFromUrl === openingThreadRef.current) {
+          openingThreadRef.current = '';
+        }
+        return;
+      }
+
+      const timeoutId = window.setTimeout(() => {
+        setThreadId(threadFromUrl);
+        sessionOpen({ threadId: threadFromUrl });
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+    }
+
     if (!threadFromUrl && threadId) {
       clearMessages();
       sessionClose({ threadId });
@@ -205,55 +261,29 @@ export function AgentPage() {
         window.clearTimeout(timeoutId);
       };
     }
-
-    if (!threadId) {
-      if (creatingThreadRef.current) return;
-
-      creatingThreadRef.current = true;
-      void createConversation({
-        variables: {
-          input: {
-            userId: 'purfence',
-          },
-        },
-      })
-        .then(({ data }) => {
-          const newThreadId = data?.createOneAgentConversation?.id;
-          if (!newThreadId) {
-            return;
-          }
-
-          setThreadId(newThreadId);
-          sessionOpen({ threadId: newThreadId });
-          setSearchParams({ thread: newThreadId, source: 'new' }, { replace: true });
-        })
-        .finally(() => {
-          creatingThreadRef.current = false;
-        });
-    }
   }, [
     connectionState,
+    sourceFromUrl,
     threadId,
     threadFromUrl,
-    setSearchParams,
     sessionOpen,
     sessionClose,
     clearMessages,
-    createConversation,
     loadHistoryMessages,
   ]);
 
   // 发送消息
   const handleSendMessage = useCallback(
     async (query: string) => {
-      if (!threadId) return;
+      const activeThreadId = await ensureThreadId();
+      if (!activeThreadId) return;
 
       let imageUrl: string | undefined;
 
       // 如果有待发送图片，先上传
       if (pendingImage) {
         try {
-          const result = await uploadImage(pendingImage, threadId);
+          const result = await uploadImage(pendingImage, activeThreadId);
           imageUrl = result.path;
         } catch (e) {
           console.error('Failed to upload image:', e as unknown);
@@ -262,7 +292,7 @@ export function AgentPage() {
       }
 
       sendMessage({
-        threadId,
+        threadId: activeThreadId,
         query,
         agentId: effectiveSelectedAgentId || undefined,
         imageUrl,
@@ -271,7 +301,7 @@ export function AgentPage() {
       setPendingImage(null);
     },
     [
-      threadId,
+      ensureThreadId,
       sendMessage,
       effectiveSelectedAgentId,
       pendingImage,
@@ -290,12 +320,14 @@ export function AgentPage() {
   useEffect(() => {
     if (!autoSendFromUrl || !prefillFromUrl) return;
     if (connectionState !== 'connected') return;
-    if (!threadId) return;
-    if (autoSentThreadRef.current === threadId) return;
+    const autoSendToken =
+      sourceFromUrl === 'new' ? `new:${prefillFromUrl}` : threadId;
+    if (!autoSendToken) return;
+    if (autoSentThreadRef.current === autoSendToken) return;
     if (messages.length > 0) return;
 
     const timeoutId = window.setTimeout(() => {
-      autoSentThreadRef.current = threadId;
+      autoSentThreadRef.current = autoSendToken;
       void handleSendMessage(prefillFromUrl);
     }, 0);
 
@@ -306,6 +338,7 @@ export function AgentPage() {
     autoSendFromUrl,
     prefillFromUrl,
     connectionState,
+    sourceFromUrl,
     threadId,
     messages.length,
     handleSendMessage,

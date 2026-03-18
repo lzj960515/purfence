@@ -135,7 +135,7 @@ export function AppSidebar() {
   }, [location.search])
 
   const handleNewChat = () => {
-    navigate('/agent')
+    navigate('/agent?source=new')
   }
 
   const handleDeleteConversation = async (convId: string) => {
@@ -147,7 +147,7 @@ export function AppSidebar() {
       })
       await refetchConversations()
       if (activeThreadId === convId) {
-        navigate('/agent')
+        navigate('/agent?source=new')
       }
     } catch (e) {
       console.error('Failed to delete conversation:', e)
@@ -287,7 +287,9 @@ export function AppSidebar() {
                           >
                             <button
                               type="button"
-                              onClick={() => navigate(`/agent?thread=${conv.id}`)}
+                              onClick={() =>
+                                navigate(`/agent?thread=${conv.id}&source=history`)
+                              }
                               className="min-w-0 flex-1 text-left"
                             >
                               <div className="truncate">
