@@ -24,6 +24,8 @@ export function AgentPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [threadId, setThreadId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
+  const [pendingFirstMessage, setPendingFirstMessage] = useState<ChatMessage | null>(null);
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
   const autoSentThreadRef = useRef<string>('');
   const creatingThreadPromiseRef = useRef<Promise<string | null> | null>(null);
   const openingThreadRef = useRef('');
@@ -63,6 +65,12 @@ export function AgentPage() {
     clearMessages,
     setMessages,
   } = useSocketAgent();
+
+  const renderedMessages = messages.length > 0
+    ? messages
+    : pendingFirstMessage
+      ? [pendingFirstMessage]
+      : messages;
 
   // 页面加载时自动连接
   useEffect(() => {
@@ -249,8 +257,10 @@ export function AgentPage() {
       };
     }
 
-    if (!threadFromUrl && threadId) {
+    if (!threadFromUrl && threadId && threadId !== openingThreadRef.current) {
       clearMessages();
+      setPendingFirstMessage(null);
+      setIsStartingConversation(false);
       sessionClose({ threadId });
       autoSentThreadRef.current = '';
       const timeoutId = window.setTimeout(() => {
@@ -272,11 +282,34 @@ export function AgentPage() {
     loadHistoryMessages,
   ]);
 
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    setPendingFirstMessage(null);
+    setIsStartingConversation(false);
+  }, [messages.length]);
+
   // 发送消息
   const handleSendMessage = useCallback(
     async (query: string) => {
+      const isFirstMessageForNewConversation = !threadId && messages.length === 0;
+
+      if (isFirstMessageForNewConversation) {
+        setIsStartingConversation(true);
+        setPendingFirstMessage({
+          id: `pending-${crypto.randomUUID()}`,
+          type: 'user',
+          content: query,
+          timestamp: new Date(),
+        });
+      }
+
       const activeThreadId = await ensureThreadId();
-      if (!activeThreadId) return;
+      if (!activeThreadId) {
+        setPendingFirstMessage(null);
+        setIsStartingConversation(false);
+        return;
+      }
 
       let imageUrl: string | undefined;
 
@@ -304,7 +337,9 @@ export function AgentPage() {
       ensureThreadId,
       sendMessage,
       effectiveSelectedAgentId,
+      messages.length,
       pendingImage,
+      threadId,
     ],
   );
 
@@ -315,7 +350,10 @@ export function AgentPage() {
     }
   }, [threadId, sessionTerminate]);
 
-  const shouldShowCenteredInput = sourceFromUrl !== 'history' && messages.length === 0;
+  const shouldShowCenteredInput =
+    sourceFromUrl !== 'history' &&
+    renderedMessages.length === 0 &&
+    !isStartingConversation;
 
   useEffect(() => {
     if (!autoSendFromUrl || !prefillFromUrl) return;
@@ -324,7 +362,7 @@ export function AgentPage() {
       sourceFromUrl === 'new' ? `new:${prefillFromUrl}` : threadId;
     if (!autoSendToken) return;
     if (autoSentThreadRef.current === autoSendToken) return;
-    if (messages.length > 0) return;
+    if (renderedMessages.length > 0) return;
 
     const timeoutId = window.setTimeout(() => {
       autoSentThreadRef.current = autoSendToken;
@@ -340,7 +378,7 @@ export function AgentPage() {
     connectionState,
     sourceFromUrl,
     threadId,
-    messages.length,
+    renderedMessages.length,
     handleSendMessage,
   ]);
 
@@ -383,7 +421,7 @@ export function AgentPage() {
       ) : (
         <>
           <div className="flex-1 overflow-y-auto min-h-0 z-0 scroll-smooth">
-            <MessageList messages={messages} />
+            <MessageList messages={renderedMessages} />
           </div>
 
           <div className="shrink-0 z-10 bg-background/95 backdrop-blur-sm">
