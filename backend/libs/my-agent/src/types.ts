@@ -59,6 +59,7 @@ export interface AgentOptions {
   prompt?: string;
   tools?: (string | { description?: string })[];
   memory?: false | 'in-memory';
+  skills?: string[];
 }
 
 export interface ChatOptions {

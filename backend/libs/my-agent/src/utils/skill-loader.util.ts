@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { homedir } from 'os';
 import matter from 'gray-matter';
+import _ from 'lodash';
 
 export type Skill = {
   name: string;
@@ -15,16 +16,19 @@ function getSkillsDir(): string {
 }
 
 // 只有name和description
-export function loadSkills() {
-  const skills: Skill[] = [];
+export function loadSkills(skillNames?: string[]) {
+  const skillList: Skill[] = [];
   const skillsDir = getSkillsDir();
   const files = loadSkillFiles(skillsDir);
   for (const filePath of files) {
     const content = fs.readFileSync(filePath, 'utf-8');
     const parsed = parseSkill(content);
-    skills.push(parsed);
+    // 为空就是全部
+    if (_.isEmpty(skillNames) || skillNames.includes(parsed?.name ?? '')) {
+      skillList.push(parsed);
+    }
   }
-  return skills;
+  return skillList;
 }
 
 export function loadSkill(name: string) {

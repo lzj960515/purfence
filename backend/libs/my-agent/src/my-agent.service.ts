@@ -48,6 +48,7 @@ import {
   MyAgentModuleOptions,
 } from './types';
 import { AgentArtifact } from '@src/purfence/artifact/agent-artifact.ai.entity';
+import { loadSkills } from './utils/skill-loader.util';
 
 @Injectable()
 export class MyAgentService {
@@ -166,11 +167,19 @@ export class MyAgentService {
   }
 
   createAgent(options: AgentOptions): MyAgent {
-    const { name, prompt, tools } = options;
-
+    const { name, prompt, tools, skills } = options;
     const agent: Agent = new Agent({
       name,
-      instructions: prompt ?? `You are a ${name} agent.`,
+      instructions: async () => {
+        const skillsInstruction = this.buildSkillsInstruction(skills);
+        return _.chain([
+          prompt ?? `You are a ${name} agent.`,
+          skillsInstruction,
+        ])
+          .compact()
+          .join('\n\n')
+          .value();
+      },
       model: ({ context }) => {
         const modelOptions = context?.get('modelOptions') as ModelOptions;
         return this.llmService.get(modelOptions).model() as any;
@@ -181,6 +190,20 @@ export class MyAgentService {
       maxSteps: 300,
     });
     return new MyAgent(agent, this);
+  }
+
+  private buildSkillsInstruction(skills?: string[]) {
+    const skillList = loadSkills(skills);
+    if (_.isEmpty(skillList)) {
+      return '';
+    }
+
+    const skillsInstruction = _.map(
+      skillList,
+      (skill) => `- ${skill.name}: ${skill.description}`,
+    ).join('\n');
+
+    return `The following skills are available for use with the Skill tool: \n${skillsInstruction}`;
   }
 
   registerAgent(agent: Agent) {

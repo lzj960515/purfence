@@ -23,6 +23,7 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { USER_ID } from './constant';
+import _ from 'lodash';
 
 const ALLOWED_IMAGE_TYPES = [
   'image/png',
@@ -51,7 +52,7 @@ export class AgentController {
 
   @Get('skills')
   getSkills() {
-    return loadSkills().map((skill) => ({
+    return _.map(loadSkills(), (skill) => ({
       name: skill.name,
       description: skill.description,
     }));
