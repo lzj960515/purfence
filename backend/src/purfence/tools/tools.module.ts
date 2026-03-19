@@ -10,6 +10,8 @@ import { ExecutionTools } from './execution.tools';
 import { GenericTools } from './generic.tools';
 import { GenericToolsService } from './generic-tools.service';
 import { ImageTool } from './image.tool';
+import { SessionTools } from './session.tools';
+import { SessionToolsService } from './session-tools.service';
 
 const tools = [
   ImageTool,
@@ -17,6 +19,7 @@ const tools = [
   TianfuTools,
   ExecutionTools,
   GenericTools,
+  SessionTools,
 ];
 
 @Global()
@@ -28,6 +31,7 @@ const tools = [
     PurfenceIssueService,
     PurfenceExecutionService,
     GenericToolsService,
+    SessionToolsService,
   ],
   exports: [
     ...tools,
@@ -35,6 +39,7 @@ const tools = [
     PurfenceIssueService,
     PurfenceExecutionService,
     GenericToolsService,
+    SessionToolsService,
   ],
 })
 export class ToolsModule {}

@@ -2,7 +2,6 @@ import { MyUtil } from '@app/shared';
 import { Log } from '@nest-mods/log';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CommonService } from '@src/common';
 import VoltAgent, {
   Agent,
   BaseGenerationOptions,
@@ -13,7 +12,7 @@ import VoltAgent, {
   VoltAgentTextStreamPart,
   Workflow,
 } from '@voltagent/core';
-import { ModelMessage, Output, streamText, type Tool } from 'ai';
+import { ModelMessage, streamText, type Tool } from 'ai';
 import _ from 'lodash';
 import {
   catchError,
@@ -31,13 +30,9 @@ import {
   throwError,
   timer,
 } from 'rxjs';
-import { z } from 'zod';
 import { AgentConversationSession } from './agent-conversation-sessions.entity';
 import { AgentSseErrorActionType } from './agent-sse-error-action.enum';
-import {
-  getErrorActionType,
-  shouldRetryError,
-} from './agent-sse-error-mapping';
+import { getErrorActionType } from './agent-sse-error-mapping';
 import { LlmService } from './llm.service';
 import { MessageService } from './message.service';
 import { MyModel } from './model';
@@ -47,12 +42,8 @@ import { summarizationSystemPrompt, summarizationUserPrompt } from './prompt';
 import { SocketService } from './socket.service';
 import { ToolsService } from './tools.service';
 import {
-  AgentModelOptions,
   AgentOptions,
   ChatOptions,
-  GenerateTextOutputOptions,
-  IndexedKnowledgeBaseOptions,
-  KnowledgeBaseAttachment,
   ModelOptions,
   MyAgentModuleOptions,
 } from './types';
@@ -81,6 +72,14 @@ export class MyAgentService {
       abortCtrl.abort('User Cancelled');
       return true;
     }
+  }
+
+  isConversationRunning(conversationId: string) {
+    return this.conversationAbortCtrls.has(conversationId);
+  }
+
+  listRunningConversationIds() {
+    return Array.from(this.conversationAbortCtrls.keys());
   }
 
   stream(myAgent: MyAgent, chatOptions: ChatOptions) {
@@ -218,6 +217,7 @@ export class MyAgentService {
         if (_.isString(tool)) {
           return this.toolsService.getTools([tool]);
         }
+        return [];
       })
       .flatten()
       .value() as VoltAgentOptions['tools'];
@@ -273,7 +273,11 @@ export class MyAgentService {
           const error =
             chunk.error instanceof Error
               ? chunk.error
-              : new Error(String(chunk.error));
+              : new Error(
+                  typeof chunk.error === 'string'
+                    ? chunk.error
+                    : JSON.stringify(chunk.error),
+                );
           throw error;
         }
 
@@ -395,7 +399,7 @@ export class MyAgentService {
 
     const session = await this.findCurrentSession(userId, conversationId);
     const myModel = this.llmService.get(modelOptions);
-    const full = await this.messageService.isSessionFull(session, myModel);
+    const full = this.messageService.isSessionFull(session, myModel);
     if (!full) {
       return { session, message };
     }

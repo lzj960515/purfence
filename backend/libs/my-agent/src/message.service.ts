@@ -77,6 +77,69 @@ export class MessageService {
       .value();
   }
 
+  async summarizeHistory(
+    userId: string,
+    conversationId: string,
+    options?: GetMessagesOptions,
+  ) {
+    const sessions = await AgentConversationSession.find({
+      where: { conversationId },
+      order: { createdAt: 'ASC' },
+    });
+    if (_.isEmpty(sessions)) {
+      const messages = await this.getMessages(userId, conversationId, options);
+      return this.formatHistorySummary(messages as any[]);
+    }
+
+    const result: Awaited<ReturnType<typeof this.formatHistorySummary>> = [];
+    for (const session of sessions) {
+      const messages = await this.getMessages(userId, session.id, options);
+      const formattedMessages = this.formatHistorySummary(messages as any[]);
+      result.push(...formattedMessages);
+    }
+    return result;
+  }
+
+  async loadToolCallDetails(
+    userId: string,
+    conversationId: string,
+    toolCallIds: string[],
+  ) {
+    const uniqueToolCallIds = _.uniq(
+      toolCallIds.map((id) => id.trim()).filter(Boolean),
+    );
+    const sessions = await AgentConversationSession.find({
+      where: { conversationId },
+      order: { createdAt: 'ASC' },
+    });
+
+    if (_.isEmpty(sessions)) {
+      const messages = await this.getMessages(userId, conversationId);
+      return this.formatToolCallDetails(
+        conversationId,
+        messages as any[],
+        uniqueToolCallIds,
+      );
+    }
+
+    const result: Awaited<ReturnType<typeof this.formatToolCallDetails>> = [];
+    for (const session of sessions) {
+      const messages = await this.getMessages(userId, session.id);
+      const details = this.formatToolCallDetails(
+        session.id,
+        messages as any[],
+        uniqueToolCallIds,
+      );
+      result.push(...details);
+    }
+
+    const detailsById = new Map(result.map((item) => [item.toolCallId, item]));
+    return uniqueToolCallIds.map((toolCallId) => ({
+      toolCallId,
+      detail: detailsById.get(toolCallId) ?? null,
+    }));
+  }
+
   extractRawText(messages: UIMessage[]) {
     return _.chain(messages)
       .map((it) => {
@@ -138,6 +201,106 @@ export class MessageService {
       }
     }
     throw new Error('Invalid input, only support string or UIMessage[]');
+  }
+
+  private formatHistorySummary(
+    messages: UIMessage<{ createdAt?: Date; isBridgeMessage?: boolean }>[],
+  ) {
+    const result: {
+      id: string;
+      role: 'ai' | 'user';
+      type: 'text' | 'tool_call';
+      text?: string;
+      toolName?: string;
+      toolCallId?: string;
+      createdAt?: Date;
+    }[] = [];
+
+    for (const message of messages) {
+      if (message.metadata?.isBridgeMessage) {
+        continue;
+      }
+
+      let index = 0;
+      for (const part of message.parts) {
+        if (part.type === 'text') {
+          result.push({
+            id: `${message.id}-${index}`,
+            role: message.role === 'assistant' ? 'ai' : 'user',
+            type: 'text',
+            text: part.text,
+            createdAt: message.metadata?.createdAt,
+          });
+        }
+
+        if (part.type.startsWith('tool-')) {
+          const toolPart = part as ToolUIPart<{
+            [k: string]: { input: unknown; output: { value?: unknown } };
+          }>;
+          result.push({
+            id: toolPart.toolCallId,
+            role: message.role === 'assistant' ? 'ai' : 'user',
+            type: 'tool_call',
+            toolName: part.type.replace(/^tool-/, ''),
+            toolCallId: toolPart.toolCallId,
+            createdAt: message.metadata?.createdAt,
+          });
+        }
+
+        index += 1;
+      }
+    }
+
+    return result;
+  }
+
+  private formatToolCallDetails(
+    conversationId: string,
+    messages: UIMessage<{ createdAt?: Date; isBridgeMessage?: boolean }>[],
+    toolCallIds: string[],
+  ) {
+    const requestedToolCallIds = new Set(toolCallIds);
+    const result: {
+      toolCallId: string;
+      toolName: string;
+      input: unknown;
+      output: unknown;
+      status?: 'error';
+      createdAt?: Date;
+    }[] = [];
+
+    for (const message of messages) {
+      if (message.metadata?.isBridgeMessage) {
+        continue;
+      }
+
+      for (const part of message.parts) {
+        if (!part.type.startsWith('tool-')) {
+          continue;
+        }
+
+        const toolPart = part as ToolUIPart<{
+          [k: string]: { input: unknown; output: { value?: unknown } };
+        }>;
+        if (!requestedToolCallIds.has(toolPart.toolCallId)) {
+          continue;
+        }
+
+        result.push({
+          toolCallId: toolPart.toolCallId,
+          toolName: part.type.replace(/^tool-/, ''),
+          input: toolPart.input,
+          output: toolPart.output?.value,
+          status: (toolPart.output?.value as { error?: unknown } | undefined)
+            ?.error
+            ? 'error'
+            : undefined,
+          createdAt: message.metadata?.createdAt,
+        });
+      }
+    }
+
+    return result;
   }
 
   private async formatMessage(

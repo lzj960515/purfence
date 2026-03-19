@@ -1,45 +1,11 @@
-import { MyAgentService, getAgentPrompt } from '@app/my-agent';
+import { MyAgentService } from '@app/my-agent';
 import { LlmService } from '@app/my-agent/llm.service';
 import { SocketService } from '@app/my-agent/socket.service';
-import { AgentModelOptions } from '@app/my-agent/types';
 import { Injectable, Logger } from '@nestjs/common';
 import { ProviderModelService } from './provider-model.service';
-import { PurfenceExecution } from './purfence-execution.entity';
-import { ExecutionStage } from './purfence-status.enum';
 import { MyUtil } from '@app/shared';
 import { Agent } from './agent/agent.entity';
 import { AgentConversation } from './conversation/agent-conversation.entity';
-const ZIWEI_TOOLS = [
-  'createProject',
-  'createIssue',
-  'startIssue',
-  'searchProjects',
-  'searchIssues',
-  'getCurrentTime',
-  'updateProject',
-  'renderArtifacts',
-  'createScheduledTask',
-  'image',
-] as const;
-
-const TIANXIANG_TOOLS = [
-  'delegateTask',
-  'renderArtifacts',
-  'getCurrentTime',
-] as const;
-
-// 天机（Tianji）工具集 - 用于调度、分配任务
-const TIANJI_TOOLS = ['delegateTask', 'getCurrentTime'] as const;
-
-// 天府（Tianfu）工具集 - 用于评估、规划下一步
-const TIANFU_TOOLS = [
-  'continueExecution',
-  'createNextExecution',
-  'completeIssue',
-  'createNextIssue',
-  'delegateTask',
-  'getCurrentTime',
-] as const;
 
 @Injectable()
 export class PurfenceAgentService {
@@ -51,11 +17,14 @@ export class PurfenceAgentService {
     private readonly llmService: LlmService,
   ) {}
 
-  async streamTianxiang(params: {
+  streamTianxiang(params: {
     threadId: string;
     query: string;
     context?: Record<string, unknown>;
-  }) {}
+  }) {
+    void params;
+    return Promise.resolve();
+  }
 
   async streamAgent(params: {
     userId: string;
@@ -65,8 +34,9 @@ export class PurfenceAgentService {
     context?: Record<string, unknown>;
     imageUrl?: string;
   }) {
+    const { userId, threadId, query, agentId, context, imageUrl } = params;
     const agentConfig = await Agent.findOneOrFail({
-      where: { id: params.agentId },
+      where: { id: agentId },
     });
 
     const agentModelOptions =
@@ -94,9 +64,15 @@ export class PurfenceAgentService {
       ],
     );
 
-    await AgentConversation.update(params.threadId, {
-      title,
+    const conversation = await AgentConversation.findOne({
+      where: { id: threadId },
     });
+    if (conversation) {
+      conversation.title = title;
+      conversation.agentId = agentId;
+      conversation.userId = conversation.userId ?? userId;
+      await conversation.save();
+    }
 
     const agent = this.myAgentService.createAgent({
       tools: agentConfig.tools,
@@ -113,24 +89,24 @@ export class PurfenceAgentService {
             parts: [
               {
                 type: 'text',
-                text: params.query,
+                text: query,
               },
-              ...(params.imageUrl
+              ...(imageUrl
                 ? [
                     {
                       type: 'text' as const,
-                      text: `user uploaded image path is: ${params.imageUrl}`,
+                      text: `user uploaded image path is: ${imageUrl}`,
                     },
                   ]
                 : []),
             ],
           },
         ],
-        conversationId: params.threadId,
-        userId: params.userId,
+        conversationId: threadId,
+        userId: userId,
         agentModelOptions,
         context: {
-          ...(params.context || {}),
+          ...(context || {}),
         },
       }),
     );

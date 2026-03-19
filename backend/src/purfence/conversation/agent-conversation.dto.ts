@@ -8,5 +8,11 @@ export class AgentConversationDto extends BaseDto {
   userId?: string;
 
   @FilterableField({ nullable: true })
+  agentId?: string;
+
+  @FilterableField({ nullable: true })
+  parentConversationId?: string;
+
+  @FilterableField({ nullable: true })
   title?: string;
 }
