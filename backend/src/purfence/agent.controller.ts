@@ -22,8 +22,7 @@ import { ensureDir } from '@src/common/utils/file.util';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-
-const USER_ID = 'purfence';
+import { USER_ID } from './constant';
 
 const ALLOWED_IMAGE_TYPES = [
   'image/png',

@@ -8,7 +8,6 @@ import { Agent } from '../agent/agent.entity';
 import { ProviderModelService } from '../provider-model.service';
 import { AgentConversation } from '../conversation/agent-conversation.entity';
 
-const DEFAULT_USER_ID = 'purfence';
 type SessionListSortField = 'createdAt' | 'updatedAt' | 'title';
 type SessionListSortOrder = 'ASC' | 'DESC';
 
@@ -96,7 +95,7 @@ export class SessionToolsService {
     limit: number;
     offset: number;
   }) {
-    const userId = params.options.userId || DEFAULT_USER_ID;
+    const userId = params.options.userId;
     await AgentConversation.findOneOrFail({ where: { id: params.sessionId } });
     const messages = await this.messageService.summarizeHistory(
       userId,
@@ -117,7 +116,7 @@ export class SessionToolsService {
     sessionId: string;
     toolCallIds: string[];
   }) {
-    const userId = params.options.userId || DEFAULT_USER_ID;
+    const userId = params.options.userId;
     await AgentConversation.findOneOrFail({ where: { id: params.sessionId } });
     return {
       sessionId: params.sessionId,
@@ -137,7 +136,7 @@ export class SessionToolsService {
     sessionId?: string;
     background: boolean;
   }) {
-    const userId = params.options.userId || DEFAULT_USER_ID;
+    const userId = params.options.userId;
     const currentConversationId = params.options.conversationId;
     const agent = await Agent.findOneOrFail({ where: { id: params.agentId } });
     const sessionId = params.sessionId?.trim();
