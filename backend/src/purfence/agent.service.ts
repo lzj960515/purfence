@@ -6,6 +6,8 @@ import { ProviderModelService } from './provider-model.service';
 import { MyUtil } from '@app/shared';
 import { Agent } from './agent/agent.entity';
 import { AgentConversation } from './conversation/agent-conversation.entity';
+import { OnEvent } from '@nestjs/event-emitter';
+import { CommonService } from '@src/common';
 
 @Injectable()
 export class PurfenceAgentService {
@@ -44,36 +46,6 @@ export class PurfenceAgentService {
         agentConfig.modelConfig,
       );
 
-    const title = await this.myAgentService.generateText(
-      agentModelOptions.default,
-      [
-        {
-          role: 'system',
-          content:
-            'Please summarize the conversation messages in 20 characters or less. Return only plain text without any quotes, symbols, or formatting.',
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: params.query,
-            },
-          ],
-        },
-      ],
-    );
-
-    const conversation = await AgentConversation.findOne({
-      where: { id: threadId },
-    });
-    if (conversation) {
-      conversation.title = title;
-      conversation.agentId = agentId;
-      conversation.userId = conversation.userId ?? userId;
-      await conversation.save();
-    }
-
     const agent = this.myAgentService.createAgent({
       tools: agentConfig.tools,
       name: agentConfig.name,
@@ -110,5 +82,59 @@ export class PurfenceAgentService {
         },
       }),
     );
+    CommonService.emit('generate.title', {
+      threadId,
+      query,
+      agentId,
+      userId,
+    });
+  }
+
+  @OnEvent('generate.title')
+  async generateTitle(payload: {
+    threadId: string;
+    query: string;
+    agentId: string;
+    userId: string;
+  }) {
+    const { threadId, query, agentId, userId } = payload;
+
+    const conversation = await AgentConversation.findOne({
+      where: { id: threadId },
+    });
+    if (conversation) {
+      const agentConfig = await Agent.findOneOrFail({
+        where: { id: agentId },
+      });
+
+      const agentModelOptions =
+        await this.providerModelService.findAgentModelOptions(
+          agentConfig.modelConfig,
+        );
+
+      const title = await this.myAgentService.generateText(
+        agentModelOptions.default,
+        [
+          {
+            role: 'system',
+            content:
+              'Please summarize the conversation messages in 20 characters or less. Return only plain text without any quotes, symbols, or formatting.',
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: query,
+              },
+            ],
+          },
+        ],
+      );
+      conversation.title = title;
+      conversation.agentId = agentId;
+      conversation.userId = userId;
+      await conversation.save();
+    }
   }
 }
