@@ -24,22 +24,8 @@ const tools = [
 
 @Global()
 @Module({
-  imports: [HttpModule, PurfenceScheduledTaskModule],
-  providers: [
-    ...tools,
-    PurfenceProjectService,
-    PurfenceIssueService,
-    PurfenceExecutionService,
-    GenericToolsService,
-    SessionToolsService,
-  ],
-  exports: [
-    ...tools,
-    PurfenceProjectService,
-    PurfenceIssueService,
-    PurfenceExecutionService,
-    GenericToolsService,
-    SessionToolsService,
-  ],
+  imports: [HttpModule],
+  providers: [...tools, GenericToolsService, SessionToolsService],
+  exports: [...tools],
 })
 export class ToolsModule {}

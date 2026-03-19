@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import {
   NestjsQueryGraphQLModule,
   PagingStrategies,
@@ -48,6 +48,7 @@ import { AgentModule } from './agent/agent.module';
 import { AgentHistoryModule } from './agent-history/agent-history.module';
 import { AgentConversationModule } from './conversation/agent-conversation.module';
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([
