@@ -2,20 +2,20 @@ import { BaseDto } from '@app/shared';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { FilterableField } from '@ptc-org/nestjs-query-graphql';
 import {
-  PurfenceScheduledTaskKind,
-  PurfenceScheduledTaskLastStatus,
-} from './purfence-scheduled-task.enum';
+  ScheduledTaskKind,
+  ScheduledTaskLastStatus,
+} from './scheduled-task.enum';
 
-@ObjectType('PurfenceScheduledTask')
-export class PurfenceScheduledTaskDto extends BaseDto {
+@ObjectType('ScheduledTask')
+export class ScheduledTaskDto extends BaseDto {
   @FilterableField()
   name: string;
 
   @Field()
   prompt: string;
 
-  @FilterableField(() => PurfenceScheduledTaskKind)
-  kind: PurfenceScheduledTaskKind;
+  @FilterableField(() => ScheduledTaskKind)
+  kind: ScheduledTaskKind;
 
   @Field({ nullable: true })
   cronExpr?: string;
@@ -32,8 +32,8 @@ export class PurfenceScheduledTaskDto extends BaseDto {
   @Field({ nullable: true })
   nextRunAt?: Date;
 
-  @Field(() => PurfenceScheduledTaskLastStatus, { nullable: true })
-  lastStatus?: PurfenceScheduledTaskLastStatus;
+  @Field(() => ScheduledTaskLastStatus, { nullable: true })
+  lastStatus?: ScheduledTaskLastStatus;
 
   @Field({ nullable: true })
   lastError?: string;

@@ -5,12 +5,12 @@ import {
   PagingStrategies,
 } from '@ptc-org/nestjs-query-graphql';
 import { NestjsQueryTypeOrmModule } from '@ptc-org/nestjs-query-typeorm';
-import { PurfenceScheduledTaskCreateInput } from './purfence-scheduled-task-create.input';
-import { PurfenceScheduledTaskDto } from './purfence-scheduled-task.dto';
-import { PurfenceScheduledTask } from './purfence-scheduled-task.entity';
-import { PurfenceScheduledTaskResolver } from './purfence-scheduled-task.resolver';
-import { PurfenceScheduledTaskService } from './purfence-scheduled-task.service';
-import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-update.input';
+import { ScheduledTaskCreateInput } from './scheduled-task-create.input';
+import { ScheduledTaskDto } from './scheduled-task.dto';
+import { ScheduledTask } from './scheduled-task.entity';
+import { ScheduledTaskResolver } from './scheduled-task.resolver';
+import { ScheduledTaskService } from './scheduled-task.service';
+import { ScheduledTaskUpdateInput } from './scheduled-task-update.input';
 import { PurfenceConfigModule } from '../purfence-config/purfence-config.module';
 import { ProviderModelService } from '../provider-model.service';
 import { PurfenceAgentService } from '../agent.service';
@@ -19,15 +19,15 @@ import { PurfenceAgentService } from '../agent.service';
 @Module({
   imports: [
     PurfenceConfigModule,
-    TypeOrmModule.forFeature([PurfenceScheduledTask]),
+    TypeOrmModule.forFeature([ScheduledTask]),
     NestjsQueryGraphQLModule.forFeature({
-      imports: [NestjsQueryTypeOrmModule.forFeature([PurfenceScheduledTask])],
+      imports: [NestjsQueryTypeOrmModule.forFeature([ScheduledTask])],
       resolvers: [
         {
-          EntityClass: PurfenceScheduledTask,
-          DTOClass: PurfenceScheduledTaskDto,
-          CreateDTOClass: PurfenceScheduledTaskCreateInput,
-          UpdateDTOClass: PurfenceScheduledTaskUpdateInput,
+          EntityClass: ScheduledTask,
+          DTOClass: ScheduledTaskDto,
+          CreateDTOClass: ScheduledTaskCreateInput,
+          UpdateDTOClass: ScheduledTaskUpdateInput,
           read: { pagingStrategy: PagingStrategies.OFFSET },
           create: { disabled: true },
           update: { disabled: true },
@@ -38,15 +38,15 @@ import { PurfenceAgentService } from '../agent.service';
     }),
   ],
   providers: [
-    PurfenceScheduledTaskService,
-    PurfenceScheduledTaskResolver,
+    ScheduledTaskService,
+    ScheduledTaskResolver,
     ProviderModelService,
     PurfenceAgentService,
   ],
   exports: [
-    PurfenceScheduledTaskService,
+    ScheduledTaskService,
     ProviderModelService,
     PurfenceAgentService,
   ],
 })
-export class PurfenceScheduledTaskModule {}
+export class ScheduledTaskModule {}

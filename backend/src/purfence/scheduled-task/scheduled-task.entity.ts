@@ -1,14 +1,14 @@
 import { BaseEntity } from '@app/shared';
 import { Column, Entity, Index } from 'typeorm';
 import {
-  PurfenceScheduledTaskKind,
-  PurfenceScheduledTaskLastStatus,
-} from './purfence-scheduled-task.enum';
+  ScheduledTaskKind,
+  ScheduledTaskLastStatus,
+} from './scheduled-task.enum';
 
 @Index(['enabled'])
 @Index(['kind'])
 @Entity()
-export class PurfenceScheduledTask extends BaseEntity {
+export class ScheduledTask extends BaseEntity {
   @Column({ type: 'varchar', length: 256 })
   name: string;
 
@@ -18,9 +18,9 @@ export class PurfenceScheduledTask extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 32,
-    default: PurfenceScheduledTaskKind.recurring,
+    default: ScheduledTaskKind.recurring,
   })
-  kind: PurfenceScheduledTaskKind;
+  kind: ScheduledTaskKind;
 
   @Column({ type: 'varchar', length: 128, nullable: true })
   cronExpr?: string;
@@ -38,7 +38,7 @@ export class PurfenceScheduledTask extends BaseEntity {
   nextRunAt?: Date;
 
   @Column({ type: 'varchar', length: 32, nullable: true })
-  lastStatus?: PurfenceScheduledTaskLastStatus;
+  lastStatus?: ScheduledTaskLastStatus;
 
   @Column({ type: 'text', nullable: true })
   lastError?: string;

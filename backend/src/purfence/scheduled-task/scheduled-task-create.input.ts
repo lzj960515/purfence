@@ -6,10 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PurfenceScheduledTaskKind } from './purfence-scheduled-task.enum';
+import { ScheduledTaskKind } from './scheduled-task.enum';
 
 @InputType()
-export class PurfenceScheduledTaskCreateInput {
+export class ScheduledTaskCreateInput {
   @Field()
   @IsNotEmpty()
   name: string;
@@ -18,8 +18,8 @@ export class PurfenceScheduledTaskCreateInput {
   @IsNotEmpty()
   prompt: string;
 
-  @Field(() => PurfenceScheduledTaskKind)
-  kind: PurfenceScheduledTaskKind;
+  @Field(() => ScheduledTaskKind)
+  kind: ScheduledTaskKind;
 
   @Field({ nullable: true })
   @IsOptional()

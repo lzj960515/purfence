@@ -34,7 +34,7 @@ import { ProviderModelService } from './provider-model.service';
 import { AgentArtifact } from './artifact/agent-artifact.ai.entity';
 import { AgentArtifactDto } from './artifact/agent-artifact.dto';
 import { AgentArtifactUpdateInput } from './artifact/agent-artifact-update.input';
-import { PurfenceScheduledTaskModule } from './scheduled-task/purfence-scheduled-task.module';
+import { ScheduledTaskModule } from './scheduled-task/scheduled-task.module';
 import { PurfenceAgentService } from './agent.service';
 import { PurfenceAppConfigModule } from './app-config/app-config.module';
 import { MyQueue, MyQueueJob, MyQueueModule } from '@app/my-queue';
@@ -65,7 +65,7 @@ import { AgentConversationModule } from './conversation/agent-conversation.modul
     AgentConversationModule,
     ModelProviderModule,
     PurfenceConfigModule,
-    PurfenceScheduledTaskModule,
+    ScheduledTaskModule,
     PurfenceAppConfigModule,
     MyQueueModule,
     NestjsQueryGraphQLModule.forFeature({

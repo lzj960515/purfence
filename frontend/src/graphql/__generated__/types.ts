@@ -132,9 +132,11 @@ export type AgentConnection = {
 
 export type AgentConversation = {
   __typename?: 'AgentConversation';
+  agentId: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   /** ID */
   id: Scalars['ID']['output'];
+  parentConversationId: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   userId: Maybe<Scalars['String']['output']>;
@@ -157,19 +159,23 @@ export type AgentConversationCreateInput = {
 
 export type AgentConversationDeleteResponse = {
   __typename?: 'AgentConversationDeleteResponse';
+  agentId: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   /** ID */
   id: Maybe<Scalars['ID']['output']>;
+  parentConversationId: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   userId: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentConversationFilter = {
+  agentId: InputMaybe<StringFieldComparison>;
   and: InputMaybe<Array<AgentConversationFilter>>;
   createdAt: InputMaybe<DateFieldComparison>;
   id: InputMaybe<IdFilterComparison>;
   or: InputMaybe<Array<AgentConversationFilter>>;
+  parentConversationId: InputMaybe<StringFieldComparison>;
   title: InputMaybe<StringFieldComparison>;
   updatedAt: InputMaybe<DateFieldComparison>;
   userId: InputMaybe<StringFieldComparison>;
@@ -182,8 +188,10 @@ export type AgentConversationSort = {
 };
 
 export type AgentConversationSortFields =
+  | 'agentId'
   | 'createdAt'
   | 'id'
+  | 'parentConversationId'
   | 'title'
   | 'updatedAt'
   | 'userId';
@@ -637,7 +645,7 @@ export type Mutation = {
   createOnePurfenceConfig: PurfenceConfig;
   createOnePurfenceIssue: PurfenceIssue;
   createOnePurfenceProject: PurfenceProject;
-  createPurfenceScheduledTask: PurfenceScheduledTask;
+  createScheduledTask: ScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneAgent: AgentDeleteResponse;
@@ -651,9 +659,9 @@ export type Mutation = {
   deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
-  deletePurfenceScheduledTask: Scalars['ID']['output'];
+  deleteScheduledTask: Scalars['ID']['output'];
   rollbackAgentHistory: Agent;
-  runPurfenceScheduledTask: Scalars['ID']['output'];
+  runScheduledTask: Scalars['ID']['output'];
   startIssue: Scalars['ID']['output'];
   startRemoteIssue: PurfenceIssue;
   updateManyPurfenceExecutions: UpdateManyResponse;
@@ -670,7 +678,7 @@ export type Mutation = {
   updateOnePurfenceExecution: PurfenceExecution;
   updateOnePurfenceIssue: PurfenceIssue;
   updateOnePurfenceProject: PurfenceProject;
-  updatePurfenceScheduledTask: PurfenceScheduledTask;
+  updateScheduledTask: ScheduledTask;
 };
 
 
@@ -724,8 +732,8 @@ export type MutationCreateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationCreatePurfenceScheduledTaskArgs = {
-  input: PurfenceScheduledTaskCreateInput;
+export type MutationCreateScheduledTaskArgs = {
+  input: ScheduledTaskCreateInput;
 };
 
 
@@ -794,7 +802,7 @@ export type MutationDeleteOnePurfenceProjectArgs = {
 };
 
 
-export type MutationDeletePurfenceScheduledTaskArgs = {
+export type MutationDeleteScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -806,7 +814,7 @@ export type MutationRollbackAgentHistoryArgs = {
 };
 
 
-export type MutationRunPurfenceScheduledTaskArgs = {
+export type MutationRunScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -891,9 +899,9 @@ export type MutationUpdateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationUpdatePurfenceScheduledTaskArgs = {
+export type MutationUpdateScheduledTaskArgs = {
   id: Scalars['ID']['input'];
-  update: PurfenceScheduledTaskUpdateInput;
+  update: ScheduledTaskUpdateInput;
 };
 
 export type MyQueue = {
@@ -1548,109 +1556,6 @@ export type PurfenceProjectUpdateInput = {
   slackChannelId: InputMaybe<Scalars['String']['input']>;
 };
 
-export type PurfenceScheduledTask = {
-  __typename?: 'PurfenceScheduledTask';
-  createdAt: Scalars['DateTime']['output'];
-  cronExpr: Maybe<Scalars['String']['output']>;
-  enabled: Scalars['Boolean']['output'];
-  /** ID */
-  id: Scalars['ID']['output'];
-  kind: PurfenceScheduledTaskKind;
-  lastError: Maybe<Scalars['String']['output']>;
-  lastRunAt: Maybe<Scalars['DateTime']['output']>;
-  lastStatus: Maybe<PurfenceScheduledTaskLastStatus>;
-  name: Scalars['String']['output'];
-  nextRunAt: Maybe<Scalars['DateTime']['output']>;
-  prompt: Scalars['String']['output'];
-  runAt: Maybe<Scalars['DateTime']['output']>;
-  runCount: Scalars['Int']['output'];
-  slackAppConfigId: Maybe<Scalars['String']['output']>;
-  slackChannelId: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type PurfenceScheduledTaskConnection = {
-  __typename?: 'PurfenceScheduledTaskConnection';
-  /** Array of nodes. */
-  nodes: Array<PurfenceScheduledTask>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PurfenceScheduledTaskCreateInput = {
-  cronExpr: InputMaybe<Scalars['String']['input']>;
-  enabled: InputMaybe<Scalars['Boolean']['input']>;
-  kind: PurfenceScheduledTaskKind;
-  name: Scalars['String']['input'];
-  prompt: Scalars['String']['input'];
-  runAt: InputMaybe<Scalars['String']['input']>;
-  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
-  slackChannelId: InputMaybe<Scalars['String']['input']>;
-};
-
-export type PurfenceScheduledTaskFilter = {
-  and: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
-  createdAt: InputMaybe<DateFieldComparison>;
-  enabled: InputMaybe<BooleanFieldComparison>;
-  id: InputMaybe<IdFilterComparison>;
-  kind: InputMaybe<PurfenceScheduledTaskKindFilterComparison>;
-  name: InputMaybe<StringFieldComparison>;
-  or: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
-  updatedAt: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceScheduledTaskKind =
-  | 'one_time'
-  | 'recurring';
-
-export type PurfenceScheduledTaskKindFilterComparison = {
-  eq: InputMaybe<PurfenceScheduledTaskKind>;
-  gt: InputMaybe<PurfenceScheduledTaskKind>;
-  gte: InputMaybe<PurfenceScheduledTaskKind>;
-  iLike: InputMaybe<PurfenceScheduledTaskKind>;
-  in: InputMaybe<Array<PurfenceScheduledTaskKind>>;
-  is: InputMaybe<Scalars['Boolean']['input']>;
-  isNot: InputMaybe<Scalars['Boolean']['input']>;
-  like: InputMaybe<PurfenceScheduledTaskKind>;
-  lt: InputMaybe<PurfenceScheduledTaskKind>;
-  lte: InputMaybe<PurfenceScheduledTaskKind>;
-  neq: InputMaybe<PurfenceScheduledTaskKind>;
-  notILike: InputMaybe<PurfenceScheduledTaskKind>;
-  notIn: InputMaybe<Array<PurfenceScheduledTaskKind>>;
-  notLike: InputMaybe<PurfenceScheduledTaskKind>;
-};
-
-export type PurfenceScheduledTaskLastStatus =
-  | 'failed'
-  | 'success';
-
-export type PurfenceScheduledTaskSort = {
-  direction: SortDirection;
-  field: PurfenceScheduledTaskSortFields;
-  nulls: InputMaybe<SortNulls>;
-};
-
-export type PurfenceScheduledTaskSortFields =
-  | 'createdAt'
-  | 'enabled'
-  | 'id'
-  | 'kind'
-  | 'name'
-  | 'updatedAt';
-
-export type PurfenceScheduledTaskUpdateInput = {
-  cronExpr: InputMaybe<Scalars['String']['input']>;
-  enabled: InputMaybe<Scalars['Boolean']['input']>;
-  kind: InputMaybe<PurfenceScheduledTaskKind>;
-  name: InputMaybe<Scalars['String']['input']>;
-  prompt: InputMaybe<Scalars['String']['input']>;
-  runAt: InputMaybe<Scalars['String']['input']>;
-  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
-  slackChannelId: InputMaybe<Scalars['String']['input']>;
-};
-
 export type PurfenceStatus =
   | 'budget_exhausted'
   | 'done'
@@ -1708,8 +1613,8 @@ export type Query = {
   purfenceProject: PurfenceProject;
   purfenceProjects: PurfenceProjectConnection;
   purfenceReadIssueArtifactFile: Scalars['String']['output'];
-  purfenceScheduledTask: PurfenceScheduledTask;
-  purfenceScheduledTasks: PurfenceScheduledTaskConnection;
+  scheduledTask: ScheduledTask;
+  scheduledTasks: ScheduledTaskConnection;
 };
 
 
@@ -1868,15 +1773,118 @@ export type QueryPurfenceReadIssueArtifactFileArgs = {
 };
 
 
-export type QueryPurfenceScheduledTaskArgs = {
+export type QueryScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
 
-export type QueryPurfenceScheduledTasksArgs = {
-  filter?: PurfenceScheduledTaskFilter;
+export type QueryScheduledTasksArgs = {
+  filter?: ScheduledTaskFilter;
   paging?: OffsetPaging;
-  sorting?: Array<PurfenceScheduledTaskSort>;
+  sorting?: Array<ScheduledTaskSort>;
+};
+
+export type ScheduledTask = {
+  __typename?: 'ScheduledTask';
+  createdAt: Scalars['DateTime']['output'];
+  cronExpr: Maybe<Scalars['String']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  kind: ScheduledTaskKind;
+  lastError: Maybe<Scalars['String']['output']>;
+  lastRunAt: Maybe<Scalars['DateTime']['output']>;
+  lastStatus: Maybe<ScheduledTaskLastStatus>;
+  name: Scalars['String']['output'];
+  nextRunAt: Maybe<Scalars['DateTime']['output']>;
+  prompt: Scalars['String']['output'];
+  runAt: Maybe<Scalars['DateTime']['output']>;
+  runCount: Scalars['Int']['output'];
+  slackAppConfigId: Maybe<Scalars['String']['output']>;
+  slackChannelId: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ScheduledTaskConnection = {
+  __typename?: 'ScheduledTaskConnection';
+  /** Array of nodes. */
+  nodes: Array<ScheduledTask>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ScheduledTaskCreateInput = {
+  cronExpr: InputMaybe<Scalars['String']['input']>;
+  enabled: InputMaybe<Scalars['Boolean']['input']>;
+  kind: ScheduledTaskKind;
+  name: Scalars['String']['input'];
+  prompt: Scalars['String']['input'];
+  runAt: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ScheduledTaskFilter = {
+  and: InputMaybe<Array<ScheduledTaskFilter>>;
+  createdAt: InputMaybe<DateFieldComparison>;
+  enabled: InputMaybe<BooleanFieldComparison>;
+  id: InputMaybe<IdFilterComparison>;
+  kind: InputMaybe<ScheduledTaskKindFilterComparison>;
+  name: InputMaybe<StringFieldComparison>;
+  or: InputMaybe<Array<ScheduledTaskFilter>>;
+  updatedAt: InputMaybe<DateFieldComparison>;
+};
+
+export type ScheduledTaskKind =
+  | 'one_time'
+  | 'recurring';
+
+export type ScheduledTaskKindFilterComparison = {
+  eq: InputMaybe<ScheduledTaskKind>;
+  gt: InputMaybe<ScheduledTaskKind>;
+  gte: InputMaybe<ScheduledTaskKind>;
+  iLike: InputMaybe<ScheduledTaskKind>;
+  in: InputMaybe<Array<ScheduledTaskKind>>;
+  is: InputMaybe<Scalars['Boolean']['input']>;
+  isNot: InputMaybe<Scalars['Boolean']['input']>;
+  like: InputMaybe<ScheduledTaskKind>;
+  lt: InputMaybe<ScheduledTaskKind>;
+  lte: InputMaybe<ScheduledTaskKind>;
+  neq: InputMaybe<ScheduledTaskKind>;
+  notILike: InputMaybe<ScheduledTaskKind>;
+  notIn: InputMaybe<Array<ScheduledTaskKind>>;
+  notLike: InputMaybe<ScheduledTaskKind>;
+};
+
+export type ScheduledTaskLastStatus =
+  | 'failed'
+  | 'success';
+
+export type ScheduledTaskSort = {
+  direction: SortDirection;
+  field: ScheduledTaskSortFields;
+  nulls: InputMaybe<SortNulls>;
+};
+
+export type ScheduledTaskSortFields =
+  | 'createdAt'
+  | 'enabled'
+  | 'id'
+  | 'kind'
+  | 'name'
+  | 'updatedAt';
+
+export type ScheduledTaskUpdateInput = {
+  cronExpr: InputMaybe<Scalars['String']['input']>;
+  enabled: InputMaybe<Scalars['Boolean']['input']>;
+  kind: InputMaybe<ScheduledTaskKind>;
+  name: InputMaybe<Scalars['String']['input']>;
+  prompt: InputMaybe<Scalars['String']['input']>;
+  runAt: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId: InputMaybe<Scalars['String']['input']>;
+  slackChannelId: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Sort Directions */
@@ -2293,39 +2301,39 @@ export type DeleteMyQueueJobMutationVariables = Exact<{
 
 export type DeleteMyQueueJobMutation = { __typename?: 'Mutation', deleteOneMyQueueJob: { __typename?: 'MyQueueJobDeleteResponse', id: string | null } };
 
-export type PurfenceScheduledTasksQueryVariables = Exact<{
+export type ScheduledTasksQueryVariables = Exact<{
   paging: InputMaybe<OffsetPaging>;
-  sorting: InputMaybe<Array<PurfenceScheduledTaskSort> | PurfenceScheduledTaskSort>;
+  sorting: InputMaybe<Array<ScheduledTaskSort> | ScheduledTaskSort>;
 }>;
 
 
-export type PurfenceScheduledTasksQuery = { __typename?: 'Query', purfenceScheduledTasks: { __typename?: 'PurfenceScheduledTaskConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceScheduledTask', id: string, name: string, prompt: string, kind: PurfenceScheduledTaskKind, cronExpr: string | null, runAt: any | null, enabled: boolean, nextRunAt: any | null, lastRunAt: any | null, lastStatus: PurfenceScheduledTaskLastStatus | null, lastError: string | null, runCount: number, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any }> } };
+export type ScheduledTasksQuery = { __typename?: 'Query', scheduledTasks: { __typename?: 'ScheduledTaskConnection', totalCount: number, nodes: Array<{ __typename?: 'ScheduledTask', id: string, name: string, prompt: string, kind: ScheduledTaskKind, cronExpr: string | null, runAt: any | null, enabled: boolean, nextRunAt: any | null, lastRunAt: any | null, lastStatus: ScheduledTaskLastStatus | null, lastError: string | null, runCount: number, slackAppConfigId: string | null, slackChannelId: string | null, createdAt: any, updatedAt: any }> } };
 
-export type CreatePurfenceScheduledTaskMutationVariables = Exact<{
-  input: PurfenceScheduledTaskCreateInput;
+export type CreateScheduledTaskMutationVariables = Exact<{
+  input: ScheduledTaskCreateInput;
 }>;
 
 
-export type CreatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', createPurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+export type CreateScheduledTaskMutation = { __typename?: 'Mutation', createScheduledTask: { __typename?: 'ScheduledTask', id: string } };
 
-export type UpdatePurfenceScheduledTaskMutationVariables = Exact<{
+export type UpdateScheduledTaskMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  update: PurfenceScheduledTaskUpdateInput;
+  update: ScheduledTaskUpdateInput;
 }>;
 
 
-export type UpdatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', updatePurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+export type UpdateScheduledTaskMutation = { __typename?: 'Mutation', updateScheduledTask: { __typename?: 'ScheduledTask', id: string } };
 
-export type DeletePurfenceScheduledTaskMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeletePurfenceScheduledTaskMutation = { __typename?: 'Mutation', deletePurfenceScheduledTask: string };
-
-export type RunPurfenceScheduledTaskMutationVariables = Exact<{
+export type DeleteScheduledTaskMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RunPurfenceScheduledTaskMutation = { __typename?: 'Mutation', runPurfenceScheduledTask: string };
+export type DeleteScheduledTaskMutation = { __typename?: 'Mutation', deleteScheduledTask: string };
+
+export type RunScheduledTaskMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RunScheduledTaskMutation = { __typename?: 'Mutation', runScheduledTask: string };

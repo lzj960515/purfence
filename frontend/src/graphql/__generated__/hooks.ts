@@ -136,9 +136,11 @@ export type AgentConnection = {
 
 export type AgentConversation = {
   __typename?: 'AgentConversation';
+  agentId?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   /** ID */
   id: Scalars['ID']['output'];
+  parentConversationId?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   userId?: Maybe<Scalars['String']['output']>;
@@ -161,19 +163,23 @@ export type AgentConversationCreateInput = {
 
 export type AgentConversationDeleteResponse = {
   __typename?: 'AgentConversationDeleteResponse';
+  agentId?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   /** ID */
   id?: Maybe<Scalars['ID']['output']>;
+  parentConversationId?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   userId?: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentConversationFilter = {
+  agentId?: InputMaybe<StringFieldComparison>;
   and?: InputMaybe<Array<AgentConversationFilter>>;
   createdAt?: InputMaybe<DateFieldComparison>;
   id?: InputMaybe<IdFilterComparison>;
   or?: InputMaybe<Array<AgentConversationFilter>>;
+  parentConversationId?: InputMaybe<StringFieldComparison>;
   title?: InputMaybe<StringFieldComparison>;
   updatedAt?: InputMaybe<DateFieldComparison>;
   userId?: InputMaybe<StringFieldComparison>;
@@ -186,8 +192,10 @@ export type AgentConversationSort = {
 };
 
 export type AgentConversationSortFields =
+  | 'agentId'
   | 'createdAt'
   | 'id'
+  | 'parentConversationId'
   | 'title'
   | 'updatedAt'
   | 'userId';
@@ -641,7 +649,7 @@ export type Mutation = {
   createOnePurfenceConfig: PurfenceConfig;
   createOnePurfenceIssue: PurfenceIssue;
   createOnePurfenceProject: PurfenceProject;
-  createPurfenceScheduledTask: PurfenceScheduledTask;
+  createScheduledTask: ScheduledTask;
   deleteManyPurfenceExecutions: DeleteManyResponse;
   deleteManyPurfenceProjects: DeleteManyResponse;
   deleteOneAgent: AgentDeleteResponse;
@@ -655,9 +663,9 @@ export type Mutation = {
   deleteOnePurfenceExecution: PurfenceExecutionDeleteResponse;
   deleteOnePurfenceIssue: Scalars['ID']['output'];
   deleteOnePurfenceProject: PurfenceProjectDeleteResponse;
-  deletePurfenceScheduledTask: Scalars['ID']['output'];
+  deleteScheduledTask: Scalars['ID']['output'];
   rollbackAgentHistory: Agent;
-  runPurfenceScheduledTask: Scalars['ID']['output'];
+  runScheduledTask: Scalars['ID']['output'];
   startIssue: Scalars['ID']['output'];
   startRemoteIssue: PurfenceIssue;
   updateManyPurfenceExecutions: UpdateManyResponse;
@@ -674,7 +682,7 @@ export type Mutation = {
   updateOnePurfenceExecution: PurfenceExecution;
   updateOnePurfenceIssue: PurfenceIssue;
   updateOnePurfenceProject: PurfenceProject;
-  updatePurfenceScheduledTask: PurfenceScheduledTask;
+  updateScheduledTask: ScheduledTask;
 };
 
 
@@ -728,8 +736,8 @@ export type MutationCreateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationCreatePurfenceScheduledTaskArgs = {
-  input: PurfenceScheduledTaskCreateInput;
+export type MutationCreateScheduledTaskArgs = {
+  input: ScheduledTaskCreateInput;
 };
 
 
@@ -798,7 +806,7 @@ export type MutationDeleteOnePurfenceProjectArgs = {
 };
 
 
-export type MutationDeletePurfenceScheduledTaskArgs = {
+export type MutationDeleteScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -810,7 +818,7 @@ export type MutationRollbackAgentHistoryArgs = {
 };
 
 
-export type MutationRunPurfenceScheduledTaskArgs = {
+export type MutationRunScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -895,9 +903,9 @@ export type MutationUpdateOnePurfenceProjectArgs = {
 };
 
 
-export type MutationUpdatePurfenceScheduledTaskArgs = {
+export type MutationUpdateScheduledTaskArgs = {
   id: Scalars['ID']['input'];
-  update: PurfenceScheduledTaskUpdateInput;
+  update: ScheduledTaskUpdateInput;
 };
 
 export type MyQueue = {
@@ -1552,109 +1560,6 @@ export type PurfenceProjectUpdateInput = {
   slackChannelId?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type PurfenceScheduledTask = {
-  __typename?: 'PurfenceScheduledTask';
-  createdAt: Scalars['DateTime']['output'];
-  cronExpr?: Maybe<Scalars['String']['output']>;
-  enabled: Scalars['Boolean']['output'];
-  /** ID */
-  id: Scalars['ID']['output'];
-  kind: PurfenceScheduledTaskKind;
-  lastError?: Maybe<Scalars['String']['output']>;
-  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
-  lastStatus?: Maybe<PurfenceScheduledTaskLastStatus>;
-  name: Scalars['String']['output'];
-  nextRunAt?: Maybe<Scalars['DateTime']['output']>;
-  prompt: Scalars['String']['output'];
-  runAt?: Maybe<Scalars['DateTime']['output']>;
-  runCount: Scalars['Int']['output'];
-  slackAppConfigId?: Maybe<Scalars['String']['output']>;
-  slackChannelId?: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-export type PurfenceScheduledTaskConnection = {
-  __typename?: 'PurfenceScheduledTaskConnection';
-  /** Array of nodes. */
-  nodes: Array<PurfenceScheduledTask>;
-  /** Paging information */
-  pageInfo: OffsetPageInfo;
-  /** Fetch total count of records */
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PurfenceScheduledTaskCreateInput = {
-  cronExpr?: InputMaybe<Scalars['String']['input']>;
-  enabled?: InputMaybe<Scalars['Boolean']['input']>;
-  kind: PurfenceScheduledTaskKind;
-  name: Scalars['String']['input'];
-  prompt: Scalars['String']['input'];
-  runAt?: InputMaybe<Scalars['String']['input']>;
-  slackAppConfigId?: InputMaybe<Scalars['String']['input']>;
-  slackChannelId?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type PurfenceScheduledTaskFilter = {
-  and?: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
-  createdAt?: InputMaybe<DateFieldComparison>;
-  enabled?: InputMaybe<BooleanFieldComparison>;
-  id?: InputMaybe<IdFilterComparison>;
-  kind?: InputMaybe<PurfenceScheduledTaskKindFilterComparison>;
-  name?: InputMaybe<StringFieldComparison>;
-  or?: InputMaybe<Array<PurfenceScheduledTaskFilter>>;
-  updatedAt?: InputMaybe<DateFieldComparison>;
-};
-
-export type PurfenceScheduledTaskKind =
-  | 'one_time'
-  | 'recurring';
-
-export type PurfenceScheduledTaskKindFilterComparison = {
-  eq?: InputMaybe<PurfenceScheduledTaskKind>;
-  gt?: InputMaybe<PurfenceScheduledTaskKind>;
-  gte?: InputMaybe<PurfenceScheduledTaskKind>;
-  iLike?: InputMaybe<PurfenceScheduledTaskKind>;
-  in?: InputMaybe<Array<PurfenceScheduledTaskKind>>;
-  is?: InputMaybe<Scalars['Boolean']['input']>;
-  isNot?: InputMaybe<Scalars['Boolean']['input']>;
-  like?: InputMaybe<PurfenceScheduledTaskKind>;
-  lt?: InputMaybe<PurfenceScheduledTaskKind>;
-  lte?: InputMaybe<PurfenceScheduledTaskKind>;
-  neq?: InputMaybe<PurfenceScheduledTaskKind>;
-  notILike?: InputMaybe<PurfenceScheduledTaskKind>;
-  notIn?: InputMaybe<Array<PurfenceScheduledTaskKind>>;
-  notLike?: InputMaybe<PurfenceScheduledTaskKind>;
-};
-
-export type PurfenceScheduledTaskLastStatus =
-  | 'failed'
-  | 'success';
-
-export type PurfenceScheduledTaskSort = {
-  direction: SortDirection;
-  field: PurfenceScheduledTaskSortFields;
-  nulls?: InputMaybe<SortNulls>;
-};
-
-export type PurfenceScheduledTaskSortFields =
-  | 'createdAt'
-  | 'enabled'
-  | 'id'
-  | 'kind'
-  | 'name'
-  | 'updatedAt';
-
-export type PurfenceScheduledTaskUpdateInput = {
-  cronExpr?: InputMaybe<Scalars['String']['input']>;
-  enabled?: InputMaybe<Scalars['Boolean']['input']>;
-  kind?: InputMaybe<PurfenceScheduledTaskKind>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  prompt?: InputMaybe<Scalars['String']['input']>;
-  runAt?: InputMaybe<Scalars['String']['input']>;
-  slackAppConfigId?: InputMaybe<Scalars['String']['input']>;
-  slackChannelId?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type PurfenceStatus =
   | 'budget_exhausted'
   | 'done'
@@ -1712,8 +1617,8 @@ export type Query = {
   purfenceProject: PurfenceProject;
   purfenceProjects: PurfenceProjectConnection;
   purfenceReadIssueArtifactFile: Scalars['String']['output'];
-  purfenceScheduledTask: PurfenceScheduledTask;
-  purfenceScheduledTasks: PurfenceScheduledTaskConnection;
+  scheduledTask: ScheduledTask;
+  scheduledTasks: ScheduledTaskConnection;
 };
 
 
@@ -1872,15 +1777,118 @@ export type QueryPurfenceReadIssueArtifactFileArgs = {
 };
 
 
-export type QueryPurfenceScheduledTaskArgs = {
+export type QueryScheduledTaskArgs = {
   id: Scalars['ID']['input'];
 };
 
 
-export type QueryPurfenceScheduledTasksArgs = {
-  filter?: PurfenceScheduledTaskFilter;
+export type QueryScheduledTasksArgs = {
+  filter?: ScheduledTaskFilter;
   paging?: OffsetPaging;
-  sorting?: Array<PurfenceScheduledTaskSort>;
+  sorting?: Array<ScheduledTaskSort>;
+};
+
+export type ScheduledTask = {
+  __typename?: 'ScheduledTask';
+  createdAt: Scalars['DateTime']['output'];
+  cronExpr?: Maybe<Scalars['String']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  /** ID */
+  id: Scalars['ID']['output'];
+  kind: ScheduledTaskKind;
+  lastError?: Maybe<Scalars['String']['output']>;
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  lastStatus?: Maybe<ScheduledTaskLastStatus>;
+  name: Scalars['String']['output'];
+  nextRunAt?: Maybe<Scalars['DateTime']['output']>;
+  prompt: Scalars['String']['output'];
+  runAt?: Maybe<Scalars['DateTime']['output']>;
+  runCount: Scalars['Int']['output'];
+  slackAppConfigId?: Maybe<Scalars['String']['output']>;
+  slackChannelId?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ScheduledTaskConnection = {
+  __typename?: 'ScheduledTaskConnection';
+  /** Array of nodes. */
+  nodes: Array<ScheduledTask>;
+  /** Paging information */
+  pageInfo: OffsetPageInfo;
+  /** Fetch total count of records */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ScheduledTaskCreateInput = {
+  cronExpr?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  kind: ScheduledTaskKind;
+  name: Scalars['String']['input'];
+  prompt: Scalars['String']['input'];
+  runAt?: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId?: InputMaybe<Scalars['String']['input']>;
+  slackChannelId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ScheduledTaskFilter = {
+  and?: InputMaybe<Array<ScheduledTaskFilter>>;
+  createdAt?: InputMaybe<DateFieldComparison>;
+  enabled?: InputMaybe<BooleanFieldComparison>;
+  id?: InputMaybe<IdFilterComparison>;
+  kind?: InputMaybe<ScheduledTaskKindFilterComparison>;
+  name?: InputMaybe<StringFieldComparison>;
+  or?: InputMaybe<Array<ScheduledTaskFilter>>;
+  updatedAt?: InputMaybe<DateFieldComparison>;
+};
+
+export type ScheduledTaskKind =
+  | 'one_time'
+  | 'recurring';
+
+export type ScheduledTaskKindFilterComparison = {
+  eq?: InputMaybe<ScheduledTaskKind>;
+  gt?: InputMaybe<ScheduledTaskKind>;
+  gte?: InputMaybe<ScheduledTaskKind>;
+  iLike?: InputMaybe<ScheduledTaskKind>;
+  in?: InputMaybe<Array<ScheduledTaskKind>>;
+  is?: InputMaybe<Scalars['Boolean']['input']>;
+  isNot?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<ScheduledTaskKind>;
+  lt?: InputMaybe<ScheduledTaskKind>;
+  lte?: InputMaybe<ScheduledTaskKind>;
+  neq?: InputMaybe<ScheduledTaskKind>;
+  notILike?: InputMaybe<ScheduledTaskKind>;
+  notIn?: InputMaybe<Array<ScheduledTaskKind>>;
+  notLike?: InputMaybe<ScheduledTaskKind>;
+};
+
+export type ScheduledTaskLastStatus =
+  | 'failed'
+  | 'success';
+
+export type ScheduledTaskSort = {
+  direction: SortDirection;
+  field: ScheduledTaskSortFields;
+  nulls?: InputMaybe<SortNulls>;
+};
+
+export type ScheduledTaskSortFields =
+  | 'createdAt'
+  | 'enabled'
+  | 'id'
+  | 'kind'
+  | 'name'
+  | 'updatedAt';
+
+export type ScheduledTaskUpdateInput = {
+  cronExpr?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  kind?: InputMaybe<ScheduledTaskKind>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  runAt?: InputMaybe<Scalars['String']['input']>;
+  slackAppConfigId?: InputMaybe<Scalars['String']['input']>;
+  slackChannelId?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Sort Directions */
@@ -2297,42 +2305,42 @@ export type DeleteMyQueueJobMutationVariables = Exact<{
 
 export type DeleteMyQueueJobMutation = { __typename?: 'Mutation', deleteOneMyQueueJob: { __typename?: 'MyQueueJobDeleteResponse', id?: string | null } };
 
-export type PurfenceScheduledTasksQueryVariables = Exact<{
+export type ScheduledTasksQueryVariables = Exact<{
   paging?: InputMaybe<OffsetPaging>;
-  sorting?: InputMaybe<Array<PurfenceScheduledTaskSort> | PurfenceScheduledTaskSort>;
+  sorting?: InputMaybe<Array<ScheduledTaskSort> | ScheduledTaskSort>;
 }>;
 
 
-export type PurfenceScheduledTasksQuery = { __typename?: 'Query', purfenceScheduledTasks: { __typename?: 'PurfenceScheduledTaskConnection', totalCount: number, nodes: Array<{ __typename?: 'PurfenceScheduledTask', id: string, name: string, prompt: string, kind: PurfenceScheduledTaskKind, cronExpr?: string | null, runAt?: any | null, enabled: boolean, nextRunAt?: any | null, lastRunAt?: any | null, lastStatus?: PurfenceScheduledTaskLastStatus | null, lastError?: string | null, runCount: number, slackAppConfigId?: string | null, slackChannelId?: string | null, createdAt: any, updatedAt: any }> } };
+export type ScheduledTasksQuery = { __typename?: 'Query', scheduledTasks: { __typename?: 'ScheduledTaskConnection', totalCount: number, nodes: Array<{ __typename?: 'ScheduledTask', id: string, name: string, prompt: string, kind: ScheduledTaskKind, cronExpr?: string | null, runAt?: any | null, enabled: boolean, nextRunAt?: any | null, lastRunAt?: any | null, lastStatus?: ScheduledTaskLastStatus | null, lastError?: string | null, runCount: number, slackAppConfigId?: string | null, slackChannelId?: string | null, createdAt: any, updatedAt: any }> } };
 
-export type CreatePurfenceScheduledTaskMutationVariables = Exact<{
-  input: PurfenceScheduledTaskCreateInput;
+export type CreateScheduledTaskMutationVariables = Exact<{
+  input: ScheduledTaskCreateInput;
 }>;
 
 
-export type CreatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', createPurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+export type CreateScheduledTaskMutation = { __typename?: 'Mutation', createScheduledTask: { __typename?: 'ScheduledTask', id: string } };
 
-export type UpdatePurfenceScheduledTaskMutationVariables = Exact<{
+export type UpdateScheduledTaskMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  update: PurfenceScheduledTaskUpdateInput;
+  update: ScheduledTaskUpdateInput;
 }>;
 
 
-export type UpdatePurfenceScheduledTaskMutation = { __typename?: 'Mutation', updatePurfenceScheduledTask: { __typename?: 'PurfenceScheduledTask', id: string } };
+export type UpdateScheduledTaskMutation = { __typename?: 'Mutation', updateScheduledTask: { __typename?: 'ScheduledTask', id: string } };
 
-export type DeletePurfenceScheduledTaskMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeletePurfenceScheduledTaskMutation = { __typename?: 'Mutation', deletePurfenceScheduledTask: string };
-
-export type RunPurfenceScheduledTaskMutationVariables = Exact<{
+export type DeleteScheduledTaskMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RunPurfenceScheduledTaskMutation = { __typename?: 'Mutation', runPurfenceScheduledTask: string };
+export type DeleteScheduledTaskMutation = { __typename?: 'Mutation', deleteScheduledTask: string };
+
+export type RunScheduledTaskMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RunScheduledTaskMutation = { __typename?: 'Mutation', runScheduledTask: string };
 
 
 export const GetAgentsDocument = gql`
@@ -4020,9 +4028,9 @@ export function useDeleteMyQueueJobMutation(baseOptions?: ApolloReactHooks.Mutat
 export type DeleteMyQueueJobMutationHookResult = ReturnType<typeof useDeleteMyQueueJobMutation>;
 export type DeleteMyQueueJobMutationResult = Apollo.MutationResult<DeleteMyQueueJobMutation>;
 export type DeleteMyQueueJobMutationOptions = Apollo.BaseMutationOptions<DeleteMyQueueJobMutation, DeleteMyQueueJobMutationVariables>;
-export const PurfenceScheduledTasksDocument = gql`
-    query PurfenceScheduledTasks($paging: OffsetPaging, $sorting: [PurfenceScheduledTaskSort!]) {
-  purfenceScheduledTasks(paging: $paging, sorting: $sorting) {
+export const ScheduledTasksDocument = gql`
+    query ScheduledTasks($paging: OffsetPaging, $sorting: [ScheduledTaskSort!]) {
+  scheduledTasks(paging: $paging, sorting: $sorting) {
     nodes {
       id
       name
@@ -4047,167 +4055,167 @@ export const PurfenceScheduledTasksDocument = gql`
     `;
 
 /**
- * __usePurfenceScheduledTasksQuery__
+ * __useScheduledTasksQuery__
  *
- * To run a query within a React component, call `usePurfenceScheduledTasksQuery` and pass it any options that fit your needs.
- * When your component renders, `usePurfenceScheduledTasksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useScheduledTasksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useScheduledTasksQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePurfenceScheduledTasksQuery({
+ * const { data, loading, error } = useScheduledTasksQuery({
  *   variables: {
  *      paging: // value for 'paging'
  *      sorting: // value for 'sorting'
  *   },
  * });
  */
-export function usePurfenceScheduledTasksQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>) {
+export function useScheduledTasksQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ScheduledTasksQuery, ScheduledTasksQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>(PurfenceScheduledTasksDocument, options);
+        return ApolloReactHooks.useQuery<ScheduledTasksQuery, ScheduledTasksQueryVariables>(ScheduledTasksDocument, options);
       }
-export function usePurfenceScheduledTasksLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>) {
+export function useScheduledTasksLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ScheduledTasksQuery, ScheduledTasksQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>(PurfenceScheduledTasksDocument, options);
+          return ApolloReactHooks.useLazyQuery<ScheduledTasksQuery, ScheduledTasksQueryVariables>(ScheduledTasksDocument, options);
         }
 // @ts-ignore
-export function usePurfenceScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>;
-export function usePurfenceScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<PurfenceScheduledTasksQuery | undefined, PurfenceScheduledTasksQueryVariables>;
-export function usePurfenceScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>) {
+export function useScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<ScheduledTasksQuery, ScheduledTasksQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<ScheduledTasksQuery, ScheduledTasksQueryVariables>;
+export function useScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<ScheduledTasksQuery, ScheduledTasksQueryVariables>): ApolloReactHooks.UseSuspenseQueryResult<ScheduledTasksQuery | undefined, ScheduledTasksQueryVariables>;
+export function useScheduledTasksSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<ScheduledTasksQuery, ScheduledTasksQueryVariables>) {
           const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useSuspenseQuery<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>(PurfenceScheduledTasksDocument, options);
+          return ApolloReactHooks.useSuspenseQuery<ScheduledTasksQuery, ScheduledTasksQueryVariables>(ScheduledTasksDocument, options);
         }
-export type PurfenceScheduledTasksQueryHookResult = ReturnType<typeof usePurfenceScheduledTasksQuery>;
-export type PurfenceScheduledTasksLazyQueryHookResult = ReturnType<typeof usePurfenceScheduledTasksLazyQuery>;
-export type PurfenceScheduledTasksSuspenseQueryHookResult = ReturnType<typeof usePurfenceScheduledTasksSuspenseQuery>;
-export type PurfenceScheduledTasksQueryResult = Apollo.QueryResult<PurfenceScheduledTasksQuery, PurfenceScheduledTasksQueryVariables>;
-export const CreatePurfenceScheduledTaskDocument = gql`
-    mutation CreatePurfenceScheduledTask($input: PurfenceScheduledTaskCreateInput!) {
-  createPurfenceScheduledTask(input: $input) {
+export type ScheduledTasksQueryHookResult = ReturnType<typeof useScheduledTasksQuery>;
+export type ScheduledTasksLazyQueryHookResult = ReturnType<typeof useScheduledTasksLazyQuery>;
+export type ScheduledTasksSuspenseQueryHookResult = ReturnType<typeof useScheduledTasksSuspenseQuery>;
+export type ScheduledTasksQueryResult = Apollo.QueryResult<ScheduledTasksQuery, ScheduledTasksQueryVariables>;
+export const CreateScheduledTaskDocument = gql`
+    mutation CreateScheduledTask($input: ScheduledTaskCreateInput!) {
+  createScheduledTask(input: $input) {
     id
   }
 }
     `;
-export type CreatePurfenceScheduledTaskMutationFn = Apollo.MutationFunction<CreatePurfenceScheduledTaskMutation, CreatePurfenceScheduledTaskMutationVariables>;
+export type CreateScheduledTaskMutationFn = Apollo.MutationFunction<CreateScheduledTaskMutation, CreateScheduledTaskMutationVariables>;
 
 /**
- * __useCreatePurfenceScheduledTaskMutation__
+ * __useCreateScheduledTaskMutation__
  *
- * To run a mutation, you first call `useCreatePurfenceScheduledTaskMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePurfenceScheduledTaskMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateScheduledTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateScheduledTaskMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createPurfenceScheduledTaskMutation, { data, loading, error }] = useCreatePurfenceScheduledTaskMutation({
+ * const [createScheduledTaskMutation, { data, loading, error }] = useCreateScheduledTaskMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useCreatePurfenceScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreatePurfenceScheduledTaskMutation, CreatePurfenceScheduledTaskMutationVariables>) {
+export function useCreateScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateScheduledTaskMutation, CreateScheduledTaskMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<CreatePurfenceScheduledTaskMutation, CreatePurfenceScheduledTaskMutationVariables>(CreatePurfenceScheduledTaskDocument, options);
+        return ApolloReactHooks.useMutation<CreateScheduledTaskMutation, CreateScheduledTaskMutationVariables>(CreateScheduledTaskDocument, options);
       }
-export type CreatePurfenceScheduledTaskMutationHookResult = ReturnType<typeof useCreatePurfenceScheduledTaskMutation>;
-export type CreatePurfenceScheduledTaskMutationResult = Apollo.MutationResult<CreatePurfenceScheduledTaskMutation>;
-export type CreatePurfenceScheduledTaskMutationOptions = Apollo.BaseMutationOptions<CreatePurfenceScheduledTaskMutation, CreatePurfenceScheduledTaskMutationVariables>;
-export const UpdatePurfenceScheduledTaskDocument = gql`
-    mutation UpdatePurfenceScheduledTask($id: ID!, $update: PurfenceScheduledTaskUpdateInput!) {
-  updatePurfenceScheduledTask(id: $id, update: $update) {
+export type CreateScheduledTaskMutationHookResult = ReturnType<typeof useCreateScheduledTaskMutation>;
+export type CreateScheduledTaskMutationResult = Apollo.MutationResult<CreateScheduledTaskMutation>;
+export type CreateScheduledTaskMutationOptions = Apollo.BaseMutationOptions<CreateScheduledTaskMutation, CreateScheduledTaskMutationVariables>;
+export const UpdateScheduledTaskDocument = gql`
+    mutation UpdateScheduledTask($id: ID!, $update: ScheduledTaskUpdateInput!) {
+  updateScheduledTask(id: $id, update: $update) {
     id
   }
 }
     `;
-export type UpdatePurfenceScheduledTaskMutationFn = Apollo.MutationFunction<UpdatePurfenceScheduledTaskMutation, UpdatePurfenceScheduledTaskMutationVariables>;
+export type UpdateScheduledTaskMutationFn = Apollo.MutationFunction<UpdateScheduledTaskMutation, UpdateScheduledTaskMutationVariables>;
 
 /**
- * __useUpdatePurfenceScheduledTaskMutation__
+ * __useUpdateScheduledTaskMutation__
  *
- * To run a mutation, you first call `useUpdatePurfenceScheduledTaskMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdatePurfenceScheduledTaskMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdateScheduledTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateScheduledTaskMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updatePurfenceScheduledTaskMutation, { data, loading, error }] = useUpdatePurfenceScheduledTaskMutation({
+ * const [updateScheduledTaskMutation, { data, loading, error }] = useUpdateScheduledTaskMutation({
  *   variables: {
  *      id: // value for 'id'
  *      update: // value for 'update'
  *   },
  * });
  */
-export function useUpdatePurfenceScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePurfenceScheduledTaskMutation, UpdatePurfenceScheduledTaskMutationVariables>) {
+export function useUpdateScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateScheduledTaskMutation, UpdateScheduledTaskMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<UpdatePurfenceScheduledTaskMutation, UpdatePurfenceScheduledTaskMutationVariables>(UpdatePurfenceScheduledTaskDocument, options);
+        return ApolloReactHooks.useMutation<UpdateScheduledTaskMutation, UpdateScheduledTaskMutationVariables>(UpdateScheduledTaskDocument, options);
       }
-export type UpdatePurfenceScheduledTaskMutationHookResult = ReturnType<typeof useUpdatePurfenceScheduledTaskMutation>;
-export type UpdatePurfenceScheduledTaskMutationResult = Apollo.MutationResult<UpdatePurfenceScheduledTaskMutation>;
-export type UpdatePurfenceScheduledTaskMutationOptions = Apollo.BaseMutationOptions<UpdatePurfenceScheduledTaskMutation, UpdatePurfenceScheduledTaskMutationVariables>;
-export const DeletePurfenceScheduledTaskDocument = gql`
-    mutation DeletePurfenceScheduledTask($id: ID!) {
-  deletePurfenceScheduledTask(id: $id)
+export type UpdateScheduledTaskMutationHookResult = ReturnType<typeof useUpdateScheduledTaskMutation>;
+export type UpdateScheduledTaskMutationResult = Apollo.MutationResult<UpdateScheduledTaskMutation>;
+export type UpdateScheduledTaskMutationOptions = Apollo.BaseMutationOptions<UpdateScheduledTaskMutation, UpdateScheduledTaskMutationVariables>;
+export const DeleteScheduledTaskDocument = gql`
+    mutation DeleteScheduledTask($id: ID!) {
+  deleteScheduledTask(id: $id)
 }
     `;
-export type DeletePurfenceScheduledTaskMutationFn = Apollo.MutationFunction<DeletePurfenceScheduledTaskMutation, DeletePurfenceScheduledTaskMutationVariables>;
+export type DeleteScheduledTaskMutationFn = Apollo.MutationFunction<DeleteScheduledTaskMutation, DeleteScheduledTaskMutationVariables>;
 
 /**
- * __useDeletePurfenceScheduledTaskMutation__
+ * __useDeleteScheduledTaskMutation__
  *
- * To run a mutation, you first call `useDeletePurfenceScheduledTaskMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeletePurfenceScheduledTaskMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteScheduledTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteScheduledTaskMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deletePurfenceScheduledTaskMutation, { data, loading, error }] = useDeletePurfenceScheduledTaskMutation({
+ * const [deleteScheduledTaskMutation, { data, loading, error }] = useDeleteScheduledTaskMutation({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useDeletePurfenceScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeletePurfenceScheduledTaskMutation, DeletePurfenceScheduledTaskMutationVariables>) {
+export function useDeleteScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteScheduledTaskMutation, DeleteScheduledTaskMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<DeletePurfenceScheduledTaskMutation, DeletePurfenceScheduledTaskMutationVariables>(DeletePurfenceScheduledTaskDocument, options);
+        return ApolloReactHooks.useMutation<DeleteScheduledTaskMutation, DeleteScheduledTaskMutationVariables>(DeleteScheduledTaskDocument, options);
       }
-export type DeletePurfenceScheduledTaskMutationHookResult = ReturnType<typeof useDeletePurfenceScheduledTaskMutation>;
-export type DeletePurfenceScheduledTaskMutationResult = Apollo.MutationResult<DeletePurfenceScheduledTaskMutation>;
-export type DeletePurfenceScheduledTaskMutationOptions = Apollo.BaseMutationOptions<DeletePurfenceScheduledTaskMutation, DeletePurfenceScheduledTaskMutationVariables>;
-export const RunPurfenceScheduledTaskDocument = gql`
-    mutation RunPurfenceScheduledTask($id: ID!) {
-  runPurfenceScheduledTask(id: $id)
+export type DeleteScheduledTaskMutationHookResult = ReturnType<typeof useDeleteScheduledTaskMutation>;
+export type DeleteScheduledTaskMutationResult = Apollo.MutationResult<DeleteScheduledTaskMutation>;
+export type DeleteScheduledTaskMutationOptions = Apollo.BaseMutationOptions<DeleteScheduledTaskMutation, DeleteScheduledTaskMutationVariables>;
+export const RunScheduledTaskDocument = gql`
+    mutation RunScheduledTask($id: ID!) {
+  runScheduledTask(id: $id)
 }
     `;
-export type RunPurfenceScheduledTaskMutationFn = Apollo.MutationFunction<RunPurfenceScheduledTaskMutation, RunPurfenceScheduledTaskMutationVariables>;
+export type RunScheduledTaskMutationFn = Apollo.MutationFunction<RunScheduledTaskMutation, RunScheduledTaskMutationVariables>;
 
 /**
- * __useRunPurfenceScheduledTaskMutation__
+ * __useRunScheduledTaskMutation__
  *
- * To run a mutation, you first call `useRunPurfenceScheduledTaskMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useRunPurfenceScheduledTaskMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useRunScheduledTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRunScheduledTaskMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [runPurfenceScheduledTaskMutation, { data, loading, error }] = useRunPurfenceScheduledTaskMutation({
+ * const [runScheduledTaskMutation, { data, loading, error }] = useRunScheduledTaskMutation({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useRunPurfenceScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RunPurfenceScheduledTaskMutation, RunPurfenceScheduledTaskMutationVariables>) {
+export function useRunScheduledTaskMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RunScheduledTaskMutation, RunScheduledTaskMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<RunPurfenceScheduledTaskMutation, RunPurfenceScheduledTaskMutationVariables>(RunPurfenceScheduledTaskDocument, options);
+        return ApolloReactHooks.useMutation<RunScheduledTaskMutation, RunScheduledTaskMutationVariables>(RunScheduledTaskDocument, options);
       }
-export type RunPurfenceScheduledTaskMutationHookResult = ReturnType<typeof useRunPurfenceScheduledTaskMutation>;
-export type RunPurfenceScheduledTaskMutationResult = Apollo.MutationResult<RunPurfenceScheduledTaskMutation>;
-export type RunPurfenceScheduledTaskMutationOptions = Apollo.BaseMutationOptions<RunPurfenceScheduledTaskMutation, RunPurfenceScheduledTaskMutationVariables>;
+export type RunScheduledTaskMutationHookResult = ReturnType<typeof useRunScheduledTaskMutation>;
+export type RunScheduledTaskMutationResult = Apollo.MutationResult<RunScheduledTaskMutation>;
+export type RunScheduledTaskMutationOptions = Apollo.BaseMutationOptions<RunScheduledTaskMutation, RunScheduledTaskMutationVariables>;

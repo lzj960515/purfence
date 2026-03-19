@@ -3,7 +3,7 @@ import { Global, Module } from '@nestjs/common';
 import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceProjectService } from '../purfence-project.service';
 import { PurfenceExecutionService } from '../purfence-execution.service';
-import { PurfenceScheduledTaskModule } from '../scheduled-task/purfence-scheduled-task.module';
+import { ScheduledTaskModule } from '../scheduled-task/scheduled-task.module';
 import { PurfenceTools } from './purfence.tools';
 import { TianfuTools } from './tianfu.tools';
 import { ExecutionTools } from './execution.tools';

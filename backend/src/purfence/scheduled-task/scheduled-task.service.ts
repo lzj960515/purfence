@@ -6,13 +6,13 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { CronJob } from 'cron';
-import { PurfenceScheduledTaskCreateInput } from './purfence-scheduled-task-create.input';
-import { PurfenceScheduledTaskUpdateInput } from './purfence-scheduled-task-update.input';
-import { PurfenceScheduledTask } from './purfence-scheduled-task.entity';
+import { ScheduledTaskCreateInput } from './scheduled-task-create.input';
+import { ScheduledTaskUpdateInput } from './scheduled-task-update.input';
+import { ScheduledTask } from './scheduled-task.entity';
 import {
-  PurfenceScheduledTaskKind,
-  PurfenceScheduledTaskLastStatus,
-} from './purfence-scheduled-task.enum';
+  ScheduledTaskKind,
+  ScheduledTaskLastStatus,
+} from './scheduled-task.enum';
 import { PurfenceAgentService } from '../agent.service';
 
 type ScheduledHandle =
@@ -20,10 +20,10 @@ type ScheduledHandle =
   | { type: 'timeout'; handle: NodeJS.Timeout };
 
 @Injectable()
-export class PurfenceScheduledTaskService
+export class ScheduledTaskService
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(PurfenceScheduledTaskService.name);
+  private readonly logger = new Logger(ScheduledTaskService.name);
   private readonly handles = new Map<string, ScheduledHandle>();
   private readonly runningTaskIds = new Set<string>();
 
@@ -37,14 +37,14 @@ export class PurfenceScheduledTaskService
     this.clearAllHandles();
   }
 
-  async createTask(input: PurfenceScheduledTaskCreateInput) {
+  async createTask(input: ScheduledTaskCreateInput) {
     const payload = this.normalizeInput(input);
 
-    const task = PurfenceScheduledTask.create({
+    const task = ScheduledTask.create({
       ...payload,
       enabled: input.enabled ?? true,
       nextRunAt:
-        payload.kind === PurfenceScheduledTaskKind.one_time
+        payload.kind === ScheduledTaskKind.one_time
           ? payload.runAt
           : undefined,
     });
@@ -57,8 +57,8 @@ export class PurfenceScheduledTaskService
     return task;
   }
 
-  async updateTask(id: string, update: PurfenceScheduledTaskUpdateInput) {
-    const task = await PurfenceScheduledTask.findOneOrFail({ where: { id } });
+  async updateTask(id: string, update: ScheduledTaskUpdateInput) {
+    const task = await ScheduledTask.findOneOrFail({ where: { id } });
     const merged = this.normalizeInput({
       name: update.name ?? task.name,
       prompt: update.prompt ?? task.prompt,
@@ -80,7 +80,7 @@ export class PurfenceScheduledTaskService
     task.slackAppConfigId = merged.slackAppConfigId;
     task.slackChannelId = merged.slackChannelId;
     task.nextRunAt =
-      task.enabled && task.kind === PurfenceScheduledTaskKind.one_time
+      task.enabled && task.kind === ScheduledTaskKind.one_time
         ? task.runAt
         : undefined;
 
@@ -96,7 +96,7 @@ export class PurfenceScheduledTaskService
 
   async deleteTask(id: string) {
     this.clearHandle(id);
-    await PurfenceScheduledTask.delete({ id });
+    await ScheduledTask.delete({ id });
     return id;
   }
 
@@ -105,7 +105,7 @@ export class PurfenceScheduledTaskService
   }
 
   async reloadEnabledTasks() {
-    const tasks = await PurfenceScheduledTask.find({
+    const tasks = await ScheduledTask.find({
       where: { enabled: true },
     });
     for (const task of tasks) {
@@ -113,8 +113,8 @@ export class PurfenceScheduledTaskService
     }
   }
 
-  private async registerTask(task: PurfenceScheduledTask) {
-    if (task.kind === PurfenceScheduledTaskKind.recurring) {
+  private async registerTask(task: ScheduledTask) {
+    if (task.kind === ScheduledTaskKind.recurring) {
       const timezone = this.getSystemTimeZone();
       const job = new CronJob(
         task.cronExpr,
@@ -127,7 +127,7 @@ export class PurfenceScheduledTaskService
       );
 
       const nextRunAt = this.toDate(job.nextDate());
-      await PurfenceScheduledTask.update(task.id, { nextRunAt });
+      await ScheduledTask.update(task.id, { nextRunAt });
       this.handles.set(task.id, { type: 'cron', handle: job });
       return;
     }
@@ -177,7 +177,7 @@ export class PurfenceScheduledTaskService
     const threadId = MyUtil.uuid();
 
     try {
-      const task = await PurfenceScheduledTask.findOneOrFail({
+      const task = await ScheduledTask.findOneOrFail({
         where: { id: taskId },
       });
 
@@ -193,44 +193,44 @@ export class PurfenceScheduledTaskService
 
       const now = new Date();
       const nextRunAt =
-        task.kind === PurfenceScheduledTaskKind.one_time
+        task.kind === ScheduledTaskKind.one_time
           ? undefined
           : this.computeNextRecurringRunAt(task.cronExpr);
-      await PurfenceScheduledTask.update(task.id, {
+      await ScheduledTask.update(task.id, {
         runCount: task.runCount + 1,
         lastRunAt: now,
-        lastStatus: PurfenceScheduledTaskLastStatus.success,
+        lastStatus: ScheduledTaskLastStatus.success,
         lastError: undefined,
         nextRunAt,
         enabled:
-          task.kind === PurfenceScheduledTaskKind.one_time
+          task.kind === ScheduledTaskKind.one_time
             ? false
             : task.enabled,
       });
 
-      if (task.kind === PurfenceScheduledTaskKind.one_time) {
+      if (task.kind === ScheduledTaskKind.one_time) {
         this.clearHandle(task.id);
       }
 
       return threadId;
     } catch (error) {
-      const task = await PurfenceScheduledTask.findOne({
+      const task = await ScheduledTask.findOne({
         where: { id: taskId },
       });
       if (task) {
         const now = new Date();
         const nextRunAt =
-          task.kind === PurfenceScheduledTaskKind.one_time
+          task.kind === ScheduledTaskKind.one_time
             ? undefined
             : this.computeNextRecurringRunAt(task.cronExpr);
-        await PurfenceScheduledTask.update(task.id, {
+        await ScheduledTask.update(task.id, {
           runCount: task.runCount + 1,
           lastRunAt: now,
-          lastStatus: PurfenceScheduledTaskLastStatus.failed,
+          lastStatus: ScheduledTaskLastStatus.failed,
           lastError: error instanceof Error ? error.message : String(error),
           nextRunAt,
           enabled:
-            task.kind === PurfenceScheduledTaskKind.one_time
+            task.kind === ScheduledTaskKind.one_time
               ? false
               : task.enabled,
         });
@@ -244,7 +244,7 @@ export class PurfenceScheduledTaskService
   private normalizeInput(input: {
     name: string;
     prompt: string;
-    kind: PurfenceScheduledTaskKind;
+    kind: ScheduledTaskKind;
     cronExpr?: string;
     runAt?: string;
     enabled?: boolean;
@@ -262,7 +262,7 @@ export class PurfenceScheduledTaskService
       );
     }
 
-    if (input.kind === PurfenceScheduledTaskKind.recurring) {
+    if (input.kind === ScheduledTaskKind.recurring) {
       const cronExpr = input.cronExpr?.trim();
       if (!cronExpr) {
         throw new Error('cronExpr is required for recurring task');
@@ -300,7 +300,7 @@ export class PurfenceScheduledTaskService
 
   private buildStreamContext(
     task: Pick<
-      PurfenceScheduledTask,
+      ScheduledTask,
       'id' | 'slackAppConfigId' | 'slackChannelId'
     >,
     trigger: 'scheduled' | 'manual',

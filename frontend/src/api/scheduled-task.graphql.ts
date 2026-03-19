@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
-export const PURFENCE_SCHEDULED_TASKS_QUERY = gql`
-  query PurfenceScheduledTasks($paging: OffsetPaging, $sorting: [PurfenceScheduledTaskSort!]) {
-    purfenceScheduledTasks(paging: $paging, sorting: $sorting) {
+export const SCHEDULED_TASKS_QUERY = gql`
+  query ScheduledTasks($paging: OffsetPaging, $sorting: [ScheduledTaskSort!]) {
+    scheduledTasks(paging: $paging, sorting: $sorting) {
       nodes {
         id
         name
@@ -26,30 +26,30 @@ export const PURFENCE_SCHEDULED_TASKS_QUERY = gql`
   }
 `
 
-export const CREATE_PURFENCE_SCHEDULED_TASK_MUTATION = gql`
-  mutation CreatePurfenceScheduledTask($input: PurfenceScheduledTaskCreateInput!) {
-    createPurfenceScheduledTask(input: $input) {
+export const CREATE_SCHEDULED_TASK_MUTATION = gql`
+  mutation CreateScheduledTask($input: ScheduledTaskCreateInput!) {
+    createScheduledTask(input: $input) {
       id
     }
   }
 `
 
-export const UPDATE_PURFENCE_SCHEDULED_TASK_MUTATION = gql`
-  mutation UpdatePurfenceScheduledTask($id: ID!, $update: PurfenceScheduledTaskUpdateInput!) {
-    updatePurfenceScheduledTask(id: $id, update: $update) {
+export const UPDATE_SCHEDULED_TASK_MUTATION = gql`
+  mutation UpdateScheduledTask($id: ID!, $update: ScheduledTaskUpdateInput!) {
+    updateScheduledTask(id: $id, update: $update) {
       id
     }
   }
 `
 
-export const DELETE_PURFENCE_SCHEDULED_TASK_MUTATION = gql`
-  mutation DeletePurfenceScheduledTask($id: ID!) {
-    deletePurfenceScheduledTask(id: $id)
+export const DELETE_SCHEDULED_TASK_MUTATION = gql`
+  mutation DeleteScheduledTask($id: ID!) {
+    deleteScheduledTask(id: $id)
   }
 `
 
-export const RUN_PURFENCE_SCHEDULED_TASK_MUTATION = gql`
-  mutation RunPurfenceScheduledTask($id: ID!) {
-    runPurfenceScheduledTask(id: $id)
+export const RUN_SCHEDULED_TASK_MUTATION = gql`
+  mutation RunScheduledTask($id: ID!) {
+    runScheduledTask(id: $id)
   }
 `

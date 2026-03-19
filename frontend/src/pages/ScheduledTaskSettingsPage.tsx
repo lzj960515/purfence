@@ -14,11 +14,11 @@ import {
   zhTW,
 } from "date-fns/locale";
 import {
-  CREATE_PURFENCE_SCHEDULED_TASK_MUTATION,
-  DELETE_PURFENCE_SCHEDULED_TASK_MUTATION,
-  PURFENCE_SCHEDULED_TASKS_QUERY,
-  RUN_PURFENCE_SCHEDULED_TASK_MUTATION,
-  UPDATE_PURFENCE_SCHEDULED_TASK_MUTATION,
+  CREATE_SCHEDULED_TASK_MUTATION,
+  DELETE_SCHEDULED_TASK_MUTATION,
+  RUN_SCHEDULED_TASK_MUTATION,
+  SCHEDULED_TASKS_QUERY,
+  UPDATE_SCHEDULED_TASK_MUTATION,
 } from "@/api/scheduled-task.graphql";
 import { GET_APP_CONFIGS } from "@/api/app-config.graphql";
 import { Button } from "@/components/ui/button";
@@ -154,7 +154,7 @@ export function ScheduledTaskSettingsPage() {
   }, []);
 
   const { data, loading, error, refetch } = useQuery(
-    PURFENCE_SCHEDULED_TASKS_QUERY,
+    SCHEDULED_TASKS_QUERY,
     {
       variables: {
         paging: { offset: 0, limit: 50 },
@@ -167,14 +167,14 @@ export function ScheduledTaskSettingsPage() {
     fetchPolicy: "network-only",
   });
 
-  const [createTask] = useMutation(CREATE_PURFENCE_SCHEDULED_TASK_MUTATION);
-  const [updateTask] = useMutation(UPDATE_PURFENCE_SCHEDULED_TASK_MUTATION);
-  const [deleteTask] = useMutation(DELETE_PURFENCE_SCHEDULED_TASK_MUTATION);
-  const [runTask] = useMutation(RUN_PURFENCE_SCHEDULED_TASK_MUTATION);
+  const [createTask] = useMutation(CREATE_SCHEDULED_TASK_MUTATION);
+  const [updateTask] = useMutation(UPDATE_SCHEDULED_TASK_MUTATION);
+  const [deleteTask] = useMutation(DELETE_SCHEDULED_TASK_MUTATION);
+  const [runTask] = useMutation(RUN_SCHEDULED_TASK_MUTATION);
 
   const tasks: ScheduledTaskItem[] = useMemo(
-    () => data?.purfenceScheduledTasks?.nodes ?? [],
-    [data?.purfenceScheduledTasks?.nodes],
+    () => data?.scheduledTasks?.nodes ?? [],
+    [data?.scheduledTasks?.nodes],
   );
 
   const slackApps: AppConfigOption[] = useMemo(() => {
@@ -432,7 +432,7 @@ export function ScheduledTaskSettingsPage() {
   const handleRunNow = async (task: ScheduledTaskItem) => {
     try {
       const result = await runTask({ variables: { id: task.id } });
-      const threadId = result.data?.runPurfenceScheduledTask;
+      const threadId = result.data?.runScheduledTask;
       toast({
         title: "已触发执行",
         description: "已为你新建 AI 会话并发送任务。",

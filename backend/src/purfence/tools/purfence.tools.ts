@@ -2,8 +2,8 @@ import { Tool } from '@app/my-agent';
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { Like } from 'typeorm';
-import { PurfenceScheduledTaskKind } from '../scheduled-task/purfence-scheduled-task.enum';
-import { PurfenceScheduledTaskService } from '../scheduled-task/purfence-scheduled-task.service';
+import { ScheduledTaskKind } from '../scheduled-task/scheduled-task.enum';
+import { ScheduledTaskService } from '../scheduled-task/scheduled-task.service';
 import { PurfenceIssueService } from '../purfence-issue.service';
 import { PurfenceIssue } from '../purfence-issue.entity';
 import { PurfenceProject } from '../purfence-project.entity';
@@ -19,7 +19,7 @@ import {
 export class PurfenceTools {
   constructor(
     private readonly issueService: PurfenceIssueService,
-    private readonly scheduledTaskService: PurfenceScheduledTaskService,
+    private readonly scheduledTaskService: ScheduledTaskService,
   ) {}
 
   @Tool({
@@ -559,7 +559,7 @@ Slack 通知配置（可选）：
       const task = await this.scheduledTaskService.createTask({
         name: args.name,
         prompt: args.prompt,
-        kind: PurfenceScheduledTaskKind.one_time,
+        kind: ScheduledTaskKind.one_time,
         runAt: args.runAt,
         enabled: true,
         slackAppConfigId,
@@ -581,7 +581,7 @@ Slack 通知配置（可选）：
     const task = await this.scheduledTaskService.createTask({
       name: args.name,
       prompt: args.prompt,
-      kind: PurfenceScheduledTaskKind.recurring,
+      kind: ScheduledTaskKind.recurring,
       cronExpr: args.cronExpr,
       enabled: true,
       slackAppConfigId,
