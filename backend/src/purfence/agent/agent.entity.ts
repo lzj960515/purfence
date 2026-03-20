@@ -17,12 +17,11 @@ export class Agent extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   changeDescription: string;
 
-  @Column({
-    type: 'simple-json',
-    nullable: true,
-    comment: '为空所有agent都可以访问该agent',
-  })
-  tags: string[];
+  @Column({ nullable: true })
+  parentId?: string;
+
+  @Column({ default: false, comment: '是否为全局角色, 所有agent可以访问' })
+  global: boolean;
 
   @Column({ type: 'simple-json', nullable: true, comment: '为空使用全部工具' })
   tools: string[];

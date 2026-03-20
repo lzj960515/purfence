@@ -60,6 +60,10 @@ export interface AgentOptions {
   tools?: (string | { description?: string })[];
   memory?: false | 'in-memory';
   skills?: string[];
+  subAgentOptions?: {
+    name: string;
+    description?: string;
+  }[];
 }
 
 export interface ChatOptions {

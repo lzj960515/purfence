@@ -8,6 +8,7 @@ import { Agent } from './agent/agent.entity';
 import { AgentConversation } from './conversation/agent-conversation.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CommonService } from '@src/common';
+import { FindOptionsWhere, Not } from 'typeorm';
 
 @Injectable()
 export class PurfenceAgentService {
@@ -41,6 +42,24 @@ export class PurfenceAgentService {
       where: { id: agentId },
     });
 
+    // 当前 agent 可以 spawn 的目标
+    const subAgents = await Agent.find({
+      where: [
+        { parentId: agentConfig.id }, // 我的下级
+        {
+          parentId: agentConfig.parentId, // 我的平级
+          id: Not(agentConfig.id),
+        },
+        { global: true }, // 全局角色
+        agentConfig.parentId ? { id: agentConfig.parentId } : undefined,
+      ],
+    });
+
+    const subAgentOptions = subAgents.map((subAgent) => ({
+      name: subAgent.name,
+      description: subAgent.description,
+    }));
+
     const agentModelOptions =
       await this.providerModelService.findAgentModelOptions(
         agentConfig.modelConfig,
@@ -50,6 +69,7 @@ export class PurfenceAgentService {
       tools: agentConfig.tools,
       name: agentConfig.name,
       prompt: agentConfig.instructions,
+      subAgentOptions,
     });
 
     await SocketService.warpSocket(params.threadId, () =>

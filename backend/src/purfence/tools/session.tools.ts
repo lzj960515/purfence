@@ -107,6 +107,8 @@ export class SessionTools {
     description: `Launch a new agent to handle complex, multi-step tasks autonomously.
   The sessionsSpawn tool launches specialized agents (subprocesses) that autonomously handle complex tasks. Each agent type has specific capabilities and tools available to it.
 
+  Available agents are listed in agent-reminder messages in the conversation.
+
   When to Use
     Use this tool proactively whenever:
     - The user explicitly asks to use an agent

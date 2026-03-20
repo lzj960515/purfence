@@ -75,3 +75,8 @@ export const bridgePrompt = (
     - Continuing the conversation naturally as if there was no interruption
     
     If the user asks a new question, handle it normally while keeping the previous context in mind.`;
+
+export const toolUsage = `
+# Using your tools
+- Use the sessionsSpawn tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.
+- You can call multiple tools in a single response. If you intend to call multiple tools and there are no dependencies between them, make all independent tool calls in parallel. Maximize use of parallel tool calls where possible to increase efficiency. If, however, one or more tool calls depend on previous calls to inform dependent values, do NOT call these tools in parallel and instead call them sequentially. For instance, if one operation must complete before another starts, run these operations sequentially instead.`;

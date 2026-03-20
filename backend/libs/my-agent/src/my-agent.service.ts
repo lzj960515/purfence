@@ -38,7 +38,11 @@ import { MessageService } from './message.service';
 import { MyModel } from './model';
 import { MyAgent } from './my-agent';
 import { MyAgentHooks } from './my-agent-hooks';
-import { summarizationSystemPrompt, summarizationUserPrompt } from './prompt';
+import {
+  summarizationSystemPrompt,
+  summarizationUserPrompt,
+  toolUsage,
+} from './prompt';
 import { SocketService } from './socket.service';
 import { ToolsService } from './tools.service';
 import {
@@ -167,17 +171,20 @@ export class MyAgentService {
   }
 
   createAgent(options: AgentOptions): MyAgent {
-    const { name, prompt, tools, skills } = options;
+    const { name, prompt, tools, skills, subAgentOptions } = options;
     const agent: Agent = new Agent({
       name,
       instructions: async () => {
+        const agentInstruction = this.buildAgentInstruction(subAgentOptions);
         const skillsInstruction = this.buildSkillsInstruction(skills);
         return _.chain([
           prompt ?? `You are a ${name} agent.`,
+          toolUsage,
+          agentInstruction,
           skillsInstruction,
         ])
           .compact()
-          .join('\n\n')
+          .join('\n\n\n')
           .value();
       },
       model: ({ context }) => {
@@ -192,6 +199,23 @@ export class MyAgentService {
     return new MyAgent(agent, this);
   }
 
+  private buildAgentInstruction(subAgents: AgentOptions['subAgentOptions']) {
+    if (_.isEmpty(subAgents)) {
+      return '';
+    }
+
+    const agentInstruction = _.map(
+      subAgents,
+      (subAgent) => `- ${subAgent.name}: ${subAgent.description}`,
+    ).join('\n');
+
+    return `
+    <agent-reminder>
+      The following agents are available for use with the sessionsSpawn tool: \n${agentInstruction}
+    </agent-reminder>
+    `;
+  }
+
   private buildSkillsInstruction(skills?: string[]) {
     const skillList = loadSkills(skills);
     if (_.isEmpty(skillList)) {
@@ -203,7 +227,11 @@ export class MyAgentService {
       (skill) => `- ${skill.name}: ${skill.description}`,
     ).join('\n');
 
-    return `The following skills are available for use with the Skill tool: \n${skillsInstruction}`;
+    return `
+    <skill-reminder>
+      The following skills are available for use with the Skill tool: \n${skillsInstruction}
+    </skill-reminder>
+    `;
   }
 
   registerAgent(agent: Agent) {
