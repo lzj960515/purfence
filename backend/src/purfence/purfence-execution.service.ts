@@ -1,4 +1,3 @@
-import { getAgentPrompt } from '@app/my-agent';
 import { Injectable } from '@nestjs/common';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -91,7 +90,6 @@ export class PurfenceExecutionService {
       where: { id: issue.projectId },
     });
 
-    const tianjiPrompt = getAgentPrompt('tianji');
     execution.status = PurfenceStatus.running;
     execution.stage = ExecutionStage.tianji;
     await execution.save();
@@ -157,8 +155,6 @@ ${goalLine}
     const project = await PurfenceProject.findOneOrFail({
       where: { id: issue.projectId },
     });
-
-    const tianfuPrompt = getAgentPrompt('tianfu');
 
     // 更新 stage 为 tianfu（天府评估阶段）
     execution.stage = ExecutionStage.tianfu;

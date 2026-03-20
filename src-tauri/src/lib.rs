@@ -48,8 +48,6 @@ pub fn run() {
                 });
             }
 
-            environment::auto_sync_builtin_agents_on_startup(app.handle());
-
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -57,12 +55,8 @@ pub fn run() {
             codex::write_codex_token,
             codex::delete_codex_token,
             codex::codex_token_exists,
-            environment::desktop_environment_status,
-            environment::install_claude_code_desktop,
-            environment::install_builtin_agents_desktop,
             environment::desktop_skills_catalog,
-            environment::install_desktop_skill,
-            environment::git_install_prompt_desktop
+            environment::install_desktop_skill
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
