@@ -130,7 +130,7 @@ export class SessionToolsService {
 
   async spawnSession(params: {
     options: ToolExecuteOptions;
-    agentId: string;
+    name: string;
     title: string;
     task: string;
     sessionId?: string;
@@ -138,7 +138,7 @@ export class SessionToolsService {
   }) {
     const userId = params.options.userId;
     const currentConversationId = params.options.conversationId;
-    const agent = await Agent.findOneOrFail({ where: { id: params.agentId } });
+    const agent = await Agent.findOneOrFail({ where: { name: params.name } });
     const sessionId = params.sessionId?.trim();
     if (sessionId) {
       if (this.myAgentService.isConversationRunning(sessionId)) {

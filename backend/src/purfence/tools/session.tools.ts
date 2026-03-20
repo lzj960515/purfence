@@ -104,19 +104,60 @@ export class SessionTools {
 
   @Tool({
     name: 'sessionsSpawn',
-    description:
-      'Create or resume an agent conversation and run its initial task either synchronously or in the background.',
+    description: `Launch a new agent to handle complex, multi-step tasks autonomously.
+  The sessionsSpawn tool launches specialized agents (subprocesses) that autonomously handle complex tasks. Each agent type has specific capabilities and tools available to it.
+
+  When to Use
+    Use this tool proactively whenever:
+    - The user explicitly asks to use an agent
+    - A task is complex enough that it would benefit from parallel work by multiple agents
+    (e.g., building a full-stack feature with frontend and backend work, refactoring
+  a codebase while keeping tests passing, implementing a multi-step project with
+  research, planning, and coding phases)
+
+  Usage notes:
+    - Always include a short description (3-5 words) summarizing what the agent will do
+    - Launch multiple agents concurrently whenever possible, to maximize performance;
+      to do that, use a single message with multiple tool uses
+    - You can optionally run agents in the background using the background parameter.
+      When an agent runs in the background, you will be automatically notified when it
+      completes — do NOT sleep, poll, or proactively check on its progress. Continue with
+      other work or respond to the user instead.
+    - When the agent is done, it will return a single message back to you
+    - The result returned by the agent is not visible to the user
+    - You should send a text message back to the user with a concise summary
+
+  Foreground vs background:
+    - Use foreground (default) when you need the agent's results before you can proceed
+      - e.g., research agents whose findings inform your next steps
+    - Use background when you have genuinely independent work to do in parallel
+
+  Continuing agents:
+    - To continue a previously spawned agent, use sessionsSpawn tool again with the same agent name and sessionId.
+      The agent resumes with its full context preserved.
+    - Each Agent invocation starts fresh — provide a complete task description.
+
+  Providing clear prompts:
+    - Provide clear, detailed prompts so the agent can work autonomously and return
+      exactly the information you need.
+    - Clearly tell the agent whether you expect it to write code or just do research
+      (search, file reads, web fetches, etc.), since it is not aware of the user's intent
+
+  Trusting results:
+    - The agent's outputs should generally be trusted
+
+  Proactive usage:
+    - If the agent description mentions that it should be used proactively, then try
+      your best to use it without the user having to ask for it first. Use your judgement.
+  `,
     parameters: z.object({
-      agentId: z.string().min(1).describe('Target agent ID'),
+      name: z.string().min(1).describe('Target agent name'),
       title: z
         .string()
         .trim()
         .min(1)
         .describe('A short (3-5 word) description of the task'),
-      task: z
-        .string()
-        .min(1)
-        .describe('Initial task/message for the spawned agent'),
+      task: z.string().min(1).describe('The task for the agent to perform'),
       sessionId: z
         .string()
         .min(1)
@@ -126,13 +167,13 @@ export class SessionTools {
         .boolean()
         .default(false)
         .describe(
-          'Run in the background instead of waiting for the full text reply',
+          'Set to true to run the agent in the background. You will be notified when it completes.',
         ),
     }),
   })
   async sessionsSpawn(
     args: {
-      agentId: string;
+      name: string;
       title: string;
       task: string;
       sessionId?: string;
