@@ -48,8 +48,6 @@ if (existsSync(binariesDir)) {
       filesToSign.push(join(binariesDir, entry));
     }
   }
-
-  collectSignableFiles(join(binariesDir, 'claude-agent-sdk'), filesToSign);
 }
 
 for (const filePath of filesToSign) {

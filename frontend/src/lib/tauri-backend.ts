@@ -126,7 +126,7 @@ export async function ensureBackendRunning() {
   window.__PURFENCE_BACKEND_STARTING__ = (async () => {
     if (window.__PURFENCE_BACKEND_CHILD__) return
 
-    const [{ Command }, { appDataDir, join, resourceDir }] = await Promise.all([
+    const [{ Command }, { appDataDir, join }] = await Promise.all([
       import('@tauri-apps/plugin-shell'),
       import('@tauri-apps/api/path'),
     ])
@@ -134,13 +134,6 @@ export async function ensureBackendRunning() {
     const dataDir = await appDataDir()
     const dbPath = await join(dataDir, 'database.sqlite')
     const logPath = await join(dataDir, 'backend.log')
-    const resourcesPath = await resourceDir()
-    const claudeAgentSdkEntry = await join(
-      resourcesPath,
-      'binaries',
-      'claude-agent-sdk',
-      'sdk.mjs',
-    )
     window.__PURFENCE_BACKEND_LOG_PATH__ = logPath
 
     if (!DISABLE_BACKEND_REUSE) {
@@ -177,7 +170,6 @@ export async function ensureBackendRunning() {
             SERVER_PORT: String(port),
             TYPEORM_DATABASE: dbPath,
             PURFENCE_LOG_PATH: logPath,
-            PURFENCE_CLAUDE_AGENT_SDK_ENTRY: claudeAgentSdkEntry,
           },
         })
 

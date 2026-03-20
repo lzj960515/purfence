@@ -55,8 +55,6 @@ const sqliteReleaseAddon = join(sqliteBuildDir, 'Release', 'node_sqlite3.node');
 const sqliteFlatAddon = join(sqliteBuildDir, 'node_sqlite3.node');
 const builtinAgentsSrcDir = resolve(repoRoot, 'backend', 'src', 'purfence', 'agents');
 const builtinAgentsOutDir = join(binariesDir, 'agents');
-const claudeAgentSdkSrcDir = resolve(repoRoot, 'node_modules', '@anthropic-ai', 'claude-agent-sdk');
-const claudeAgentSdkOutDir = join(binariesDir, 'claude-agent-sdk');
 
 mkdirSync(packagingDir, { recursive: true });
 mkdirSync(binariesDir, { recursive: true });
@@ -129,11 +127,6 @@ try {
 if (existsSync(builtinAgentsSrcDir)) {
   rmSync(builtinAgentsOutDir, { recursive: true, force: true });
   cpSync(builtinAgentsSrcDir, builtinAgentsOutDir, { recursive: true });
-}
-
-if (existsSync(claudeAgentSdkSrcDir)) {
-  rmSync(claudeAgentSdkOutDir, { recursive: true, force: true });
-  cpSync(claudeAgentSdkSrcDir, claudeAgentSdkOutDir, { recursive: true });
 }
 
 const tauriSidecarPath = join(

@@ -38,8 +38,7 @@
       "binaries/purfence-backend-*",
       "binaries/node_sqlite3.node",
       "binaries/agents/**/*",
-      "binaries/skills/**/*",
-      "binaries/claude-agent-sdk/**/*"
+      "binaries/skills/**/*"
     ],
     "icon": [
       "icons/32x32.png",
