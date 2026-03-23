@@ -1,11 +1,11 @@
-import { Tool } from '@app/my-agent';
+import { MyAgentService, Tool } from '@app/my-agent';
+import { loadSkill, loadSkills } from '@app/my-agent/utils/skill-loader.util';
 import { Injectable } from '@nestjs/common';
-import { z } from 'zod';
 import { ToolExecuteOptions } from '@voltagent/core';
-import { loadSkill } from '@app/my-agent/utils/skill-loader.util';
+import { z } from 'zod';
 @Injectable()
 export class SkillTools {
-  constructor() {}
+  constructor(private readonly myAgentService: MyAgentService) {}
 
   @Tool({
     name: 'Skill',
@@ -43,5 +43,24 @@ export class SkillTools {
         text: skill.content,
       },
     ];
+  }
+
+  @Tool({
+    name: 'tools',
+    description: `list all tools`,
+    parameters: z.object({
+      name: z.string().describe('The tool name. E.g., "pdf"'),
+    }),
+  })
+  async tools() {
+    return this.myAgentService.getTools();
+  }
+
+  @Tool({
+    name: 'skills',
+    description: `list all skills`,
+  })
+  async skills() {
+    return loadSkills();
   }
 }
