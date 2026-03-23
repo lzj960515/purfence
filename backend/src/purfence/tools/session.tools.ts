@@ -13,40 +13,31 @@ const sessionsListSchema = z.object({
     .describe('Fuzzy match conversation titles with SQL LIKE'),
   limit: z.number().int().min(1).max(100).default(20),
   offset: z.number().int().min(0).default(0),
-  agentId: z.string().trim().min(1).optional(),
+  agentId: z.string().optional(),
   currentConversationOnly: z
     .boolean()
     .default(false)
     .describe(
-      'When true, only return sessions whose parentConversationId matches options.conversationId',
+      'When true, only return sessions that are children of the current conversation',
     ),
-  sortBy: z.enum(['createdAt', 'updatedAt', 'title']).default('updatedAt'),
+  sortBy: z.enum(['createdAt', 'updatedAt', 'title']).default('createdAt'),
   sortOrder: z.enum(['ASC', 'DESC']).default('DESC'),
 });
 
 const sessionsHistorySchema = z.object({
-  sessionId: z.string().trim().min(1),
+  sessionId: z.string(),
   limit: z.number().int().min(1).max(500).default(100),
   offset: z.number().int().min(0).default(0),
 });
 
 const sessionToolDetailsSchema = z.object({
-  sessionId: z.string().trim().min(1),
-  toolCallIds: z.array(z.string().trim().min(1)).min(1),
+  sessionId: z.string(),
+  toolCallIds: z.array(z.string()).min(1),
 });
 
 @Injectable()
 export class SessionTools {
   constructor(private readonly sessionToolsService: SessionToolsService) {}
-
-  @Tool({
-    name: 'agentsList',
-    description: 'List configured agents available in this Purfence instance.',
-    parameters: z.object({}),
-  })
-  async agentsList() {
-    return this.sessionToolsService.listAgents();
-  }
 
   @Tool({
     name: 'sessionsList',
@@ -153,16 +144,14 @@ export class SessionTools {
       your best to use it without the user having to ask for it first. Use your judgement.
   `,
     parameters: z.object({
-      name: z.string().min(1).describe('Target agent name'),
+      name: z.string().describe('Target agent name'),
       title: z
         .string()
         .trim()
-        .min(1)
         .describe('A short (3-5 word) description of the task'),
-      task: z.string().min(1).describe('The task for the agent to perform'),
+      task: z.string().describe('The task for the agent to perform'),
       sessionId: z
         .string()
-        .min(1)
         .optional()
         .describe('Reuse an existing child session'),
       background: z
@@ -190,7 +179,7 @@ export class SessionTools {
     name: 'sessionStatus',
     description: 'Show whether a session is currently running or idle.',
     parameters: z.object({
-      sessionId: z.string().trim().min(1),
+      sessionId: z.string(),
     }),
   })
   async sessionStatus(
@@ -204,7 +193,7 @@ export class SessionTools {
     name: 'killSession',
     description: 'Terminate a running session by sessionId.',
     parameters: z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string(),
     }),
   })
   killSession(args: { sessionId: string }) {

@@ -9,6 +9,7 @@ import { SessionToolsService } from './session-tools.service';
 import { SessionTools } from './session.tools';
 import { SkillTools } from './skill.tools';
 import { TianfuTools } from './tianfu.tools';
+import { AgentTools } from './agent.tools';
 
 const tools = [
   ImageTool,
@@ -18,6 +19,7 @@ const tools = [
   GenericTools,
   SessionTools,
   SkillTools,
+  AgentTools,
 ];
 
 @Global()

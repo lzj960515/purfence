@@ -55,10 +55,9 @@ export class GenericTools {
     description:
       'Read a text file or directory. Relative paths resolve from the current server process directory or the provided cwd.',
     parameters: z.object({
-      path: z.string().min(1).describe('File or directory path'),
+      path: z.string().describe('File or directory path'),
       cwd: z
         .string()
-        .min(1)
         .optional()
         .describe('Optional working directory used to resolve relative paths'),
       offset: z
@@ -96,10 +95,9 @@ export class GenericTools {
     description:
       'Create or overwrite a UTF-8 text file. Parent directories are created automatically.',
     parameters: z.object({
-      path: z.string().min(1).describe('File path'),
+      path: z.string().describe('File path'),
       cwd: z
         .string()
-        .min(1)
         .optional()
         .describe('Optional working directory used to resolve relative paths'),
       content: z.string().describe('Full UTF-8 file content to write'),
@@ -119,13 +117,12 @@ export class GenericTools {
     description:
       'Replace exact text inside a UTF-8 file. By default the old text must match exactly once; use replaceAll or expectedOccurrences for explicit multi-match edits.',
     parameters: z.object({
-      path: z.string().min(1).describe('File path'),
+      path: z.string().describe('File path'),
       cwd: z
         .string()
-        .min(1)
         .optional()
         .describe('Optional working directory used to resolve relative paths'),
-      oldText: z.string().min(1).describe('Exact text to replace'),
+      oldText: z.string().describe('Exact text to replace'),
       newText: z.string().describe('Replacement text'),
       replaceAll: z
         .boolean()
@@ -167,10 +164,9 @@ export class GenericTools {
     description:
       'Run a shell command. The command can complete in the foreground or continue in the background and be managed with the process tool.',
     parameters: z.object({
-      command: z.string().min(1).describe('Shell command to execute'),
+      command: z.string().describe('Shell command to execute'),
       cwd: z
         .string()
-        .min(1)
         .optional()
         .describe('Optional working directory used to run the command'),
       env: z
@@ -230,7 +226,6 @@ export class GenericTools {
       action: z.enum(['list', 'poll', 'log', 'write', 'kill', 'remove']),
       sessionId: z
         .string()
-        .min(1)
         .optional()
         .describe('Required for every action except list'),
       waitMs: z

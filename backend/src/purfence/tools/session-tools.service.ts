@@ -21,21 +21,6 @@ export class SessionToolsService {
     private readonly providerModelService: ProviderModelService,
   ) {}
 
-  async listAgents() {
-    const agents = await Agent.find({ order: { updatedAt: 'DESC' } });
-    return {
-      total: agents.length,
-      agents: agents.map((agent) => ({
-        id: agent.id,
-        name: agent.name,
-        description: agent.description ?? null,
-        tools: agent.tools ?? [],
-        skills: agent.skills ?? [],
-        updatedAt: agent.updatedAt.toISOString(),
-      })),
-    };
-  }
-
   async listSessions(params: {
     options: ToolExecuteOptions;
     title?: string;
