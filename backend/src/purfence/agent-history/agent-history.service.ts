@@ -34,7 +34,8 @@ export class AgentHistoryService {
     agent.description = history.description ?? null;
     agent.changeDescription =
       changeDescription?.trim() || `回滚到 v${history.version}`;
-    agent.tags = history.tags ?? null;
+    agent.parentId = history.parentId ?? null;
+    agent.global = history.global;
     agent.tools = history.tools ?? null;
     agent.skills = history.skills ?? null;
     agent.modelConfig = history.modelConfig ?? null;
@@ -72,7 +73,8 @@ export class AgentHistoryService {
         instructions: agent.instructions,
         description: agent.description,
         changeDescription: agent.changeDescription,
-        tags: agent.tags,
+        parentId: agent.parentId,
+        global: agent.global,
         tools: agent.tools,
         skills: agent.skills,
         modelConfig: agent.modelConfig,

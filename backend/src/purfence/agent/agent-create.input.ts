@@ -1,6 +1,7 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, ID, InputType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsObject,
   IsOptional,
@@ -33,11 +34,14 @@ export class AgentCreateInput {
   @IsOptional()
   changeDescription?: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsArray()
-  @IsString({ each: true })
+  @Field(() => ID, { nullable: true })
+  @IsString()
   @IsOptional()
-  tags?: string[];
+  parentId?: string;
+
+  @Field({ defaultValue: false })
+  @IsBoolean()
+  global: boolean;
 
   @Field(() => [String], { nullable: true })
   @IsArray()

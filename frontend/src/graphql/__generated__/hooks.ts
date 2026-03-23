@@ -29,13 +29,14 @@ export type Agent = {
   changeDescription?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  global: Scalars['Boolean']['output'];
   /** ID */
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   modelConfig?: Maybe<Scalars['JSON']['output']>;
   name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['ID']['output']>;
   skills?: Maybe<Array<Scalars['String']['output']>>;
-  tags?: Maybe<Array<Scalars['String']['output']>>;
   tools?: Maybe<Array<Scalars['String']['output']>>;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -208,11 +209,12 @@ export type AgentConversationUpdateInput = {
 export type AgentCreateInput = {
   changeDescription?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  global?: Scalars['Boolean']['input'];
   instructions?: InputMaybe<Scalars['String']['input']>;
   modelConfig?: InputMaybe<Scalars['JSON']['input']>;
   name: Scalars['String']['input'];
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   skills?: InputMaybe<Array<Scalars['String']['input']>>;
-  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   tools?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
@@ -221,13 +223,14 @@ export type AgentDeleteResponse = {
   changeDescription?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
+  global?: Maybe<Scalars['Boolean']['output']>;
   /** ID */
   id?: Maybe<Scalars['ID']['output']>;
   instructions?: Maybe<Scalars['String']['output']>;
   modelConfig?: Maybe<Scalars['JSON']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  parentId?: Maybe<Scalars['ID']['output']>;
   skills?: Maybe<Array<Scalars['String']['output']>>;
-  tags?: Maybe<Array<Scalars['String']['output']>>;
   tools?: Maybe<Array<Scalars['String']['output']>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -235,9 +238,11 @@ export type AgentDeleteResponse = {
 export type AgentFilter = {
   and?: InputMaybe<Array<AgentFilter>>;
   createdAt?: InputMaybe<DateFieldComparison>;
+  global?: InputMaybe<BooleanFieldComparison>;
   id?: InputMaybe<IdFilterComparison>;
   name?: InputMaybe<StringFieldComparison>;
   or?: InputMaybe<Array<AgentFilter>>;
+  parentId?: InputMaybe<IdFilterComparison>;
   updatedAt?: InputMaybe<DateFieldComparison>;
 };
 
@@ -247,13 +252,14 @@ export type AgentHistory = {
   changeDescription?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  global: Scalars['Boolean']['output'];
   /** ID */
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   modelConfig?: Maybe<Scalars['JSON']['output']>;
   name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['ID']['output']>;
   skills?: Maybe<Array<Scalars['String']['output']>>;
-  tags?: Maybe<Array<Scalars['String']['output']>>;
   tools?: Maybe<Array<Scalars['String']['output']>>;
   updatedAt: Scalars['DateTime']['output'];
   version: Scalars['Int']['output'];
@@ -275,13 +281,14 @@ export type AgentHistoryDeleteResponse = {
   changeDescription?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
+  global?: Maybe<Scalars['Boolean']['output']>;
   /** ID */
   id?: Maybe<Scalars['ID']['output']>;
   instructions?: Maybe<Scalars['String']['output']>;
   modelConfig?: Maybe<Scalars['JSON']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  parentId?: Maybe<Scalars['ID']['output']>;
   skills?: Maybe<Array<Scalars['String']['output']>>;
-  tags?: Maybe<Array<Scalars['String']['output']>>;
   tools?: Maybe<Array<Scalars['String']['output']>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   version?: Maybe<Scalars['Int']['output']>;
@@ -291,8 +298,10 @@ export type AgentHistoryFilter = {
   agentId?: InputMaybe<StringFieldComparison>;
   and?: InputMaybe<Array<AgentHistoryFilter>>;
   createdAt?: InputMaybe<DateFieldComparison>;
+  global?: InputMaybe<BooleanFieldComparison>;
   id?: InputMaybe<IdFilterComparison>;
   or?: InputMaybe<Array<AgentHistoryFilter>>;
+  parentId?: InputMaybe<IdFilterComparison>;
   updatedAt?: InputMaybe<DateFieldComparison>;
   version?: InputMaybe<IntFieldComparison>;
 };
@@ -306,7 +315,9 @@ export type AgentHistorySort = {
 export type AgentHistorySortFields =
   | 'agentId'
   | 'createdAt'
+  | 'global'
   | 'id'
+  | 'parentId'
   | 'updatedAt'
   | 'version';
 
@@ -318,18 +329,21 @@ export type AgentSort = {
 
 export type AgentSortFields =
   | 'createdAt'
+  | 'global'
   | 'id'
   | 'name'
+  | 'parentId'
   | 'updatedAt';
 
 export type AgentUpdateInput = {
   changeDescription?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  global?: InputMaybe<Scalars['Boolean']['input']>;
   instructions?: InputMaybe<Scalars['String']['input']>;
   modelConfig?: InputMaybe<Scalars['JSON']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   skills?: InputMaybe<Array<Scalars['String']['input']>>;
-  tags?: InputMaybe<Array<Scalars['String']['input']>>;
   tools?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
@@ -2036,14 +2050,14 @@ export type Link__Purpose =
 export type GetAgentsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAgentsQuery = { __typename?: 'Query', agents: { __typename?: 'AgentConnection', totalCount: number, nodes: Array<{ __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
+export type GetAgentsQuery = { __typename?: 'Query', agents: { __typename?: 'AgentConnection', totalCount: number, nodes: Array<{ __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, parentId?: string | null, global: boolean, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
 
 export type GetAgentHistoriesQueryVariables = Exact<{
   agentId: Scalars['String']['input'];
 }>;
 
 
-export type GetAgentHistoriesQuery = { __typename?: 'Query', agentHistories: { __typename?: 'AgentHistoryConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentHistory', id: string, agentId: string, version: number, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
+export type GetAgentHistoriesQuery = { __typename?: 'Query', agentHistories: { __typename?: 'AgentHistoryConnection', totalCount: number, nodes: Array<{ __typename?: 'AgentHistory', id: string, agentId: string, version: number, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, parentId?: string | null, global: boolean, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any }> } };
 
 export type AgentConversationsQueryVariables = Exact<{
   filter?: InputMaybe<AgentConversationFilter>;
@@ -2073,14 +2087,14 @@ export type CreateAgentMutationVariables = Exact<{
 }>;
 
 
-export type CreateAgentMutation = { __typename?: 'Mutation', createOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+export type CreateAgentMutation = { __typename?: 'Mutation', createOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, parentId?: string | null, global: boolean, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
 
 export type UpdateAgentMutationVariables = Exact<{
   input: UpdateOneAgentInput;
 }>;
 
 
-export type UpdateAgentMutation = { __typename?: 'Mutation', updateOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+export type UpdateAgentMutation = { __typename?: 'Mutation', updateOneAgent: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, parentId?: string | null, global: boolean, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
 
 export type RollbackAgentHistoryMutationVariables = Exact<{
   agentId: Scalars['ID']['input'];
@@ -2089,7 +2103,7 @@ export type RollbackAgentHistoryMutationVariables = Exact<{
 }>;
 
 
-export type RollbackAgentHistoryMutation = { __typename?: 'Mutation', rollbackAgentHistory: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, tags?: Array<string> | null, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
+export type RollbackAgentHistoryMutation = { __typename?: 'Mutation', rollbackAgentHistory: { __typename?: 'Agent', id: string, name: string, instructions?: string | null, description?: string | null, changeDescription?: string | null, parentId?: string | null, global: boolean, tools?: Array<string> | null, skills?: Array<string> | null, modelConfig?: any | null, createdAt: any, updatedAt: any } };
 
 export type DeleteAgentHistoryMutationVariables = Exact<{
   input: DeleteOneAgentHistoryInput;
@@ -2355,7 +2369,8 @@ export const GetAgentsDocument = gql`
       instructions
       description
       changeDescription
-      tags
+      parentId
+      global
       tools
       skills
       modelConfig
@@ -2416,7 +2431,8 @@ export const GetAgentHistoriesDocument = gql`
       instructions
       description
       changeDescription
-      tags
+      parentId
+      global
       tools
       skills
       modelConfig
@@ -2593,7 +2609,8 @@ export const CreateAgentDocument = gql`
     instructions
     description
     changeDescription
-    tags
+    parentId
+    global
     tools
     skills
     modelConfig
@@ -2636,7 +2653,8 @@ export const UpdateAgentDocument = gql`
     instructions
     description
     changeDescription
-    tags
+    parentId
+    global
     tools
     skills
     modelConfig
@@ -2682,7 +2700,9 @@ export const RollbackAgentHistoryDocument = gql`
     name
     instructions
     description
-    tags
+    changeDescription
+    parentId
+    global
     tools
     skills
     modelConfig

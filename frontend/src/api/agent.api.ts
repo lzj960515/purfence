@@ -25,7 +25,8 @@ export interface AgentHistoryItem {
   instructions?: string | null;
   description?: string | null;
   changeDescription?: string | null;
-  tags?: string[] | null;
+  parentId?: string | null;
+  global: boolean;
   tools?: string[] | null;
   skills?: string[] | null;
   modelConfig?: AgentModelConfigPayload | null;

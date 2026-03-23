@@ -12,7 +12,8 @@ export const GET_AGENTS = gql`
         instructions
         description
         changeDescription
-        tags
+        parentId
+        global
         tools
         skills
         modelConfig
@@ -39,7 +40,8 @@ export const GET_AGENT_HISTORIES = gql`
         instructions
         description
         changeDescription
-        tags
+        parentId
+        global
         tools
         skills
         modelConfig
@@ -108,7 +110,8 @@ export const CREATE_AGENT = gql`
       instructions
       description
       changeDescription
-      tags
+      parentId
+      global
       tools
       skills
       modelConfig
@@ -126,7 +129,8 @@ export const UPDATE_AGENT = gql`
       instructions
       description
       changeDescription
-      tags
+      parentId
+      global
       tools
       skills
       modelConfig
@@ -147,7 +151,9 @@ export const ROLLBACK_AGENT_HISTORY = gql`
       name
       instructions
       description
-      tags
+      changeDescription
+      parentId
+      global
       tools
       skills
       modelConfig

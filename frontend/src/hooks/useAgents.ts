@@ -23,7 +23,8 @@ export interface AgentItem {
   instructions?: string
   description?: string
   changeDescription?: string
-  tags?: string[]
+  parentId?: string
+  global: boolean
   tools?: string[]
   skills?: string[]
   modelConfig?: AgentModelConfig
@@ -36,7 +37,8 @@ export interface AgentInput {
   instructions?: string
   description?: string
   changeDescription?: string
-  tags?: string[]
+  parentId?: string | null
+  global: boolean
   tools?: string[]
   skills?: string[]
   modelConfig?: AgentModelConfig
@@ -47,7 +49,8 @@ type AgentMutationInput = {
   instructions?: string | null
   description?: string | null
   changeDescription?: string | null
-  tags?: string[] | null
+  parentId?: string | null
+  global?: boolean
   tools?: string[] | null
   skills?: string[] | null
   modelConfig?: AgentModelConfig | null
@@ -59,7 +62,8 @@ type AgentNode = {
   instructions?: string | null
   description?: string | null
   changeDescription?: string | null
-  tags?: unknown
+  parentId?: string | null
+  global?: boolean | null
   tools?: unknown
   skills?: unknown
   modelConfig?: unknown
@@ -118,7 +122,8 @@ function mapFromGraphQL(node: AgentNode): AgentItem {
     instructions: node.instructions || undefined,
     description: node.description || undefined,
     changeDescription: node.changeDescription || undefined,
-    tags: toStringArray(node.tags),
+    parentId: node.parentId?.trim() || undefined,
+    global: node.global === true,
     tools: toStringArray(node.tools),
     skills: toStringArray(node.skills),
     modelConfig: toModelConfig(node.modelConfig),
@@ -165,8 +170,13 @@ function normalizeInput(
     return mode === 'update' ? [] : undefined
   }
 
-  if (hasOwnField(input, 'tags')) {
-    normalized.tags = normalizeList(input.tags)
+  if (hasOwnField(input, 'parentId')) {
+    const parentId = input.parentId?.trim() ?? ''
+    normalized.parentId = parentId || (mode === 'update' ? null : undefined)
+  }
+
+  if (hasOwnField(input, 'global')) {
+    normalized.global = input.global ?? false
   }
 
   if (hasOwnField(input, 'tools')) {

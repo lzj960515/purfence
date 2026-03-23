@@ -12,7 +12,8 @@ type DiffFieldKey =
   | 'name'
   | 'description'
   | 'instructions'
-  | 'tags'
+  | 'parentId'
+  | 'global'
   | 'tools'
   | 'skills'
   | 'modelConfig'
@@ -21,7 +22,8 @@ const DIFF_FIELDS: Array<{ key: DiffFieldKey; label: string }> = [
   { key: 'name', label: '名称' },
   { key: 'description', label: '简介' },
   { key: 'instructions', label: '系统提示词' },
-  { key: 'tags', label: '访问标签' },
+  { key: 'parentId', label: '直属上级' },
+  { key: 'global', label: '全局角色' },
   { key: 'tools', label: 'Tools' },
   { key: 'skills', label: 'Skills' },
   { key: 'modelConfig', label: '模型路由' },

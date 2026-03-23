@@ -1,6 +1,7 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import {
   IsArray,
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsObject,
@@ -43,11 +44,14 @@ export class AgentHistoryCreateInput {
   @IsOptional()
   changeDescription?: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsArray()
-  @IsString({ each: true })
+  @Field(() => ID, { nullable: true })
+  @IsString()
   @IsOptional()
-  tags?: string[];
+  parentId?: string;
+
+  @Field({ defaultValue: false })
+  @IsBoolean()
+  global: boolean;
 
   @Field(() => [String], { nullable: true })
   @IsArray()

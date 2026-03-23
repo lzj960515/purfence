@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { DeleteConfirmDialog } from '@/components/settings/DeleteConfirmDialog'
 import {
@@ -67,7 +68,8 @@ type FormState = {
   description: string
   changeDescription: string
   instructions: string
-  tags: string[]
+  parentId: string
+  global: boolean
   tools: string[]
   skills: string[]
   modelConfig?: AgentModelConfig
@@ -84,7 +86,8 @@ const EMPTY_FORM: FormState = {
   description: '',
   changeDescription: '',
   instructions: '',
-  tags: [],
+  parentId: '',
+  global: false,
   tools: [],
   skills: [],
 }
@@ -109,7 +112,8 @@ function agentToForm(agent?: AgentItem | null): FormState {
     description: agent.description || '',
     changeDescription: '',
     instructions: agent.instructions || '',
-    tags: agent.tags || [],
+    parentId: agent.parentId || '',
+    global: agent.global,
     tools: agent.tools || [],
     skills: agent.skills || [],
     modelConfig: agent.modelConfig,
@@ -122,7 +126,8 @@ function formToInput(form: FormState, fallbacks: FallbackDraft[]): AgentInput {
     description: form.description,
     changeDescription: form.changeDescription,
     instructions: form.instructions,
-    tags: form.tags,
+    parentId: form.parentId,
+    global: form.global,
     tools: form.tools,
     skills: form.skills,
     modelConfig: form.modelConfig?.default.id
@@ -153,7 +158,6 @@ export function AgentsPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [isCreating, setIsCreating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [tagDraft, setTagDraft] = useState('')
   const [toolPickerOpen, setToolPickerOpen] = useState(false)
   const [skillPickerOpen, setSkillPickerOpen] = useState(false)
   const [markdownOpen, setMarkdownOpen] = useState(false)
@@ -196,6 +200,11 @@ export function AgentsPage() {
   const selectedAgent = useMemo(
     () => items.find((item) => item.id === selectedAgentId) ?? null,
     [items, selectedAgentId],
+  )
+
+  const superiorAgentOptions = useMemo(
+    () => items.filter((item) => item.id !== form.id),
+    [items, form.id],
   )
 
   useEffect(() => {
@@ -324,26 +333,10 @@ export function AgentsPage() {
   const createNewAgent = () => {
     setIsCreating(true)
     setSelectedAgentId(null)
-    setTagDraft('')
   }
 
   const cancelCreate = () => {
     setIsCreating(false)
-    setTagDraft('')
-  }
-
-  const addTag = () => {
-    const nextTag = tagDraft.trim()
-    if (!nextTag || form.tags.includes(nextTag)) return
-    setForm((prev) => ({ ...prev, tags: [...prev.tags, nextTag] }))
-    setTagDraft('')
-  }
-
-  const removeTag = (tag: string) => {
-    setForm((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((item) => item !== tag),
-    }))
   }
 
   const updateModelDefault = (field: 'id' | 'model', value: string) => {
@@ -623,13 +616,6 @@ export function AgentsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium">{item.name}</div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {(item.tags || []).slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="rounded-full">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
                   </button>
                 )
               })}
@@ -700,28 +686,59 @@ export function AgentsPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="agent-tags">访问标签</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="agent-tags"
-                            value={tagDraft}
-                            onChange={(event) => setTagDraft(event.target.value)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ',') {
-                                event.preventDefault()
-                                addTag()
-                              }
-                            }}
-                            placeholder="输入后回车，例如 reviewer"
-                          />
-                          <Button variant="outline" onClick={addTag}>
-                            添加
-                          </Button>
+                        <Label htmlFor="agent-parent-id">直属上级</Label>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={form.parentId || ''}
+                            onValueChange={(value) =>
+                              setForm((prev) => ({ ...prev, parentId: value }))
+                            }
+                          >
+                            <SelectTrigger id="agent-parent-id" className="flex-1">
+                              <SelectValue placeholder="选择直属上级（可选）" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {superiorAgentOptions.map((agent) => (
+                                <SelectItem key={agent.id} value={agent.id}>
+                                  {agent.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {form.parentId ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="shrink-0"
+                              onClick={() => setForm((prev) => ({ ...prev, parentId: '' }))}
+                              aria-label="清空直属上级"
+                              title="清空直属上级"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          ) : null}
                         </div>
                         <p className="text-xs leading-5 text-muted-foreground">
-                          相同标签的 Agent 可以互相通信；如果留空，表示所有 Agent 都可以给它发消息。
+                          用于定义直属上下级关系；留空时该 Agent 不设置直属上级。
                         </p>
                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-2xl border border-border/80 bg-background/90 px-4 py-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="agent-global">全局角色</Label>
+                        <p className="text-xs leading-5 text-muted-foreground">
+                          开启后，所有 Agent 都可以访问这个角色，不受层级限制。
+                        </p>
+                      </div>
+                      <Switch
+                        id="agent-global"
+                        checked={form.global}
+                        onCheckedChange={(checked) =>
+                          setForm((prev) => ({ ...prev, global: checked }))
+                        }
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -755,20 +772,6 @@ export function AgentsPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {form.tags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="inline-flex"
-                        >
-                          <Badge variant="outline" className="rounded-full px-3 py-1 hover:border-destructive/40 hover:text-destructive">
-                            #{tag}
-                          </Badge>
-                        </button>
-                      ))}
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -1111,7 +1114,8 @@ export function AgentsPage() {
                           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                             <span>Tools: {(history.tools || []).length || '全部'}</span>
                             <span>Skills: {(history.skills || []).length || '全部'}</span>
-                            <span>Tags: {(history.tags || []).length || '开放'}</span>
+                            <span>直属上级: {history.parentId || '无'}</span>
+                            <span>Global: {history.global ? '是' : '否'}</span>
                           </div>
                         </div>
                       </label>
