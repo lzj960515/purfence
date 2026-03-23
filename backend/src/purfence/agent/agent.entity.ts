@@ -9,13 +9,13 @@ export class Agent extends BaseEntity {
   name: string;
 
   @Column({ type: 'text', nullable: true })
-  instructions: string;
+  instructions?: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'text', nullable: true })
-  changeDescription: string;
+  changeDescription?: string;
 
   @Column({ nullable: true })
   parentId?: string;
@@ -24,15 +24,15 @@ export class Agent extends BaseEntity {
   global: boolean;
 
   @Column({ type: 'simple-json', nullable: true, comment: '为空使用全部工具' })
-  tools: string[];
+  tools?: string[];
 
   @Column({
     type: 'simple-json',
     nullable: true,
     comment: '为空使用全部skills',
   })
-  skills: string[];
+  skills?: string[];
 
   @Column({ type: 'json', nullable: true, comment: '为空使用全局配置' })
-  modelConfig: ModelConfig;
+  modelConfig?: ModelConfig;
 }
