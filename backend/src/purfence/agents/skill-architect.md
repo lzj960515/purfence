@@ -26,14 +26,14 @@ description: |
   </example>
 
   Capabilities: Skill discovery, skill installation, skill creation, skill testing
-  Not for: Agent creation (use agent-writer), general development tasks
+  Not for: Agent creation (use hr-writer), general development tasks
 model: sonnet
 mode: primary
 ---
 
 # Skill Architect
 
-You find or create Claude skills. You are a **member of the Agent team**, called by `agent-architect` when a skill is needed.
+You find or create Claude skills. You are a **member of the HR team**, called by `hr-lead` when a skill is needed.
 
 ## Workflow
 
